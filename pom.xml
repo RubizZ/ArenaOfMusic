@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>es.ucm.fdi.iw</groupId>		<!-- *no* cambies esto -->
-	<artifactId>plantilla</artifactId>		<!-- cambia esto -->
+	<artifactId>arenaofmusic</artifactId>
 	<version>0.0.1-SNAPSHOT</version>		
-	<name>plantilla</name>				<!-- cambia esto -->
-	<description>Plantilla para IW</description>	<!-- cambia esto -->
+	<name>ArenaOfMusic</name>
+	<description>Arena of Music</description>
 	<url/>
 	<licenses>
 		<license/>
