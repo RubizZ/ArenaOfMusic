@@ -1,4 +1,4 @@
-package es.ucm.fdi.iw.plantilla;
+package es.ucm.fdi.iw.arenaofmusic;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,16 +17,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @SpringBootTest
-class PlantillaApplicationTests {
+class ArenaOfMusicApplicationTests {
 
-    @LocalServerPort private int port;
-	@Autowired private WebApplicationContext wac;	
-	private MockMvc mockMvc;	
-	
+	@LocalServerPort
+	private int port;
+	@Autowired
+	private WebApplicationContext wac;
+	private MockMvc mockMvc;
+
 	@BeforeEach
 	public void setup() throws Exception {
-	    this.mockMvc = MockMvcBuilders
-			.webAppContextSetup(this.wac).build();
+		this.mockMvc = MockMvcBuilders
+				.webAppContextSetup(this.wac).build();
 	}
 
 	@Test
@@ -36,11 +38,11 @@ class PlantillaApplicationTests {
 
 	@Test
 	public void aSimpleTest() throws Exception {
-	    MvcResult mvcResult = this.mockMvc.perform(get("/api/status/test"))
-	      .andDo(print()).andExpect(status().isOk())
-	      .andExpect(jsonPath("$.code").value("test"))
-	      .andReturn();	     
-	    Assertions.assertEquals("application/json;charset=UTF-8", 
-	      mvcResult.getResponse().getContentType());
+		MvcResult mvcResult = this.mockMvc.perform(get("/api/status/test"))
+				.andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$.code").value("test"))
+				.andReturn();
+		Assertions.assertEquals("application/json;charset=UTF-8",
+				mvcResult.getResponse().getContentType());
 	}
 }
