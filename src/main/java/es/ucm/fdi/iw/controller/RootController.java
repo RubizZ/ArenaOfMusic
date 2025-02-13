@@ -36,4 +36,9 @@ public class RootController {
     public String index(Model model) {
         return "index";
     }
+
+    @GetMapping("/tienda")
+    public String tienda(Model model) {
+        return "tienda";
+    }
 }
