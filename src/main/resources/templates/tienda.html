@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html class="h-100" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <th:block th:replace="fragments/head :: header" />
+    <title>TIENDA</title>
+</head>
+
+<body class="d-flex flex-column h-100">
+    <header th:replace="fragments/nav.html :: nav"></header>
+
+    <main class="flex-shrink-0">
+        <h1 class="mt-5 tituloPagina">Bienvenid@ a la Tienda</h1>
+        <div class="container">
+            <div class="row seccion" id="fotos">
+                <h2>Fotos de Perfil</h2>
+                <div class="componentes-wrapper">
+                    <!-- Flecha izquierda -->
+                    <button class="scroll-btn left" onclick="scrollCards(-1, 'fotos')">&#10094;</button>
+                    <div class="componentes-container componentes d-flex" id="componentes-fotos">
+                        <div class="card mx-2">
+                            <img src="/img/iconos/usuario.png" class="card-img-top" alt="Foto de usuario">
+                            <div class="card-body">
+                                <h5 class="card-title">Usuario</h5>
+                                <a href="#" class="btn btn-primary">Comprar</a>
+                            </div>
+                        </div>
+                        <div class="card mx-2">
+                            <img src="/img/iconos/perro.png" class="card-img-top" alt="Foto de perrete">
+                            <div class="card-body">
+                                <h5 class="card-title">Perro</h5>
+                                <a href="#" class="btn btn-primary">Comprar</a>
+                            </div>
+                        </div>
+                        <div class="card mx-2">
+                            <img src="/img/iconos/gato.png" class="card-img-top" alt="Foto de gato">
+                            <div class="card-body">
+                                <h5 class="card-title">gato</h5>
+                                <a href="#" class="btn btn-primary">Comprar</a>
+                            </div>
+                        </div>
+                        <div class="card mx-2">
+                            <img src="/img/iconos/pajaro.png" class="card-img-top" alt="Foto de pajaro">
+                            <div class="card-body">
+                                <h5 class="card-title">Pajaro</h5>
+                                <a href="#" class="btn btn-primary">Comprar</a>
+                            </div>
+                        </div>
+                        <div class="card mx-2">
+                            <img src="/img/iconos/pescado.png" class="card-img-top" alt="Foto de pescado">
+                            <div class="card-body">
+                                <h5 class="card-title">Pescado</h5>
+                                <a href="#" class="btn btn-primary">Comprar</a>
+                            </div>
+                        </div>
+                        <div class="card mx-2">
+                            <img src="/img/iconos/conejo.png" class="card-img-top" alt="Foto de conejo">
+                            <div class="card-body">
+                                <h5 class="card-title">Conejo</h5>
+                                <a href="#" class="btn btn-primary">Comprar</a>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="scroll-btn right" onclick="scrollCards(1, 'fotos')">&#10095;</button>
+                </div>
+            </div>
+            <div class="row seccion" id="marcos">
+                <h2>Marcos de Foto</h2>
+                <div class="componentes-wrapper">
+                    <!-- Flecha izquierda -->
+                    <button class="scroll-btn left" onclick="scrollCards(-1, 'marcos')">&#10094;</button>
+                    <div class="componentes-container componentes d-flex" id="componentes-marcos">
+                        <div class="card mx-2">
+                            <img src="/img/marco/cuadrado-en-blanco.png" class="card-img-top" alt="Foto de perfil">
+                            <div class="card-body">
+                                <h5 class="card-title">Marco 1</h5>
+                                <a href="#" class="btn btn-primary">Comprar</a>
+                            </div>
+                        </div>
+                        <div class="card mx-2">
+                            <img src="/img/marco/cuadro-de-seleccion.png" class="card-img-top" alt="Foto de perfil">
+                            <div class="card-body">
+                                <h5 class="card-title">Marco 2</h5>
+                                <a href="#" class="btn btn-primary">Comprar</a>
+                            </div>
+                        </div>
+                        <div class="card mx-2">
+                            <img src="/img/marco/flores-marco-ornamental-fino.png" class="card-img-top" alt="Foto de perfil">
+                            <div class="card-body">
+                                <h5 class="card-title">Marco 3</h5>
+                                <a href="#" class="btn btn-primary">Comprar</a>
+                            </div>
+                        </div>
+                        <div class="card mx-2">
+                            <img src="/img/marco/herramienta-de-seleccion.png" class="card-img-top" alt="Foto de perfil">
+                            <div class="card-body">
+                                <h5 class="card-title">Marco 1</h5>
+                                <a href="#" class="btn btn-primary">Comprar</a>
+                            </div>
+                        </div>
+                        <div class="card mx-2">
+                            <img src="/img/marco/marco.png" class="card-img-top" alt="Foto de perfil">
+                            <div class="card-body">
+                                <h5 class="card-title">Marco 2</h5>
+                                <a href="#" class="btn btn-primary">Comprar</a>
+                            </div>
+                        </div>
+                        <div class="card mx-2">
+                            <img src="/img/marco/marco2.png" class="card-img-top" alt="Foto de perfil">
+                            <div class="card-body">
+                                <h5 class="card-title">Marco 3</h5>
+                                <a href="#" class="btn btn-primary">Comprar</a>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="scroll-btn right" onclick="scrollCards(1, 'marcos')">&#10095;</button>
+                </div>
+            </div>
+            <div class="row seccion" id="banners">
+                <h2>Banners de Perfil</h2>
+                <div class="componentes-wrapper">
+                    <!-- Flecha izquierda -->
+                    <button class="scroll-btn left" onclick="scrollCards(-1, 'banners')">&#10094;</button>
+                    <div class="componentes-container componentes d-flex" id="componentes-banners">
+                        <div class="card mx-2">
+                            <img src="/img/banners/Amarillo-Negro.png" class="card-img-top" alt="Foto de perfil">
+                            <div class="card-body">
+                                <h5 class="card-title">Banner 1</h5>
+                                <a href="#" class="btn btn-primary">Comprar</a>
+                            </div>
+                        </div>
+                        <div class="card mx-2">
+                            <img src="/img/banners/Morado-Neón-Amarillo-Negro.png" class="card-img-top" alt="Foto de perfil">
+                            <div class="card-body">
+                                <h5 class="card-title">Banner 2</h5>
+                                <a href="#" class="btn btn-primary">Comprar</a>
+                            </div>
+                        </div>
+                        <div class="card mx-2">
+                            <img src="/img/banners/Negro-Gris-Aguamarina-Grunge.png" class="card-img-top" alt="Foto de perfil">
+                            <div class="card-body">
+                                <h5 class="card-title">Banner 3</h5>
+                                <a href="#" class="btn btn-primary">Comprar</a>
+                            </div>
+                        </div>
+                        <div class="card mx-2">
+                            <img src="/img/banners/Negro-Maximalista.png" class="card-img-top" alt="Foto de perfil">
+                            <div class="card-body">
+                                <h5 class="card-title">Banner 1</h5>
+                                <a href="#" class="btn btn-primary">Comprar</a>
+                            </div>
+                        </div>
+                        <div class="card mx-2">
+                            <img src="/img/banners/Rosa-Amarillo-Blanco-Gradiente.png" class="card-img-top" alt="Foto de perfil">
+                            <div class="card-body">
+                                <h5 class="card-title">Banner 2</h5>
+                                <a href="#" class="btn btn-primary">Comprar</a>
+                            </div>
+                        </div>
+                        <div class="card mx-2">
+                            <img src="/img/banners/Rojo-NegroOscuro-Gamer.png" class="card-img-top" alt="Foto de perfil">
+                            <div class="card-body">
+                                <h5 class="card-title">Banner 3</h5>
+                                <a href="#" class="btn btn-primary">Comprar</a>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="scroll-btn right" onclick="scrollCards(1, 'banners')">&#10095;</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <th:block th:replace="fragments/footer.html :: footer" />
+    <script>
+        function scrollCards(direction, section) {
+            const container = document.querySelector("#componentes-" + section);
+            const scrollAmount = 225; // Ajusta la distancia de desplazamiento
+
+            container.scrollBy({
+                left: direction * scrollAmount,
+                behavior: "smooth"
+            });
+        }
+    </script>
+</body>
+
+</html>
