@@ -11,7 +11,7 @@
     <header th:replace="~{fragments/nav.html :: nav}"></header>
 
     <main class="flex-shrink-0">
-        <!-- Sezione "Perfil" -->
+        <!-- Perfil -->
         <div class="container mt-5">
             <div class="card profile-card mx-auto shadow-lg">
                 <div class="card-header text-center bg-success text-white position-relative">
@@ -22,13 +22,15 @@
                 </div>
                 <div class="card-body text-center">
                     <p class="text-muted">profil@ucm.es</p>
-                    <p class="text-secondary">"Descripción "</p>
-                    <a href="#" class="btn btn-outline-success btn-sm">Editar Perfil</a>
+                    <p class="text-secondary">"Descripción"</p>
+                    <a href="#" class="btn btn-outline-success btn-sm" data-bs-toggle="modal"
+                        data-bs-target="#editProfileModal">Editar
+                        Perfil</a>
                 </div>
             </div>
         </div>
 
-        <!-- Sezione "Mis Objetos" -->
+        <!-- Mis Objetos -->
         <div class="container mt-5">
             <h2 class="text-center mb-4 text-success">Mis Objetos</h2>
 
@@ -42,7 +44,7 @@
         </div>
 
 
-        <!-- Sezione "Estadísticas" -->
+        <!-- Estadísticas -->
         <div class="container mt-5">
             <h2 class="text-center mb-4 text-success">Estadísticas</h2>
             <div class="row justify-content-center">
@@ -73,7 +75,7 @@
             </div>
         </div>
 
-        <!-- Sezione "Historial de Partidas" -->
+        <!-- Historial de Partidas -->
         <div class="container mt-5">
             <h2 class="text-center mb-4 text-success">Historial de Partidas</h2>
             <ul class="list-group">
@@ -90,6 +92,55 @@
         </div>
 
 
+        <!-- Edit Profile Modal -->
+        <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header border-0">
+                        <h5 class="modal-title text-success" id="editProfileModalLabel">Editar Perfil</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <!-- Username -->
+                            <div class="mb-3">
+                                <label for="username" class="form-label text-success">Nombre de Usuario</label>
+                                <input type="text" class="form-control" id="username" placeholder="Nombre Usuario">
+                            </div>
+
+                            <!-- Description -->
+                            <div class="mb-3">
+                                <label for="description" class="form-label text-success">Descripción</label>
+                                <textarea class="form-control" id="description" rows="3"
+                                    placeholder="Descripción..."></textarea>
+                            </div>
+
+                            <hr class="text-muted">
+
+                            <!-- Email -->
+                            <div class="mb-3">
+                                <label for="email" class="form-label text-success">Correo Electrónico</label>
+                                <input type="email" class="form-control" id="email" placeholder="ejemplo@correo.com">
+                            </div>
+
+                            <!-- Password -->
+                            <div class="mb-3">
+                                <label for="password" class="form-label text-success">Nueva Contraseña</label>
+                                <input type="password" class="form-control" id="password" placeholder="********">
+                            </div>
+
+
+                        </form>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-success">Guardar Cambios</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </main>
 

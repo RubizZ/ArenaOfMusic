@@ -26,9 +26,7 @@ img.preview {
     border-radius: 10px;
 }
 
-
-
-/* --------------------- */
+/*! ---------- PROFILE PAGE ----------- */
 
 /* Profile card styling */
 .profile-card {
@@ -210,4 +208,26 @@ img.preview {
 
 .stats-card:hover {
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+
+
+/* Modal customization */
+.modal-content {
+    border-radius: 15px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header h5 {
+    font-weight: bold;
+}
+
+.modal-footer button {
+    border-radius: 20px;
+}
+
+.profile-image {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
 }
