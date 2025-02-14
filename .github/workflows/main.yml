@@ -48,9 +48,6 @@ jobs:
           mvn clean package
           nohup mvn spring-boot:run &
 
-      - name: Run Spring Boot Tests
-        run: mvn test -Dtest=**/*Test
-
       - name: Run Karate Tests
         run: mvn test -Dtest=**/*KarateTest
 
