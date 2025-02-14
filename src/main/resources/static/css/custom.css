@@ -25,3 +25,76 @@ img.preview {
     height: 100px;
     border-radius: 10px;
 }
+
+/*---PRINCIPAL----*/
+/* Fondo y layout general*/
+.contenido-principal {
+    background-image: url("/img/fondo.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    position: relative;
+    padding-top: 20px;
+  }
+  /* Capa semitransparente */
+  .contenido-principal::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+  }
+  
+  .contenido-principal .profile-img {
+    width: 125px;
+    height: 125px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+  }
+  
+
+  /* Estilos generales para las tarjetas */
+  .contenido-principal .card {
+    background-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
+    color: white;
+  }
+  
+  .contenido-principal .tarjeta-boton {
+    height: 85px;
+    width: 125px;
+    margin-bottom: 20px;
+  }
+  
+     
+   .contenido-principal .tarjeta-bienvenida .card-body {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  
+  .contenido-principal .titulo {
+    display: inline-block;
+    font-size: 3rem;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    background: linear-gradient(45deg, #307930, #77467b);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    backdrop-filter: blur(5px);
+    text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.7);
+    margin-bottom: 20px;
+    z-index: 10;
+  }
+  /*---FIN PRINCIPAL----*/
