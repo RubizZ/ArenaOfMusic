@@ -19,8 +19,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @SpringBootTest
 class ArenaOfMusicApplicationTests {
 
-	@LocalServerPort
-	private int port;
+	// @LocalServerPort
+	// private int port;
 	@Autowired
 	private WebApplicationContext wac;
 	private MockMvc mockMvc;
