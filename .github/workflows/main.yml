@@ -1,9 +1,10 @@
-name: Deploy Spring Boot App
+name: Deploy and Test Spring Boot App
 
 on:
   push:
     branches:
       - main
+      - develop
 
 jobs:
   deploy:
@@ -47,7 +48,7 @@ jobs:
         run: |
           mvn clean package
           nohup mvn spring-boot:run &
-
+  
       - name: Run Karate Tests
         run: mvn test -Dtest=**/*KarateTest
 
