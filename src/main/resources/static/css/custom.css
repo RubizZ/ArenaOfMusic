@@ -50,6 +50,7 @@ img.preview {
 .card>svg {
     flex-shrink: 1;
     width: 50%;
-    height: 50%;
+    height: auto;
+    max-height: 100px;
     margin: 0 auto;
 }
