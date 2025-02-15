@@ -54,3 +54,15 @@ img.preview {
     max-height: 100px;
     margin: 0 auto;
 }
+
+.card-body .card-title {
+    font-size: clamp(1em, 1.2vw, 1.4em);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+}
+
+.capitalize {
+    text-transform: capitalize;
+}
