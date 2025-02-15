@@ -13,17 +13,40 @@
             <div class="container-fluid">
                 <!-- nombre del sitio; es un enlace que lleva a la página ppal -->
                 <a class="navbar-brand" th:href="@{/}" href="/">
-                    <img th:src="@{/img/logo.png}" src="/img/logo.png" alt="logo IW" width="32" height="32" class="d-inline-block align-text-top"> IW 2024-25
+                    <img th:src="@{/img/logo.png}" src="/img/logo.png" alt="logo IW" width="32" height="32"
+                        class="d-inline-block align-text-top"> IW 2024-25
                 </a>
                 <!-- menu hamburguesa si no cabe todo -->
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav ms-auto">
+                    <ul class="navbar-nav align-items-center ms-auto">
                         <th:block th:if="${u}">
+
+                            <!-- Boton de administrador -->
                             <li class="nav-item mx-3">
-                                <a class="nav-link" th:if="${u.hasRole('ADMIN')}" th:href="@{/admin/}">Administrar</a>
+
+                                <div class="btn-group" th:if="${u.hasRole('ADMIN')}">
+                                    <a type="button" class="btn btn-primary" th:href="@{/admin/}">
+                                        Administrador
+                                    </a>
+                                    <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                        <span class="visually-hidden">Toggle Dropdown</span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li th:each="adminpage : ${adminPages}">
+                                            <a class="dropdown-item capitalize"
+                                                th:href="@{/admin/{adminpage}(adminpage=${adminpage})}"
+                                                th:text="${adminpage}">adminpage
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
                             </li>
 
                             <li class="nav-item mx-2">
@@ -34,7 +57,9 @@
                             </li>
                             <li class="nav-item align-self-center me-4">
                                 <button type="button" class="btn btn-outline-primary btn-sm position-relative">
-                                    ✉️ <span id="nav-unread" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary">+99 <span class="visually-hidden">unread messages</span></span>
+                                    ✉️ <span id="nav-unread"
+                                        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary">+99
+                                        <span class="visually-hidden">unread messages</span></span>
                                 </button>
                             </li>
                             <li class="nav-item align-self-center">
@@ -42,6 +67,7 @@
                                     <button type="submit" class="btn btn-outline-secondary btn-sm">logout</button>
                                 </form>
                             </li>
+
                         </th:block>
                         <th:block th:unless="${u}">
                             <li class="nav-item mx-2">
