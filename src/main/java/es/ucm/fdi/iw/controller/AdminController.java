@@ -1,5 +1,7 @@
 package es.ucm.fdi.iw.controller;
 
+import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Controller;
@@ -27,42 +29,44 @@ public class AdminController {
         for (String name : new String[] { "u", "url", "ws" }) {
             model.addAttribute(name, session.getAttribute(name));
         }
+        List<String> adminPages = List.of("playlists", "shop", "users", "reports", "spectate", "stats");
+        model.addAttribute("adminPages", adminPages);
     }
 
     private static final Logger log = LogManager.getLogger(AdminController.class);
 
-    @GetMapping("/")
+    @GetMapping({ "", "/" })
     public String index(Model model) {
         log.info("Admin acaba de entrar");
         return "admin";
     }
 
-    @GetMapping("/playlists")
+    @GetMapping({ "/playlists", "/playlists/" })
     public String playlists(Model model) {
         return "admin/playlists";
     }
 
-    @GetMapping("/shop")
+    @GetMapping({ "/shop", "/shop/" })
     public String shop(Model model) {
         return "admin/shop";
     }
 
-    @GetMapping("/users")
+    @GetMapping({ "/users", "users/" })
     public String users(Model model) {
         return "admin/users";
     }
 
-    @GetMapping("/reports")
+    @GetMapping({ "/reports", "/reports/" })
     public String reports(Model model) {
         return "admin/reports";
     }
 
-    @GetMapping("/spectate")
+    @GetMapping({ "/spectate", "/spectate/" })
     public String spectate(Model model) {
         return "admin/spectate";
     }
 
-    @GetMapping("/stats")
+    @GetMapping({ "/stats", "/stats/" })
     public String stats(Model model) {
         return "admin/stats";
     }
