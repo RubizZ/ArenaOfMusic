@@ -26,6 +26,77 @@ img.preview {
     border-radius: 10px;
 }
 
+/* --- Personalización de vistas ---*/
+
+/* TIENDA */
+.tituloPagina {
+    background-color: rgba(195, 195, 195, 0.5);
+    display: flex;
+    justify-content: center;
+    padding: 0.5rem;
+}
+
+.seccion {
+    padding: 1rem;
+    margin: 0.5rem;
+    font-style: italic;
+    overflow: auto;
+}
+
+.seccion h2 {
+    background-color: rgba(175, 175, 175, 0.5);
+    padding: 0.5rem;
+}
+
+/* Contenedor de las cards */
+.componentes-wrapper {
+    position: relative; /* Importante para que los botones sean relativos a este contenedor */
+    display: flex;
+    align-items: center;
+}
+
+.componentes {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    white-space: nowrap;
+    scroll-behavior: smooth;
+    padding: 0.5rem 0.1px; 
+    scrollbar-width: none;
+}
+
+.card {
+    flex: 0 0 auto;
+    width: 200px; 
+}
+
+.scroll-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 24px;
+    border-radius: 5px;
+    z-index: 10;
+}
+
+.scroll-btn.left {
+    left: 0;
+}
+
+.scroll-btn.right {
+    right: 0;
+}
+
+.scroll-btn:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+/* ---TIENDA--- */
+
 .hoverable {
     border: 2px solid #d3d3d3;
     border-radius: 15px;
