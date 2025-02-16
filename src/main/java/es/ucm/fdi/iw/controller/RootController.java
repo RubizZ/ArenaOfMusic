@@ -1,5 +1,7 @@
 package es.ucm.fdi.iw.controller;
 
+import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Controller;
@@ -23,18 +25,20 @@ public class RootController {
         for (String name : new String[] { "u", "url", "ws" }) {
             model.addAttribute(name, session.getAttribute(name));
         }
+        List<String> adminPages = List.of("playlists", "shop", "users", "reports", "spectate", "stats");
+        model.addAttribute("adminPages", adminPages);
     }
 
     @GetMapping("/profile")
     public String profile(Model model) {
-        // Crea un array di ObjectCard
+         
         ObjectCard[] objects = {
                 new ObjectCard("/img/default-obj.png", "Object 1", "Description 1"),
                 new ObjectCard("/img/default-obj.png", "Object 2", "Description 2"),
                 new ObjectCard("/img/default-obj.png", "Object 3", "Description 3")
         };
 
-        // Aggiungi l'array al modello
+         
         model.addAttribute("objects", objects);
 
         Match[] matches = {
@@ -51,7 +55,7 @@ public class RootController {
         private String name;
         private String description;
 
-        // Costruttore
+        
         public ObjectCard(String imageUrl, String name, String description) {
             this.imageUrl = imageUrl;
             this.name = name;
@@ -101,7 +105,7 @@ public class RootController {
             return result;
         }
     }
-
+ 
     @GetMapping("/login")
     public String login(Model model, HttpServletRequest request) {
         boolean error = request.getQueryString() != null && request.getQueryString().indexOf("error") != -1;
