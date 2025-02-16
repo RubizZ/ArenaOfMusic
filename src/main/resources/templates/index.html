@@ -1,21 +1,64 @@
 <!DOCTYPE html>
 <html class="h-100" xmlns:th="http://www.thymeleaf.org">
-
 <head>
-    <th:block th:replace="~{fragments/head :: header}" />
-    <title>IW: Welcome</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <th:block th:replace="~{fragments/head :: header}" />
+  <title>Arena of Music</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" 
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" 
+        crossorigin="anonymous">
+  <link rel="stylesheet" href="/css/custom.css">
 </head>
+<body>
 
-<body class="d-flex flex-column h-100">
     <header th:replace="~{fragments/nav.html :: nav}"></header>
 
-    <main class="flex-shrink-0">
-        <div class="container">
-            <h1 class="mt-5">Bienvenid@</h1>
+    <main class="contenido-principal">
+        <!-- Título -->
+        <div class="container-fluid text-center">
+            <h1 class="titulo shadow-lg p-3 rounded">ARENA OF MUSIC</h1>
+        </div>
+
+        <!-- Imagen clickeable para el perfil -->
+        <img src="/img/icono_de_perfil.png" alt="Perfil" class="profile-img shadow-lg rounded-circle">
+
+
+
+        <!-- Tarjeta de bienvenida -->
+        <div class="card shadow-lg p-2 mt-3 w-75" style="max-width:700px;">
+            <div class="card-body text-center">
+            <h2>¡Bienvenido!</h2>
+            <p>
+                ¡Bienvenido a Arena of Music, el desafío definitivo para los amantes de la música! ¿Puedes adivinar la canción solo con escuchar un fragmento? Demuestra tu conocimiento musical y compite con tus amigos para ver quién es el verdadero experto. ¡Prepara tus oídos, porque la diversión está por comenzar!
+            </p>
+            </div>
+        </div>
+
+        <!-- Sección con texto y foto -->
+        <div class="card shadow-lg p-2 mt-3 w-75">
+            <div class="row align-items-center">
+            <div class="col-md-8">
+                <p>
+                Aquí va una información importante sobre nuestra web, como las normas o cosas para decirle al usuario.
+                </p>
+            </div>
+            <div class="col-md-4 text-center">
+                <img src="/img/dj.png" alt="Imagen de dj" class="img-fluid rounded" style="max-width: 170px; height: auto;">
+            </div>
+            </div>
+        </div>
+
+        <!-- Tarjeta del botón -->
+        <div class="card tarjeta-boton shadow-lg mt-3">
+            <div class="card-body text-center">
+            <button class="btn btn-success btn-lg">JUGAR</button>
+            </div>
         </div>
     </main>
+  
 
-    <th:block th:replace="~{fragments/footer.html :: footer}" />
+  <th:block th:replace="~{fragments/footer.html :: footer}" />
+
 </body>
-
 </html>

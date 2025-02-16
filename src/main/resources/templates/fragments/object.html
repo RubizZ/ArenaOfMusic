@@ -1,0 +1,8 @@
+<!-- Frammento Thymeleaf per una card di oggetto -->
+<div th:fragment="object-card(image, name, description)" class="object-card">
+    <img th:src="${image}" alt="Imagen de objeto" class="object-image">
+    <div class="object-overlay">
+        <h5 class="object-title" th:text="${name}">Nombre del objeto</h5>
+        <p class="object-description" th:text="${description}">Descripción breve del objeto.</p>
+    </div>
+</div>
