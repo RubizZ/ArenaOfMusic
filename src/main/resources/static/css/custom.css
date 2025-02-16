@@ -313,7 +313,6 @@ img.preview {
     border-radius: 15px;
     transition: transform 0.2s, box-shadow 0.2s;
     cursor: pointer;
-    text-decoration: none;
     color: #333333;
     background-color: #a8e6cf;
 }
