@@ -13,7 +13,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.RequestParam;
 
-
 /**
  * Non-authenticated requests only.
  */
@@ -33,14 +32,13 @@ public class RootController {
 
     @GetMapping("/profile")
     public String profile(Model model) {
-         
+
         ObjectCard[] objects = {
                 new ObjectCard("/img/default-obj.png", "Object 1", "Description 1"),
                 new ObjectCard("/img/default-obj.png", "Object 2", "Description 2"),
                 new ObjectCard("/img/default-obj.png", "Object 3", "Description 3")
         };
 
-         
         model.addAttribute("objects", objects);
 
         Match[] matches = {
@@ -57,7 +55,6 @@ public class RootController {
         private String name;
         private String description;
 
-        
         public ObjectCard(String imageUrl, String name, String description) {
             this.imageUrl = imageUrl;
             this.name = name;
@@ -107,7 +104,7 @@ public class RootController {
             return result;
         }
     }
- 
+
     @GetMapping("/login")
     public String login(Model model, HttpServletRequest request) {
         boolean error = request.getQueryString() != null && request.getQueryString().indexOf("error") != -1;
@@ -120,9 +117,14 @@ public class RootController {
         return "index";
     }
 
+    @GetMapping("/tienda")
+    public String tienda(Model model) {
+        return "tienda";
+    }
+
     @GetMapping("/principal")
     public String principal(Model model) {
         return "principal";
     }
-    
+
 }

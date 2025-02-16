@@ -26,6 +26,8 @@ img.preview {
     border-radius: 10px;
 }
 
+/* --- Personalización de vistas ---*/
+
 /*---PRINCIPAL----*/
 /* Fondo y layout general*/
 .contenido-principal {
@@ -43,7 +45,7 @@ img.preview {
     padding-top: 20px;
   }
   /* Capa semitransparente */
-  .contenido-principal::before {
+.contenido-principal::before {
     content: "";
     position: fixed;
     top: 0;
@@ -52,38 +54,37 @@ img.preview {
     height: 100vh;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: -1;
-  }
-  
-  .contenido-principal .profile-img {
+}
+
+.contenido-principal .profile-img {
     width: 125px;
     height: 125px;
     position: absolute;
     top: 10px;
     right: 10px;
     cursor: pointer;
-  }
-  
+}
 
-  /* Estilos generales para las tarjetas */
-  .contenido-principal .card {
+
+/* Estilos generales para las tarjetas */
+.contenido-principal .card {
     background-color: rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(5px);
     color: white;
-  }
-  
-  .contenido-principal .tarjeta-boton {
+}
+
+.contenido-principal .tarjeta-boton {
     height: 85px;
     width: 125px;
     margin-bottom: 20px;
-  }
-  
-     
-   .contenido-principal .tarjeta-bienvenida .card-body {
+}
+
+.contenido-principal .tarjeta-bienvenida .card-body {
     font-size: 16px;
     line-height: 1.5;
-  }
-  
-  .contenido-principal .titulo {
+}
+
+.contenido-principal .titulo {
     display: inline-block;
     font-size: 3rem;
     font-family: Arial, sans-serif;
@@ -96,9 +97,9 @@ img.preview {
     text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.7);
     margin-bottom: 20px;
     z-index: 10;
-  }
-  /*---FIN PRINCIPAL----*/
- 
+}
+/*---FIN PRINCIPAL----*/
+
 /*! ---------- PROFILE PAGE ----------- */
 
 /* Profile card styling */
@@ -283,8 +284,6 @@ img.preview {
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
-
-
 /* Modal customization */
 .modal-content {
     border-radius: 15px;
@@ -348,4 +347,73 @@ img.preview {
     text-transform: capitalize;
 }
 
-/*--- FIN ADMIN DASHBOARD ---*/
+/*---FIN ADMIN DASHBOARD---*/
+
+/* TIENDA */
+.tituloPagina {
+    background-color: rgba(195, 195, 195, 0.5);
+    display: flex;
+    justify-content: center;
+    padding: 0.5rem;
+}
+
+.seccion {
+    padding: 1rem;
+    margin: 0.5rem;
+    font-style: italic;
+    overflow: auto;
+}
+
+.seccion h2 {
+    background-color: rgba(175, 175, 175, 0.5);
+    padding: 0.5rem;
+}
+
+/* Contenedor de las cards */
+.componentes-wrapper {
+    position: relative; /* Importante para que los botones sean relativos a este contenedor */
+    display: flex;
+    align-items: center;
+}
+
+.componentes {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    white-space: nowrap;
+    scroll-behavior: smooth;
+    padding: 0.5rem 0.1px; 
+    scrollbar-width: none;
+}
+
+.card.tienda {
+    flex: 0 0 auto;
+    width: 200px; 
+}
+
+.scroll-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 24px;
+    border-radius: 5px;
+    z-index: 10;
+}
+
+.scroll-btn.left {
+    left: 0;
+}
+
+.scroll-btn.right {
+    right: 0;
+}
+
+.scroll-btn:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+/* ---TIENDA--- */
