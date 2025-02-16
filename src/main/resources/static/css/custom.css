@@ -386,7 +386,7 @@ img.preview {
     scrollbar-width: none;
 }
 
-.card {
+.card.tienda {
     flex: 0 0 auto;
     width: 200px; 
 }
