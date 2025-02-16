@@ -28,6 +28,327 @@ img.preview {
 
 /* --- Personalización de vistas ---*/
 
+/*---PRINCIPAL----*/
+/* Fondo y layout general*/
+.contenido-principal {
+    background-image: url("/img/fondo.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    position: relative;
+    padding-top: 20px;
+  }
+  /* Capa semitransparente */
+.contenido-principal::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+}
+
+.contenido-principal .profile-img {
+    width: 125px;
+    height: 125px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+}
+
+
+/* Estilos generales para las tarjetas */
+.contenido-principal .card {
+    background-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
+    color: white;
+}
+
+.contenido-principal .tarjeta-boton {
+    height: 85px;
+    width: 125px;
+    margin-bottom: 20px;
+}
+
+.contenido-principal .tarjeta-bienvenida .card-body {
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.contenido-principal .titulo {
+    display: inline-block;
+    font-size: 3rem;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    background: linear-gradient(45deg, #307930, #77467b);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    backdrop-filter: blur(5px);
+    text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.7);
+    margin-bottom: 20px;
+    z-index: 10;
+}
+/*---FIN PRINCIPAL----*/
+
+/*! ---------- PROFILE PAGE ----------- */
+
+/* Profile card styling */
+.profile-card {
+    max-width: 450px;
+    border-radius: 20px;
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.profile-card:hover {
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.25);
+}
+
+/* Profile image */
+.profile-image {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+}
+
+/* Object card for "Mis Objetos" section */
+.object-card {
+    width: 100%;
+    height: 250px;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    transition: box-shadow 0.4s ease;
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    background: #f5f5f5;
+}
+
+.object-card:hover {
+    box-shadow: 0 20px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Background image */
+.object-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: filter 0.4s ease;
+    border-radius: 20px;
+}
+
+/* Overlay initially hidden */
+.object-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.4s ease, backdrop-filter 0.4s ease;
+    padding: 20px;
+    border-radius: 20px;
+}
+
+/* Title text */
+.object-title {
+    font-size: 1.5rem;
+    color: white;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* Description text */
+.object-description {
+    font-size: 1rem;
+    color: white;
+}
+
+/* Hover effects */
+.object-card:hover .object-image {
+    filter: blur(10px) brightness(0.7);
+}
+
+.object-card:hover .object-overlay {
+    opacity: 1;
+    backdrop-filter: blur(15px);
+}
+
+/* Profile card */
+.profile-card {
+    max-width: 450px;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    transition: box-shadow 0.3s ease;
+}
+
+.profile-card:hover {
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.25);
+}
+
+/* Profile image */
+.profile-image {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+}
+
+/* Object card for "Mis Objetos" section */
+.object-card {
+    width: 100%;
+    height: 250px;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    background: #f5f5f5;
+    transition: box-shadow 0.4s ease;
+}
+
+.object-card:hover {
+    box-shadow: 0 20px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Background image */
+.object-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: filter 0.4s ease;
+    border-radius: 20px;
+}
+
+/* Overlay initially hidden */
+.object-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.4s ease, backdrop-filter 0.4s ease;
+    padding: 20px;
+    border-radius: 20px;
+}
+
+/* Title text */
+.object-title {
+    font-size: 1.5rem;
+    color: white;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* Description text */
+.object-description {
+    font-size: 1rem;
+    color: white;
+}
+
+/* Hover effects */
+.object-card:hover .object-image {
+    filter: blur(10px) brightness(0.7);
+}
+
+.object-card:hover .object-overlay {
+    opacity: 1;
+    backdrop-filter: blur(15px);
+}
+
+/* Stats card */
+.stats-card {
+    border-radius: 15px;
+    transition: box-shadow 0.3s ease;
+}
+
+.stats-card:hover {
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Modal customization */
+.modal-content {
+    border-radius: 15px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header h5 {
+    font-weight: bold;
+}
+
+.modal-footer button {
+    border-radius: 20px;
+}
+
+.profile-image {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+}
+
+/*--- ADMIN DASHBOARD ---*/
+
+.hoverable {
+    border: 2px solid #d3d3d3;
+    border-radius: 15px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    text-decoration: none;
+    color: #333333;
+    background-color: #a8e6cf;
+}
+
+.hoverable:hover {
+    transform: scale(1.05);
+    background-color: #75b79e;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.hoverable:active {
+    transform: scale(0.95);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.card>svg {
+    flex-shrink: 1;
+    width: 50%;
+    height: auto;
+    max-height: 100px;
+    margin: 0 auto;
+}
+
+.card-body .card-title {
+    font-size: clamp(1em, 1.2vw, 1.4em);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+}
+
+.capitalize {
+    text-transform: capitalize;
+}
+
+/*---FIN ADMIN DASHBOARD---*/
+
 /* TIENDA */
 .tituloPagina {
     background-color: rgba(195, 195, 195, 0.5);
@@ -96,44 +417,3 @@ img.preview {
     background-color: rgba(0, 0, 0, 0.8);
 }
 /* ---TIENDA--- */
-
-.hoverable {
-    border: 2px solid #d3d3d3;
-    border-radius: 15px;
-    transition: transform 0.2s, box-shadow 0.2s;
-    cursor: pointer;
-    text-decoration: none;
-    color: #333333;
-    background-color: #a8e6cf;
-}
-
-.hoverable:hover {
-    transform: scale(1.05);
-    background-color: #75b79e;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-}
-
-.hoverable:active {
-    transform: scale(0.95);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-}
-
-.card>svg {
-    flex-shrink: 1;
-    width: 50%;
-    height: auto;
-    max-height: 100px;
-    margin: 0 auto;
-}
-
-.card-body .card-title {
-    font-size: clamp(1em, 1.2vw, 1.4em);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-align: center;
-}
-
-.capitalize {
-    text-transform: capitalize;
-}
