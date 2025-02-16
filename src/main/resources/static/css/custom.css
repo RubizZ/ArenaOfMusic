@@ -231,6 +231,8 @@ img.preview {
     width: 120px;
     height: 120px;
     object-fit: cover;
+}
+
 
 .hoverable {
     border: 2px solid #d3d3d3;
