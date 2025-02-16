@@ -25,3 +25,44 @@ img.preview {
     height: 100px;
     border-radius: 10px;
 }
+
+.hoverable {
+    border: 2px solid #d3d3d3;
+    border-radius: 15px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    text-decoration: none;
+    color: #333333;
+    background-color: #a8e6cf;
+}
+
+.hoverable:hover {
+    transform: scale(1.05);
+    background-color: #75b79e;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.hoverable:active {
+    transform: scale(0.95);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.card>svg {
+    flex-shrink: 1;
+    width: 50%;
+    height: auto;
+    max-height: 100px;
+    margin: 0 auto;
+}
+
+.card-body .card-title {
+    font-size: clamp(1em, 1.2vw, 1.4em);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+}
+
+.capitalize {
+    text-transform: capitalize;
+}
