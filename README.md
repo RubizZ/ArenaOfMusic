@@ -49,4 +49,7 @@ También se presentan estadísticas personales, proporcionando un resumen del re
 
 Por último, el historial de partidas ofrece un registro completo de las partidas jugadas, con detalles sobre los resultados y el progreso en el juego.
 ### Vista Tienda
+Al acceder en la tienda se verán separadas en filas los actuales tipos de cosméticos que se podrán comprar en la tienda. Actualmente hay 3: la primera imagenes para la foto de perfil, la segunda marcos para las fotos y la tercera para los banners del perfil. Cada uno de los componentes está representado en una tarjeta con su nombre y un botón que al pulsarse (en el futuro) mostrará un modal en el que se mostrará el titulo, el coste, la imagen más ampliada, más información relevante acerca de ese componente y un boton con el que confirmar la compra de dicho componente.
 
+Todos los iconos y los marcos incluidos hns sido obtenidas de flaticon.com con licencia gratuita con atribución (al ser imagenes actualmente de placeholder no se incluye la atribución, pero en caso de ser incluidos en la versión final los autores serán debidamente referenciados).
+Todos los banners incluidos han sido obtenidos de Canva.es que pertenecen al contenido gratuito
