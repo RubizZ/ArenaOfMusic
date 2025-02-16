@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * Non-authenticated requests only.
@@ -32,8 +30,8 @@ public class RootController {
         model.addAttribute("adminPages", adminPages);
     }
 
-    @GetMapping("/profile")
-    public String profile(Model model) {
+    @GetMapping("/perfil")
+    public String perfil(Model model) {
 
         ObjectCard[] objects = {
                 new ObjectCard("/img/default-obj.png", "Object 1", "Description 1"),
@@ -49,7 +47,7 @@ public class RootController {
                 new Match("Carlos", 0) };
         model.addAttribute("matches", matches);
 
-        return "profile";
+        return "perfil";
     }
 
     public class ObjectCard {
