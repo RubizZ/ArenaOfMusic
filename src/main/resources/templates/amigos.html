@@ -9,12 +9,12 @@
 <body class="d-flex flex-column h-100">
     <header th:replace="~{fragments/nav.html :: nav}"></header>
 
-    <main class="flex-shrink-0 pt-5">
+    <main class="flex-shrink-0 mt-5">
         <div class="container my-5">
-            <div class="row align-items-start mt-5">
+            <div class="row align-items-start">
 
                 <!-- Lista de amigos -->
-                <div class="col-md-4">
+                <div class="col-md-5 left-panel me-md-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h2 class="fw-bold"
                             th:text="${viewType == 'solicitudes' ? 'Solicitudes' : 'Amigos'}">
@@ -85,14 +85,14 @@
                                     <div>
                                         <div class="fw-semibold" th:text="${request.username}">Nombre</div>
                                         <div class="text-muted">
-                                            <span th:text="${'Nivel + request.level'}">Nivel 0</span>
+                                            <span th:text="${'Nivel ' + request.level}">Nivel 0</span>
                                             <span> • </span>
-                                            <span th:text="${request.winRate + '% victorias.'}"></span>
+                                            <span th:text="${request.winRate + '% victorias'}"></span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div>
+                                <div class="ms-auto">
                                     <button class="btn btn-success btn-sm me-2">
                                         Aceptar
                                     </button>
@@ -106,12 +106,12 @@
                 </div>
 
                 <!-- Perfil del usuario seleccionado -->
-                <div class="col-md-8">
+                <div class="col-md-6 right-panel ms-md-4">
 
                     <div th:if="${selectedUser != null}">
 
                         <!-- Perfil de usuario -->
-                        <div class="d-flex align-items-center mb-4">
+                        <div class="d-flex align-items-center mb-5">
                             <img
                                 th:src="${selectedUser.photoUrl}"
                                 class="rounded-circle me-3"
@@ -124,7 +124,7 @@
                         </div>
 
                         <!-- Estadísticas del usuario -->
-                        <div class="mb-4">
+                        <div class="mb-5">
                             <div class="row text-center">
                                 <div class="col">
                                     <h5 class="mb-0 fw-bold" th:text="${selectedUser.victories}">7</h5>
@@ -144,11 +144,11 @@
                         </div>
 
                         <!-- Playlists favoritas -->
-                        <h5 class="fw-bold">Playlists favoritas</h5>
+                        <h5 class="fw-bold mb-3">Playlists favoritas</h5>
                         <ul class="list-group">
                             <li
                                 class="list-group-item d-flex align-items-center"
-                                th:each="playlist : {selectedUser.favoritePlaylists}"
+                                th:each="playlist : ${selectedUser.favoritePlaylists}"
                             >
 
                                 <!-- Playlist -->
