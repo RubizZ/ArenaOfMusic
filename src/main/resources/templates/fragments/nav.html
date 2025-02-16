@@ -34,12 +34,14 @@
                         <li class="nav-item">
                             <a class="nav-link" th:href="@{/tienda}">Tienda</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" th:href="@{/amigos}">Amigos</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" th:href="@{/perfil}">Perfil</a>
-                        </li>
+                        <th:block th:if="${u}">
+                            <li class="nav-item">
+                                <a class="nav-link" th:href="@{/amigos}">Amigos</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" th:href="@{/perfil}">Perfil</a>
+                            </li>
+                        </th:block>
                     </ul>
 
                     <!-- Right-aligned items (Admin, Logout, Login) -->
@@ -49,11 +51,11 @@
                             <!-- Admin button -->
                             <li class="nav-item mx-3">
                                 <div class="btn-group" th:if="${u.hasRole('ADMIN')}">
-                                    <a class="btn btn-outline-secondary" th:href="@{/admin/}">
+                                    <a class="btn btn-secondary" th:href="@{/admin/}">
                                         Administración
                                     </a>
                                     <button type="button"
-                                        class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                                        class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
                                         data-bs-toggle="dropdown" aria-expanded="false">
                                         <span class="visually-hidden">Toggle Dropdown</span>
                                     </button>
@@ -70,7 +72,7 @@
                             <!-- Logout -->
                             <li class="nav-item align-self-center">
                                 <form th:action="@{/logout}" method="post">
-                                    <button type="submit" class="btn btn-outline-secondary btn-sm">Logout</button>
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">Cerrar sesión</button>
                                 </form>
                             </li>
 
@@ -80,6 +82,20 @@
                         <th:block th:unless="${u}">
                             <li class="nav-item">
                                 <a class="nav-link" th:href="@{/login}">Login</a>
+                            </li>
+                            <li class="nav-item debug align-self-center" th:if="${application.debug}">
+                                <form class="d-flex" th:action="@{/login}" method="post">
+                                    <input type="hidden" name="username" value="a">
+                                    <input type="hidden" name="password" value="aa">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">a</button>
+                                </form>
+                            </li>
+                            <li class="nav-item debug align-self-center" th:if="${application.debug}">
+                                <form class="d-flex" th:action="@{/login}" method="post">
+                                    <input type="hidden" name="username" value="b">
+                                    <input type="hidden" name="password" value="aa">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">b</button>
+                                </form>
                             </li>
                         </th:block>
                     </ul>
