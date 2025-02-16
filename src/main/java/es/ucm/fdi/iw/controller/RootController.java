@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 /**
  * Non-authenticated requests only.
@@ -117,4 +119,10 @@ public class RootController {
     public String index(Model model) {
         return "index";
     }
+
+    @GetMapping("/principal")
+    public String principal(Model model) {
+        return "principal";
+    }
+    
 }
