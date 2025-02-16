@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html class="h-100" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <th:block th:replace="~{fragments/head :: header}" />
+    <title>Arena Of Music</title>
+</head>
+
+<body class="d-flex flex-column h-100">
+    <header th:replace="~{fragments/nav.html :: nav}"></header>
+
+    <main class="flex-shrink-0 pt-5">
+        <div class="container my-5">
+            <div class="row align-items-start mt-5">
+
+                <!-- Lista de amigos -->
+                <div class="col-md-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2 class="fw-bold"
+                            th:text="${viewType == 'solicitudes' ? 'Solicitudes' : 'Amigos'}">
+                            Amigos
+                        </h2>
+                        <div>
+                            <!-- Vista de amigos -->
+                            <a class="btn btn-outline-primary btn-sm me-2"
+                               th:href="@{/amigos(view='amigos')}">
+                               Ver Amigos
+                            </a>
+
+                            <!-- Vista de solicitudes -->
+                            <a class="btn btn-outline-success btn-sm me-2"
+                               th:href="@{/amigos(view='solicitudes')}">
+                               Ver Solicitudes
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Barra de búsqueda -->
+                    <div class="mb-3">
+                        <input
+                            type="text"
+                            class="form-control"
+                            placeholder="Buscar amigos"
+                            name="search"
+                        />
+                    </div>
+
+                    <!-- Lista de amigos -->
+                    <div th:if="${viewType} == 'amigos'">
+                        <ul class="list-group mb-3">
+                            <li class="list-group-item d-flex align-items-center" th:each="friend : ${friends}">
+
+                                <!-- Foto de perfil -->
+                                <img
+                                    th:src="${friend.photoUrl}"
+                                    class="rounded-circle me-3"
+                                    style="width: 40px; height: 40px; object-fit: cover;"
+                                />
+                                <div>
+                                    <div class="fw-semibold" th:text="${friend.username}">Nombre</div>
+                                    <div class="text-muted" th:text="${friend.status}">Conectado</div>
+                                </div>
+                            </li>
+                        </ul>
+
+                        <!-- Añadir amigos -->
+                        <button class="btn btn-outline-primary w-100 fw-semibold">
+                            + Añadir amigos
+                        </button>
+                    </div>
+
+                    <!-- Lista de solicitudes -->
+                    <div th:if="${viewType} == 'solicitudes'">
+                        <ul class="list-group mb-3">
+                            <li class="list-group-item d-flex align-items-center" th:each="request : ${requests}">
+
+                                <div class="d-flex align-items-center">
+                                    <!-- Foto de perfil -->
+                                    <img
+                                        th:src="${request.photoUrl}"
+                                        class="rounded-circle me-3"
+                                        style="width: 40px; height: 40px; object-fit: cover;"
+                                    />
+
+                                    <div>
+                                        <div class="fw-semibold" th:text="${request.username}">Nombre</div>
+                                        <div class="text-muted">
+                                            <span th:text="${'Nivel + request.level'}">Nivel 0</span>
+                                            <span> • </span>
+                                            <span th:text="${request.winRate + '% victorias.'}"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <button class="btn btn-success btn-sm me-2">
+                                        Aceptar
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm">
+                                        Rechazar
+                                    </button>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Perfil del usuario seleccionado -->
+                <div class="col-md-8">
+
+                    <div th:if="${selectedUser != null}">
+
+                        <!-- Perfil de usuario -->
+                        <div class="d-flex align-items-center mb-4">
+                            <img
+                                th:src="${selectedUser.photoUrl}"
+                                class="rounded-circle me-3"
+                                style="width: 80px; height: 80px; object-fit: cover;"
+                            />
+                            <div>
+                                <h3 class="mb-0" th:text="${selectedUser.username}">Nombre</h3>
+                                <small class="text-success" th:text="${selectedUser.status}">Conectado</small>
+                            </div>
+                        </div>
+
+                        <!-- Estadísticas del usuario -->
+                        <div class="mb-4">
+                            <div class="row text-center">
+                                <div class="col">
+                                    <h5 class="mb-0 fw-bold" th:text="${selectedUser.victories}">7</h5>
+                                    <small class="text-muted">Victorias</small>
+                                </div>
+
+                                <div class="col">
+                                    <h5 class="mb-0 fw-bold" th:text="${selectedUser.losses}">3</h5>
+                                    <small class="text-muted">Derrotas</small>
+                                </div>
+
+                                <div class="col">
+                                    <h5 class="mb-0 fw-bold" th:text="${selectedUser.draws}">12</h5>
+                                    <small class="text-muted">Empates</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Playlists favoritas -->
+                        <h5 class="fw-bold">Playlists favoritas</h5>
+                        <ul class="list-group">
+                            <li
+                                class="list-group-item d-flex align-items-center"
+                                th:each="playlist : {selectedUser.favoritePlaylists}"
+                            >
+
+                                <!-- Playlist -->
+                                <div
+                                    class="me-3 rounded"
+                                    style="width: 24px; height: 24px;"
+                                    th:style="${'background:' + playlist.image}"
+                                ></div>
+                                <div>
+                                    <div class="fw-semibold" th:text="${playlist.title}">Título</div>
+                                    <small class="text-muted" th:text="${'by ' + playlist.author}">by ArenaOfMusic</small>
+                                </div>
+
+                            </li>
+                        </ul>
+
+                    </div>
+
+                    <!-- Ningún usuario seleccionado -->
+                    <div th:if="${selectedUser == null}"
+                         class="d-flex justify-content-center align-items-center text-center"
+                         style="min-height: 300px;">
+                        <p class="text-muted fs-5">Selecciona un usuario para consultar su perfil.</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <th:block th:replace="~{fragments/footer.html :: footer}" />
+</body>
+
+</html>
