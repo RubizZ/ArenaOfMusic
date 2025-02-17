@@ -368,7 +368,7 @@ img.preview {
     background: linear-gradient(45deg, #307930, #77467b);
     color: white;
     padding: 1rem;
-    margin: 1rem;
+    margin: 0.5rem;
     border-radius: 10px;
     text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.7);
     margin-bottom: 20px;
