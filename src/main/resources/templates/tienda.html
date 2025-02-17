@@ -9,9 +9,11 @@
 <body class="d-flex flex-column h-100">
     <header th:replace="fragments/nav.html :: nav"></header>
 
-    <main class="flex-shrink-0 body-tienda">
-        <h1 class="mt-5 tituloPagina">Bienvenid@ a la Tienda</h1>
+    <main class="body-tienda">
         <div class="container">
+            <div class="row text-center">
+                <h1 class="titulo-tienda">Tienda</h1>
+            </div>
             <div class="row seccion" id="fotos">
                 <h2>Fotos de Perfil</h2>
                 <div class="componentes-wrapper">
@@ -68,8 +70,9 @@
                         <button class="scroll-btn right" onclick="scrollCards(1, 'banners')">&#10095;</button>
                     </div>
                 </div>
-                
+
             </div>
+        </div>
     </main>
 
     <th:block th:replace="fragments/footer.html :: footer" />

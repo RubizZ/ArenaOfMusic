@@ -202,19 +202,19 @@ public class RootController {
                         "title", "Banner 1",
                         "foto", "img/banners/banner1.png"),
                 Map.of(
-                        "title", "Banner 1",
+                        "title", "Banner 2",
                         "foto", "img/banners/banner2.png"),
                 Map.of(
-                        "title", "Banner 1",
+                        "title", "Banner 3",
                         "foto", "img/banners/banner3.png"),
                 Map.of(
-                        "title", "Banner 1",
+                        "title", "Banner 4",
                         "foto", "img/banners/banner4.png"),
                 Map.of(
-                        "title", "Banner 1",
+                        "title", "Banner 5",
                         "foto", "img/banners/banner5.png"),
                 Map.of(
-                        "title", "Banner 1",
+                        "title", "Banner 6",
                         "foto", "img/banners/banner6.png"));
 
         model.addAttribute("itemFotos", fotos);

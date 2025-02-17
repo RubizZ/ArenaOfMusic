@@ -352,27 +352,27 @@ img.preview {
 
 /* TIENDA */
 
-.body-tienda{
+.body-tienda {
     background-image: url("/img/fondo.png");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed;
-    min-height: 100vh;
 }
-.tituloPagina {
-    display: flex;
-    justify-content: center;
-    padding: 0.5rem;
 
+.titulo-tienda {
+    display: inline-block;
     font-size: 3rem;
     font-family: Arial, sans-serif;
     font-weight: bold;
     background: linear-gradient(45deg, #307930, #77467b);
     color: white;
-    backdrop-filter: blur(5px);
+    padding: 1rem;
+    margin: 1rem;
+    border-radius: 10px;
     text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.7);
     margin-bottom: 20px;
+    z-index: 10;
 }
 
 .seccion {
@@ -381,7 +381,7 @@ img.preview {
     font-style: italic;
     overflow: auto;
     background-color: rgba(255, 255, 255, 0.85);
-    border-radius: 5px;
+    border-radius: 10px;
 }
 
 .seccion h2 {
