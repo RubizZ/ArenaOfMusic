@@ -128,29 +128,29 @@ public class RootController {
 
         // Lista de amigos
         List<Map<String, Object>> friends = Arrays.asList(
-            Map.of("username", "Ava", "photoUrl", "img/logo.png", "status", "Conectado"),
-            Map.of("username", "Sam", "photoUrl", "img/logo.png", "status", "Conectado"),
-            Map.of("username", "Taylor", "photoUrl", "img/logo.png", "status", "Desconectado")
+            Map.of("username", "Ava", "photoUrl", "img/logo.jpeg", "status", "Conectado"),
+            Map.of("username", "Sam", "photoUrl", "img/logo.jpeg", "status", "Conectado"),
+            Map.of("username", "Taylor", "photoUrl", "img/logo.jpeg", "status", "Desconectado")
         );
 
         // Lista de solicitudes
         List<Map<String, Object>> requests = Arrays.asList(
-            Map.of("username", "Sam", "photoUrl", "img/logo.png", "level", 4, "winRate", 85),
-            Map.of("username", "Taylor", "photoUrl", "img/logo.png", "level", 3, "winRate", 70)
+            Map.of("username", "Sam", "photoUrl", "img/logo.jpeg", "level", 4, "winRate", 85),
+            Map.of("username", "Taylor", "photoUrl", "img/logo.jpeg", "level", 3, "winRate", 70)
         );
 
         // Usuario seleccionado
         Map<String, Object> selectedUser = Map.of(
             "username", "Eric",
-            "photoUrl", "img/logo.png",
+            "photoUrl", "img/logo.jpeg",
             "status", "Conectado",
             "victories", 7,
             "losses", 3,
             "draws", 12,
             "favoritePlaylists", Arrays.asList(
-                Map.of("title", "The Weeknd", "author", "ArenaOfMusic", "image", "img/logo.png"),
-                Map.of("title", "Coldplay", "author", "ArenaOfMusic", "image", "img/logo.png"),
-                Map.of("title", "Clásicos 80s", "author", "ArenaOfMusic", "image", "img/logo.png")
+                Map.of("title", "The Weeknd", "author", "ArenaOfMusic", "image", "img/logo.jpeg"),
+                Map.of("title", "Coldplay", "author", "ArenaOfMusic", "image", "img/logo.jpeg"),
+                Map.of("title", "Clásicos 80s", "author", "ArenaOfMusic", "image", "img/logo.jpeg")
             )
         );
 
