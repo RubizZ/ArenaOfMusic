@@ -9,55 +9,24 @@
 <body class="d-flex flex-column h-100">
     <header th:replace="fragments/nav.html :: nav"></header>
 
-    <main class="flex-shrink-0">
-        <h1 class="mt-5 tituloPagina">Bienvenid@ a la Tienda</h1>
+    <main class="body-tienda">
         <div class="container">
+            <div class="row d-flex titulo-tienda text-center">
+                <h1 class="">Tienda</h1>
+            </div>
             <div class="row seccion" id="fotos">
                 <h2>Fotos de Perfil</h2>
                 <div class="componentes-wrapper">
                     <!-- Flecha izquierda -->
                     <button class="scroll-btn left" onclick="scrollCards(-1, 'fotos')">&#10094;</button>
                     <div class="componentes-container componentes d-flex" id="componentes-fotos">
-                        <div class="card tienda mx-2">
-                            <img src="/img/iconos/usuario.png" class="card-img-top" alt="Foto de usuario">
-                            <div class="card-body">
-                                <h5 class="card-title">Usuario</h5>
-                                <a href="#" class="btn btn-primary">Comprar</a>
-                            </div>
-                        </div>
-                        <div class="card tienda mx-2">
-                            <img src="/img/iconos/perro.png" class="card-img-top" alt="Foto de perrete">
-                            <div class="card-body">
-                                <h5 class="card-title">Perro</h5>
-                                <a href="#" class="btn btn-primary">Comprar</a>
-                            </div>
-                        </div>
-                        <div class="card tienda mx-2">
-                            <img src="/img/iconos/gato.png" class="card-img-top" alt="Foto de gato">
-                            <div class="card-body">
-                                <h5 class="card-title">gato</h5>
-                                <a href="#" class="btn btn-primary">Comprar</a>
-                            </div>
-                        </div>
-                        <div class="card tienda mx-2">
-                            <img src="/img/iconos/pajaro.png" class="card-img-top" alt="Foto de pajaro">
-                            <div class="card-body">
-                                <h5 class="card-title">Pajaro</h5>
-                                <a href="#" class="btn btn-primary">Comprar</a>
-                            </div>
-                        </div>
-                        <div class="card tienda mx-2">
-                            <img src="/img/iconos/pescado.png" class="card-img-top" alt="Foto de pescado">
-                            <div class="card-body">
-                                <h5 class="card-title">Pescado</h5>
-                                <a href="#" class="btn btn-primary">Comprar</a>
-                            </div>
-                        </div>
-                        <div class="card tienda mx-2">
-                            <img src="/img/iconos/conejo.png" class="card-img-top" alt="Foto de conejo">
-                            <div class="card-body">
-                                <h5 class="card-title">Conejo</h5>
-                                <a href="#" class="btn btn-primary">Comprar</a>
+                        <div th:each="icono : ${itemFotos}">
+                            <div class="card tienda text-center mx-2 p-2">
+                                <img th:src="${icono.foto}" class="card-img-top" alt="Foto de usuario">
+                                <div class="card-body">
+                                    <h5 class="card-title" th:text="${icono.title}">Usuario</h5>
+                                    <a href="#" class="btn btn-primary text-align-center">Comprar</a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -70,50 +39,17 @@
                     <!-- Flecha izquierda -->
                     <button class="scroll-btn left" onclick="scrollCards(-1, 'marcos')">&#10094;</button>
                     <div class="componentes-container componentes d-flex" id="componentes-marcos">
-                        <div class="card tienda mx-2">
-                            <img src="/img/marco/cuadrado-en-blanco.png" class="card-img-top" alt="Foto de perfil">
-                            <div class="card-body">
-                                <h5 class="card-title">Marco 1</h5>
-                                <a href="#" class="btn btn-primary">Comprar</a>
+                        <div th:each="marco : ${itemMarcos}">
+                            <div class="card tienda text-center p-2 mx-2">
+                                <img th:src="${marco.foto}" class="card-img-top" alt="Foto de perfil">
+                                <div class="card-body">
+                                    <h5 class="card-title" th:text="${marco.title}">Marco</h5>
+                                    <a href="#" class="btn btn-primary ">Comprar</a>
+                                </div>
                             </div>
                         </div>
-                        <div class="card tienda mx-2">
-                            <img src="/img/marco/cuadro-de-seleccion.png" class="card-img-top" alt="Foto de perfil">
-                            <div class="card-body">
-                                <h5 class="card-title">Marco 2</h5>
-                                <a href="#" class="btn btn-primary">Comprar</a>
-                            </div>
-                        </div>
-                        <div class="card tienda mx-2">
-                            <img src="/img/marco/flores-marco-ornamental-fino.png" class="card-img-top" alt="Foto de perfil">
-                            <div class="card-body">
-                                <h5 class="card-title">Marco 3</h5>
-                                <a href="#" class="btn btn-primary">Comprar</a>
-                            </div>
-                        </div>
-                        <div class="card tienda mx-2">
-                            <img src="/img/marco/herramienta-de-seleccion.png" class="card-img-top" alt="Foto de perfil">
-                            <div class="card-body">
-                                <h5 class="card-title">Marco 1</h5>
-                                <a href="#" class="btn btn-primary">Comprar</a>
-                            </div>
-                        </div>
-                        <div class="card tienda mx-2">
-                            <img src="/img/marco/marco.png" class="card-img-top" alt="Foto de perfil">
-                            <div class="card-body">
-                                <h5 class="card-title">Marco 2</h5>
-                                <a href="#" class="btn btn-primary">Comprar</a>
-                            </div>
-                        </div>
-                        <div class="card tienda mx-2">
-                            <img src="/img/marco/marco2.png" class="card-img-top" alt="Foto de perfil">
-                            <div class="card-body">
-                                <h5 class="card-title">Marco 3</h5>
-                                <a href="#" class="btn btn-primary">Comprar</a>
-                            </div>
-                        </div>
+                        <button class="scroll-btn right" onclick="scrollCards(1, 'marcos')">&#10095;</button>
                     </div>
-                    <button class="scroll-btn right" onclick="scrollCards(1, 'marcos')">&#10095;</button>
                 </div>
             </div>
             <div class="row seccion" id="banners">
@@ -122,51 +58,19 @@
                     <!-- Flecha izquierda -->
                     <button class="scroll-btn left" onclick="scrollCards(-1, 'banners')">&#10094;</button>
                     <div class="componentes-container componentes d-flex" id="componentes-banners">
-                        <div class="card tienda mx-2">
-                            <img src="/img/banners/Amarillo-Negro.png" class="card-img-top" alt="Foto de perfil">
-                            <div class="card-body">
-                                <h5 class="card-title">Banner 1</h5>
-                                <a href="#" class="btn btn-primary">Comprar</a>
+                        <div th:each="banner : ${itemBanners}">
+                            <div class="card tienda text-center p-2 mx-2">
+                                <img th:src="${banner.foto}" class="card-img-top" alt="Foto de perfil">
+                                <div class="card-body">
+                                    <h5 class="card-title" th:text="${banner.title}">Marco</h5>
+                                    <a href="#" class="btn btn-primary ">Comprar</a>
+                                </div>
                             </div>
                         </div>
-                        <div class="card tienda mx-2">
-                            <img src="/img/banners/Morado-Neón-Amarillo-Negro.png" class="card-img-top" alt="Foto de perfil">
-                            <div class="card-body">
-                                <h5 class="card-title">Banner 2</h5>
-                                <a href="#" class="btn btn-primary">Comprar</a>
-                            </div>
-                        </div>
-                        <div class="card tienda mx-2">
-                            <img src="/img/banners/Negro-Gris-Aguamarina-Grunge.png" class="card-img-top" alt="Foto de perfil">
-                            <div class="card-body">
-                                <h5 class="card-title">Banner 3</h5>
-                                <a href="#" class="btn btn-primary">Comprar</a>
-                            </div>
-                        </div>
-                        <div class="card tienda mx-2">
-                            <img src="/img/banners/Negro-Maximalista.png" class="card-img-top" alt="Foto de perfil">
-                            <div class="card-body">
-                                <h5 class="card-title">Banner 1</h5>
-                                <a href="#" class="btn btn-primary">Comprar</a>
-                            </div>
-                        </div>
-                        <div class="card tienda mx-2">
-                            <img src="/img/banners/Rosa-Amarillo-Blanco-Gradiente.png" class="card-img-top" alt="Foto de perfil">
-                            <div class="card-body">
-                                <h5 class="card-title">Banner 2</h5>
-                                <a href="#" class="btn btn-primary">Comprar</a>
-                            </div>
-                        </div>
-                        <div class="card tienda mx-2">
-                            <img src="/img/banners/Rojo-NegroOscuro-Gamer.png" class="card-img-top" alt="Foto de perfil">
-                            <div class="card-body">
-                                <h5 class="card-title">Banner 3</h5>
-                                <a href="#" class="btn btn-primary">Comprar</a>
-                            </div>
-                        </div>
+                        <button class="scroll-btn right" onclick="scrollCards(1, 'banners')">&#10095;</button>
                     </div>
-                    <button class="scroll-btn right" onclick="scrollCards(1, 'banners')">&#10095;</button>
                 </div>
+
             </div>
         </div>
     </main>
