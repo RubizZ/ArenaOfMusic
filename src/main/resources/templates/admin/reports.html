@@ -12,13 +12,77 @@
     <main class="flex-shrink-0">
         <div class="container">
             <h1 class="mt-5 mb-5 text-center">Reportes</h1>
-            <div class="alert alert-info" role="alert">
-                La pagina todavia no esta disponible
-            </div>
+            <!--TODO: Filtros-->
+            <table
+                class="table table-sm table-responsive table-light table-striped table-bordered text-center align-middle">
+                <thead class="table-success align-middle">
+                    <tr>
+                        <th scope="col">ID de reporte</th>
+                        <th scope="col">Usuario reportado</th>
+                        <th scope="col">Reportado por</th>
+                        <th scope="col">Razón</th>
+                        <th scope="col">Partida</th>
+                        <th scope="col">Fecha de creacion</th>
+                        <th scope="col">Fecha de resolucion</th>
+                        <th scope="col">Admin</th>
+                        <th scope="col">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td><a href="#">Pedro (1)</a></td>
+                        <td><a href="#">Alberto (2)</a></td>
+                        <td>Trampas</td>
+                        <td><a href="#">1</a></td>
+                        <td>18-02-2025</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>
+                            <th:block th:replace="~{fragments/report-actions :: report-actions(1)}" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td><a href="#">Ana (3)</a></td>
+                        <td><a href="#">Pepe (4)</a></td>
+                        <td>Nombre de usuario inapropiado</td>
+                        <td>-</td>
+                        <td>18-02-2025</td>
+                        <td>19-02-2025</td>
+                        <td><a href="#">Jorge (5)</a></td>
+                        <td>
+                            <th:block th:replace="~{fragments/report-actions :: report-actions(2)}" />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#banModal">
+                Ban confirm test modal
+            </button>
         </div>
     </main>
 
+    <div class="modal fade" id="banModal" tabindex="-1" aria-labelledby="BanModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="BanModalLabel">Estas seguro?</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Estas seguro que quieres banear a XXXXXXX (0)?<p></p>
+                    Esta accion es reversible pero puede tener consecuencias inesperadas.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <th:block th:replace="~{fragments/footer.html :: footer}" />
+    <script th:src="@{/js/activate-tooltips.js}"></script>
 </body>
 
 </html>
