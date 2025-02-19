@@ -70,7 +70,7 @@ public class Report implements Transferable<Report.Transfer> {
         private long reported;
         private int reason;
         private int partida;
-        private boolean open;
+        private boolean solved;
         private boolean banned;
         private long admin;
         private Date creationDate;
@@ -80,7 +80,7 @@ public class Report implements Transferable<Report.Transfer> {
 
     @Override
     public Transfer toTransfer() {
-        return new Transfer(id, reporter.getId(), reported.getId(), reason, partida, open, banned, admin.getId(),
+        return new Transfer(id, reporter.getId(), reported.getId(), reason, partida, solved, banned, admin.getId(),
                 creationDate,
                 resolutionDate);
     }
