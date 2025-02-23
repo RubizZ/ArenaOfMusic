@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html class="h-100" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <base th:href="@{/admin/}">
+    <th:block th:replace="~{fragments/head :: header}" />
+    <title>Arena of Music</title>
+</head>
+
+<body class="d-flex flex-column h-100">
+    <header th:replace="~{fragments/nav.html :: nav}"></header>
+
+    <main class="flex-shrink-0">
+        <div class="container mt-5">
+            <div class="card bg-secondary p-4">
+                <h2 class="text-center">Configurar Partida</h2>
+                <form>
+                    <!-- Selección de Playlist -->
+                    <div class="mb-3">
+                        <label for="playlist" class="form-label">Selecciona una Playlist</label>
+                        <select class="form-select" id="playlist" required>
+                            <option value="" disabled selected>Elige una Playlist...</option>
+                            <option value="1">Anime Openings</option>
+                            <option value="2">J-Pop Hits</option>
+                            <option value="3">OST Épicas</option>
+                            <option value="4">Lo-Fi & Relax</option>
+                        </select>
+                    </div>
+
+                    <!-- Número de Rondas -->
+                    <div class="mb-3">
+                        <label for="rondas" class="form-label">Número de Rondas: <span id="rondasValue"
+                                class="range-value">10</span></label>
+                        <input type="range" class="form-range" id="rondas" min="5" max="25" value="10" step="1">
+                    </div>
+
+                    <!-- Tiempo de Fragmento -->
+                    <div class="mb-3">
+                        <label for="tiempo" class="form-label">Duración del Fragmento: <span id="tiempoValue"
+                                class="range-value">15</span> segundos</label>
+                        <input type="range" class="form-range" id="tiempo" min="5" max="30" value="15" step="1">
+                    </div>
+
+                    <!-- Modo de Juego -->
+                    <div class="mb-3">
+                        <label class="form-label">Modo de Juego</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="modoJuego" id="opciones" value="opciones"
+                                checked>
+                            <label class="form-check-label" for="opciones">Opciones</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="modoJuego" id="escribir"
+                                value="escribir">
+                            <label class="form-check-label" for="escribir">Escribir la Canción</label>
+                        </div>
+                    </div>
+
+                    <!-- Botón de Envío -->
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary w-100">Iniciar Partida</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+    <script>
+        // Mostrar valores dinámicamente
+        const rondasInput = document.getElementById("rondas");
+        const rondasValue = document.getElementById("rondasValue");
+        rondasInput.addEventListener("input", () => rondasValue.textContent = rondasInput.value);
+
+        const tiempoInput = document.getElementById("tiempo");
+        const tiempoValue = document.getElementById("tiempoValue");
+        tiempoInput.addEventListener("input", () => tiempoValue.textContent = tiempoInput.value);
+    </script>
+    <th:block th:replace="~{fragments/footer.html :: footer}" />
+</body>
+
+</html>
