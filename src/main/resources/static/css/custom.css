@@ -26,16 +26,23 @@ img.preview {
     border-radius: 10px;
 }
 
-/* --- Personalización de vistas ---*/
-
-/*---PRINCIPAL----*/
-/* Fondo y layout general*/
-.contenido-principal {
+/* --- Personalización general ---*/
+body{
     background-image: url("/img/fondo.png");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed;
+    min-height: 100vh;
+}
+/* --- Personalización general ---*/
+
+
+/* --- Personalización de vistas ---*/
+
+/*---PRINCIPAL----*/
+/* Fondo y layout general*/
+.contenido-principal {
     min-height: 100vh;
     display: flex;
     flex-direction: column;

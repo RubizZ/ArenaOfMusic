@@ -167,9 +167,14 @@ public class RootController {
         return "tienda";
     }
 
+    @GetMapping("/configuracion-partida")
+    public String configPartida(Model model) {
+        return "configuracion-partida";
+    }
+
     @GetMapping("/sala-espera")
     public String salaespera(Model model) {
         return "sala-espera";
     }
-    
+
 }
