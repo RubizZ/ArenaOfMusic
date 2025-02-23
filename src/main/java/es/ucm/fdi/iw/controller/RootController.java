@@ -172,5 +172,9 @@ public class RootController {
         return "configuracion-partida";
     }
 
+    @GetMapping("/sala-espera")
+    public String salaespera(Model model) {
+        return "sala-espera";
+    }
 
 }

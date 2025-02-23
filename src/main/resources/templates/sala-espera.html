@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html class="h-100" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <th:block th:replace="~{fragments/head :: header}" />
+    <title>Arena of Music</title>
+</head>
+
+<body class="d-flex flex-column h-100">
+    <header th:replace="~{fragments/nav.html :: nav}"></header>
+
+    <main class="flex-shrink-0">
+        <div class="sala-espera">
+            <div class="espera-card">
+                <h1>Sala de Espera</h1>
+                <p>Esperando a otros jugadores para comenzar la partida...</p>
+        
+        
+                <!-- Lista de jugadores -->
+                <div>
+                    <h3>Jugadores esperando:</h3>
+                    <ul class="list-group">
+                        <li class="list-group-item">Jugador 1</li>
+                        <li class="list-group-item">Jugador 2</li>
+                        <li class="list-group-item">Jugador 3</li>
+                        <!-- Agregar más jugadores según sea necesario -->
+                    </ul>
+                </div>
+        
+                <!-- Botón para empezar -->
+                <button class="btn btn-success btn-empezarEspera mt-4" id="startButton">Comenzar partida</button>
+            </div>
+        </div>
+    </main>
+    
+    <th:block th:replace="~{fragments/footer.html :: footer}" />
+</body>
+
+</html>
