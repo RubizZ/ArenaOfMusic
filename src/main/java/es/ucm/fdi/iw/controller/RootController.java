@@ -166,4 +166,11 @@ public class RootController {
     public String tienda(Model model) {
         return "tienda";
     }
+
+    @GetMapping("/configuracion-partida")
+    public String configPartida(Model model) {
+        return "configuracion-partida";
+    }
+
+
 }
