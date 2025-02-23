@@ -166,4 +166,10 @@ public class RootController {
     public String tienda(Model model) {
         return "tienda";
     }
+
+    @GetMapping("/sala-espera")
+    public String salaespera(Model model) {
+        return "sala-espera";
+    }
+    
 }
