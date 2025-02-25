@@ -58,6 +58,8 @@ jobs:
     needs: test  # Solo se ejecuta si el job "test" pasó
     if: github.ref == 'refs/heads/main'  # Solo se ejecuta en "main"
 
+    environment: UCM Docker
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -75,16 +77,19 @@ jobs:
 
       - name: Configure credentials
         run: |
-          echo '${{ secrets.CREDENTIALS_JSON }}' > credentials.json
+          echo '{
+            "target": "${{ secrets.TARGET }}",
+            "target_user": "${{ secrets.TARGET_USER }}",
+            "target_pass": "${{ secrets.TARGET_PASS }}",
+            "jumphost": "${{ secrets.JUMPHOST }}",
+            "jumphost_user": "${{ secrets.JUMPHOST_USER }}",
+            "jumphost_pass": "${{ secrets.JUMPHOST_PASS }}"
+          }' > credentials.json
 
-      - name: Run Deploy Script
-        run: |
-          source venv/bin/activate
-          python deploy.py
 
-      - name: Restart Application in Tmux
+      - name: Restart Application in Tmux (before deploy)
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.TARGET_USER }}@${{ secrets.TARGET_HOST }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no ${{ secrets.TARGET_USER }}@${{ secrets.TARGET }} << 'EOF'
             if tmux has-session -t myapp 2>/dev/null; then
               echo "Stopping existing application..."
               tmux send-keys -t myapp C-c
@@ -92,6 +97,17 @@ jobs:
               tmux kill-session -t myapp
             fi
             echo "Starting new application..."
-            tmux new-session -d -s myapp 'SPRING_PROFILES_ACTIVE=container java -jar *.jar'
+            tmux new-session -d -s myapp
           EOF
-
+      
+      - name: Run Deploy Script
+        run: |
+          source venv/bin/activate
+          python deploy.py
+      
+      - name: Deploy Application in Tmux
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.TARGET_USER }}@${{ secrets.TARGET }} << 'EOF'
+            echo "Starting the application in tmux..."
+            tmux send-keys -t myapp "SPRING_PROFILES_ACTIVE=container java -jar target/*.jar" C-m
+          EOF
