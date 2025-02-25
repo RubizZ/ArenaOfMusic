@@ -20,9 +20,9 @@ function fn() {
      */
     karate.configure('driver', {
         type: 'chrome',
-        // descomentar para chromium bajo linux
-        // executable: '/usr/bin/chromium-browser',
-        executable: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+        executable: platform === 'win32' ? 
+            "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" : 
+            '/usr/bin/google-chrome', // Path for Ubuntu/Linux (default location for Chrome)
         addOptions: ["--remote-allow-origins=*", "--incognito"],
         showDriverLog: true
     })
