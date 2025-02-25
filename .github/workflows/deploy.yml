@@ -54,7 +54,7 @@ jobs:
           nohup mvn spring-boot:run &
 
       - name: Run Karate Tests
-        run: mvn test -Dtest=**/*KarateTest
+        run: mvn test -Dtest=**/*Runner
 
   deploy:
     runs-on: ubuntu-latest
