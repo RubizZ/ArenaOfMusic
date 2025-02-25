@@ -15,6 +15,10 @@ function fn() {
         baseUrl: 'http://localhost:8080'
     }
 
+    // Handle driver configuration based on OS platform (Linux or Windows)
+    var os = require('os');
+    var platform = os.platform(); // 'win32' for Windows, 'linux' for Ubuntu, etc.
+
     /**
      * Drivers for tests - currently configured value is good for Linux
      */
