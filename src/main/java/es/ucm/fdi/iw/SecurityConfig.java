@@ -58,12 +58,14 @@ public class SecurityConfig {
 				.csrf(csrf -> csrf
 						.ignoringRequestMatchers("/api/**"))
 				.authorizeHttpRequests(authorize -> authorize
-						.requestMatchers("/css/**", "/js/**", "/img/**", "/", "/error",
-								"/perfil", "/tienda", "/amigos", "/configuracion-partida")
+						.requestMatchers("/css/**", "/js/**", "/img/**")
 						.permitAll()
-						.requestMatchers("/api/**").permitAll() // <-- public api access
-						.requestMatchers("/admin/**").hasRole("ADMIN") // <-- administration
-						.requestMatchers("/user/**", "/sala-espera").hasRole("USER") // <-- logged-in users
+						.requestMatchers("/api/**", "/", "/error", "/tienda")
+						.permitAll() // <-- public access
+						.requestMatchers("/admin/**")
+						.hasRole("ADMIN") // <-- administration
+						.requestMatchers("/user/**", "/perfil", "/amigos", "/sala-espera", "/configuracion-partida")
+						.hasRole("USER") // <-- logged-in users
 						.anyRequest().authenticated())
 				.formLogin(formLogin -> formLogin
 						.loginPage("/login")
