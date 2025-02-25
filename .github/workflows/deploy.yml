@@ -49,7 +49,7 @@ jobs:
           sudo chmod +x /usr/local/bin/chromedriver
 
       - name: Build Spring Boot App
-        run: mvn clean package
+        run: mvn clean package -DskipTests
           
       - name: Run Spring Boot Tests
         run: mvn test
