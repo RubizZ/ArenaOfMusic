@@ -39,6 +39,16 @@ jobs:
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           sudo dpkg -i google-chrome-stable_current_amd64.deb
           sudo apt-get install -f -y  # Fix any missing dependencies
+          
+      - name: Install Xvfb (X Virtual Frame Buffer)
+        run: |
+          sudo apt install -y xvfb
+          Xvfb :99 -screen 0 1280x1024x24 &
+          export DISPLAY=:99
+
+      - name: Start Chrome in headless mode with remote debugging enabled
+        run: |
+          google-chrome-stable --headless --remote-debugging-port=9222 --no-sandbox --disable-dev-shm-usage --remote-allow-origins=* &
 
       - name: Install ChromeDriver
         run: |
