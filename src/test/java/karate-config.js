@@ -25,7 +25,15 @@ function fn() {
         executable: osName.includes('win') ? 
             "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" : 
             '/usr/bin/google-chrome', // Path for Ubuntu/Linux (default location for Chrome)
-        addOptions: ["--remote-allow-origins=*", "--incognito"],
+        addOptions: ["--remote-allow-origins=*",
+        "--incognito",
+        "--no-sandbox",
+        "--disable-dev-shm-usage",
+        "--headless",
+        "--disable-extensions", // Disable extensions
+        "--disable-gpu",         // Disable GPU (useful for CI)
+        "--remote-debugging-port=9222"
+        ],
         showDriverLog: true
     })
 
