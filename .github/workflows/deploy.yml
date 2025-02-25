@@ -81,3 +81,17 @@ jobs:
         run: |
           source venv/bin/activate
           python deploy.py
+
+      - name: Restart Application in Tmux
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.TARGET_USER }}@${{ secrets.TARGET_HOST }} << 'EOF'
+            if tmux has-session -t myapp 2>/dev/null; then
+              echo "Stopping existing application..."
+              tmux send-keys -t myapp C-c
+              sleep 2
+              tmux kill-session -t myapp
+            fi
+            echo "Starting new application..."
+            tmux new-session -d -s myapp 'SPRING_PROFILES_ACTIVE=container java -jar *.jar'
+          EOF
+
