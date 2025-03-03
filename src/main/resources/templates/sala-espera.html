@@ -29,7 +29,10 @@
 
                 <div class="container d-flex justify-content-center">
                     <!-- Botón para empezar -->
-                    <button class="btn btn-success btn-empezarEspera mt-4" id="startButton">Comenzar partida</button>
+                    <a th:href="@{/partida}">
+                        <button class="btn btn-success btn-empezarEspera mt-4" id="startButton" type="button">
+                            Comenzar partida</button>
+                    </a>
                 </div>
             </div>
         </div>
