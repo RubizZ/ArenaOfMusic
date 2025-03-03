@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html class="h-100" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <th:block th:replace="~{fragments/head :: header}" />
+    <title>Arena of Music</title>
+</head>
+
+<body class="d-flex flex-column h-100">
+    <header th:replace="~{fragments/nav.html :: nav}"></header>
+
+    <main class="flex-shrink-0">
+        <div class="container d-flex justify-content-center">
+            <div class="row">
+                <div class="col">
+                    <h1>Cosa</h1>
+
+                </div>
+            </div>
+            <div class="row d-flex justify-content-center">
+                <img src="preview-song-img.png" alt="Imagen de interrogacion de partida">
+            </div>
+        </div>
+
+    </main>
+
+    <th:block th:replace="~{fragments/footer.html :: footer}" />
+</body>
+
+</html>
