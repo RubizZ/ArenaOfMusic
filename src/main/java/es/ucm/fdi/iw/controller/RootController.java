@@ -119,40 +119,35 @@ public class RootController {
         return "index";
     }
 
-
     @GetMapping("/amigos")
-    public String amigos(@RequestParam(name="view", required=false) String viewType, Model model) {
-        if(viewType == null || viewType.isBlank()){
+    public String amigos(@RequestParam(name = "view", required = false) String viewType, Model model) {
+        if (viewType == null || viewType.isBlank()) {
             viewType = "amigos";
         }
 
         // Lista de amigos
         List<Map<String, Object>> friends = Arrays.asList(
-            Map.of("username", "Ava", "photoUrl", "img/logo.jpeg", "status", "Conectado"),
-            Map.of("username", "Sam", "photoUrl", "img/logo.jpeg", "status", "Conectado"),
-            Map.of("username", "Taylor", "photoUrl", "img/logo.jpeg", "status", "Desconectado")
-        );
+                Map.of("username", "Ava", "photoUrl", "img/logo.jpeg", "status", "Conectado"),
+                Map.of("username", "Sam", "photoUrl", "img/logo.jpeg", "status", "Conectado"),
+                Map.of("username", "Taylor", "photoUrl", "img/logo.jpeg", "status", "Desconectado"));
 
         // Lista de solicitudes
         List<Map<String, Object>> requests = Arrays.asList(
-            Map.of("username", "Sam", "photoUrl", "img/logo.jpeg", "level", 4, "winRate", 85),
-            Map.of("username", "Taylor", "photoUrl", "img/logo.jpeg", "level", 3, "winRate", 70)
-        );
+                Map.of("username", "Sam", "photoUrl", "img/logo.jpeg", "level", 4, "winRate", 85),
+                Map.of("username", "Taylor", "photoUrl", "img/logo.jpeg", "level", 3, "winRate", 70));
 
         // Usuario seleccionado
         Map<String, Object> selectedUser = Map.of(
-            "username", "Eric",
-            "photoUrl", "img/logo.jpeg",
-            "status", "Conectado",
-            "victories", 7,
-            "losses", 3,
-            "draws", 12,
-            "favoritePlaylists", Arrays.asList(
-                Map.of("title", "The Weeknd", "author", "ArenaOfMusic", "image", "img/logo.jpeg"),
-                Map.of("title", "Coldplay", "author", "ArenaOfMusic", "image", "img/logo.jpeg"),
-                Map.of("title", "Clásicos 80s", "author", "ArenaOfMusic", "image", "img/logo.jpeg")
-            )
-        );
+                "username", "Eric",
+                "photoUrl", "img/logo.jpeg",
+                "status", "Conectado",
+                "victories", 7,
+                "losses", 3,
+                "draws", 12,
+                "favoritePlaylists", Arrays.asList(
+                        Map.of("title", "The Weeknd", "author", "ArenaOfMusic", "image", "img/logo.jpeg"),
+                        Map.of("title", "Coldplay", "author", "ArenaOfMusic", "image", "img/logo.jpeg"),
+                        Map.of("title", "Clásicos 80s", "author", "ArenaOfMusic", "image", "img/logo.jpeg")));
 
         model.addAttribute("friends", friends);
         model.addAttribute("requests", requests);
@@ -164,6 +159,78 @@ public class RootController {
 
     @GetMapping("/tienda")
     public String tienda(Model model) {
+        List<Map<String, Object>> fotos = Arrays.asList(Map.of(
+                "title", "Foto 1",
+                "foto", "img/iconos/usuario.png"),
+                Map.of(
+                        "title", "Foto 2",
+                        "foto", "/img/iconos/perro.png"),
+                Map.of(
+                        "title", "Foto 3",
+                        "foto", "img/iconos/gato.png"),
+                Map.of(
+                        "title", "Foto 4",
+                        "foto", "img/iconos/pez.png"),
+                Map.of(
+                        "title", "Foto 5",
+                        "foto", "img/iconos/pajaro.png"),
+                Map.of(
+                        "title", "Foto 6",
+                        "foto", "img/iconos/conejo.png"));
+
+        List<Map<String, Object>> marcos = Arrays.asList(
+                Map.of(
+                        "title", "Marco 1",
+                        "foto", "img/marco/marco1.png"),
+                Map.of(
+                        "title", "Marco 2",
+                        "foto", "img/marco/marco2.png"),
+                Map.of(
+                        "title", "Marco 3",
+                        "foto", "img/marco/marco3.png"),
+                Map.of(
+                        "title", "Marco 4",
+                        "foto", "img/marco/marco4.png"),
+                Map.of(
+                        "title", "Marco 5",
+                        "foto", "img/marco/marco5.png"),
+                Map.of(
+                        "title", "Marco 6",
+                        "foto", "img/marco/marco6.png"));
+        List<Map<String, Object>> banners = Arrays.asList(
+                Map.of(
+                        "title", "Banner 1",
+                        "foto", "img/banners/banner1.png"),
+                Map.of(
+                        "title", "Banner 2",
+                        "foto", "img/banners/banner2.png"),
+                Map.of(
+                        "title", "Banner 3",
+                        "foto", "img/banners/banner3.png"),
+                Map.of(
+                        "title", "Banner 4",
+                        "foto", "img/banners/banner4.png"),
+                Map.of(
+                        "title", "Banner 5",
+                        "foto", "img/banners/banner5.png"),
+                Map.of(
+                        "title", "Banner 6",
+                        "foto", "img/banners/banner6.png"));
+
+        model.addAttribute("itemFotos", fotos);
+        model.addAttribute("itemMarcos", marcos);
+        model.addAttribute("itemBanners", banners);
         return "tienda";
     }
+
+    @GetMapping("/configuracion-partida")
+    public String configPartida(Model model) {
+        return "configuracion-partida";
+    }
+
+    @GetMapping("/sala-espera")
+    public String salaespera(Model model) {
+        return "sala-espera";
+    }
+
 }

@@ -1,9 +1,7 @@
 package es.ucm.fdi.iw.model;
 
-import java.sql.Date;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.LocalDate;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;

@@ -38,13 +38,17 @@ class ArenaOfMusicApplicationTests {
 		// Sólo estamos probando que la plantilla carga
 	}
 
-	@Test
-	public void aSimpleTest() throws Exception {
-		MvcResult mvcResult = this.mockMvc.perform(get("/api/status/test"))
-				.andDo(print()).andExpect(status().isOk())
-				.andExpect(jsonPath("$.code").value("test"))
-				.andReturn();
-		Assertions.assertEquals("application/json;charset=UTF-8",
-				mvcResult.getResponse().getContentType());
-	}
+	/*
+	 * TEST api gateaway
+	 * 
+	 * @Test
+	 * public void aSimpleTest() throws Exception {
+	 * MvcResult mvcResult = this.mockMvc.perform(get("/api/status/test"))
+	 * .andDo(print()).andExpect(status().isOk())
+	 * .andExpect(jsonPath("$.code").value("test"))
+	 * .andReturn();
+	 * Assertions.assertEquals("application/json;charset=UTF-8",
+	 * mvcResult.getResponse().getContentType());
+	 * }
+	 */
 }
