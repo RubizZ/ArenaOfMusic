@@ -232,5 +232,10 @@ public class RootController {
     public String salaespera(Model model) {
         return "sala-espera";
     }
+   
+    @GetMapping("/partida")
+    public String partida(Model model) {
+        return "partida";
+    }
 
 }

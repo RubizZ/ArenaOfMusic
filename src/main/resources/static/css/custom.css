@@ -27,7 +27,7 @@ img.preview {
 }
 
 /* --- Personalización general ---*/
-body{
+body {
     background-image: url("/img/fondo.png");
     background-size: cover;
     background-position: center;
@@ -35,6 +35,7 @@ body{
     background-attachment: fixed;
     min-height: 100vh;
 }
+
 /* --- Personalización general ---*/
 
 
@@ -446,6 +447,16 @@ body{
 }
 
 /* ---TIENDA--- */
+
+/* ---PARTIDA--- */
+
+.preview-match-img {
+    width: 50dvh;
+    height: auto;
+    overflow-wrap: normal;
+}
+
+/* ---PARTIDA--- */
 
 
 /* ---NAVBAR--- */
