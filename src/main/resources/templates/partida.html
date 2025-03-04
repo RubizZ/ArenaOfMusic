@@ -257,7 +257,7 @@
                 const chatBoxes = document.querySelectorAll(".chat-box");
                 chatBoxes.forEach(chatBox => {
                     const newMessage = document.createElement("p");
-                    newMessage.textContent = `Tú: ${message}`;
+                    newMessage.textContent = `${message}`;
                     const strongElement = document.createElement("strong");
                     strongElement.textContent = "Tú: ";
                     newMessage.insertBefore(strongElement, newMessage.firstChild);
