@@ -238,4 +238,37 @@ public class RootController {
         return "partida";
     }
 
+    @GetMapping("/resultados")
+    public String resultados(Model model) {
+        model.addAttribute("position", "¡Has acabado en 1ª posición!");
+
+        // Lista de jugadores
+        List<Map<String, Object>> players = Arrays.asList(
+                Map.of("username", "Eric", "photoUrl", "img/logo.jpeg", "hits", 13, "songs", 15, "score", 5750),
+                Map.of("username", "Ava", "photoUrl", "img/logo.jpeg", "hits", 11, "songs", 15, "score", 5200),
+                Map.of("username", "Sam", "photoUrl", "img/logo.jpeg", "hits", 10,  "songs", 15, "score", 4850),
+                Map.of("username", "Taylor", "photoUrl", "img/logo.jpeg", "hits", 6,  "songs", 15, "score", 2650)
+        );
+        model.addAttribute("players", players);
+
+        // Información de la playlist
+        model.addAttribute("playlistImage", "img/logo.jpeg");
+        model.addAttribute("playlistName", "Top Hits 2010's");
+        model.addAttribute("playlistSongs", 30);
+        model.addAttribute("playlistAuthor", "ArenaOfMusic");
+
+        // Detalles de cada canción: título, artista, quién acertó, tiempo
+        List<Map<String, Object>> songs = Arrays.asList(
+                Map.of("title", "Sorry", "artist", "Justin Bieber", "player", "Sam", "time", 2.1),
+                Map.of("title", "God's Plan", "artist", "Drake", "player", "Eric", "time", 3.9),
+                Map.of("title", "Memories", "artist", "David Guetta ft. Kid Cudi", "player", "Eric", "time", 3.5),
+                Map.of("title", "Good Feeling", "artist", "Flo Rida", "player", null, "time", null),
+                Map.of("title", "Can't Hold Us", "artist", "Macklemore ft. Ryan Lewis", "player", "Ava", "time", 2.7)
+        );
+        model.addAttribute("songs", songs);
+
+        return "resultados";
+    }
+
+
 }
