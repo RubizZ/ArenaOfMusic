@@ -42,38 +42,39 @@ public class RegisterController {
             @RequestParam String password,
             @RequestParam String firstName,
             @RequestParam String lastName,
+            @RequestParam String email,
+
             Model model,
             HttpServletRequest request,
             HttpServletResponse response) throws Exception {
-        // Controlla se il nome utente esiste già
+        // Check if the username already exists
         if (userService.usernameExists(username)) {
             model.addAttribute("registerError", "Username already used!");
             return "register";
         }
 
-        // Registra l'utente nel database
-        userService.registerUser(username, password, firstName, lastName);
+        // Register the user
+        userService.registerUser(username, password, firstName, lastName, email);
 
         try {
-            // Effettua il login automatico
+            // Do the automatic login
             UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(username,
                     password);
 
             Authentication authentication = authenticationManager.authenticate(authRequest);
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            // Usa il loginSuccessHandler per gestire la sessione
+            // Use loginSuccessHandler to handle the session
             loginSuccessHandler.onAuthenticationSuccess(request, response, authentication);
             request.getSession().setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
                     SecurityContextHolder.getContext());
 
-            return null; // Evita il doppio redirect
+            return null; // Avoid double redirect
         } catch (Exception e) {
             e.printStackTrace();
-             
-            // model.addAttribute("registerError", "Registrazione riuscita, ma errore nel
-            // login.");
-            return "login"; // Ritorna alla pagina di login in caso di errore
+
+            return "login"; // Go back to login page on error
+
         }
     }
 }
