@@ -16,7 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 /**
  * Security configuration.
- * 
+ *
  * Most security configuration will appear in this file, but according to
  * https://spring.io/guides/topicals/spring-security-architecture/, it is not
  * a bad idea to also use method security (via @Secured annotations in methods)
@@ -30,11 +30,11 @@ public class SecurityConfig {
 
 	/**
 	 * Main security configuration.
-	 * 
+	 *
 	 * The first rule that matches will be followed - so if a rule decides to grant
 	 * access
 	 * to a resource, a later rule cannot deny that access, and vice-versa.
-	 * 
+	 *
 	 * To disable security entirely, just add an .antMatchers("**").permitAll()
 	 * as a first rule. Note that this may break an application that expects to have
 	 * login information available.
@@ -59,7 +59,7 @@ public class SecurityConfig {
 						.ignoringRequestMatchers("/api/**"))
 				.authorizeHttpRequests(authorize -> authorize
 						.requestMatchers("/css/**", "/js/**", "/img/**", "/", "/error",
-								"/perfil", "/tienda", "/amigos", "/configuracion-partida")
+								"/perfil", "/tienda", "/amigos", "/configuracion-partida, /resultados")
 						.permitAll()
 						.requestMatchers("/api/**").permitAll() // <-- public api access
 						.requestMatchers("/admin/**").hasRole("ADMIN") // <-- administration
@@ -76,7 +76,7 @@ public class SecurityConfig {
 
 	/**
 	 * Declares a PasswordEncoder bean.
-	 * 
+	 *
 	 * This allows you to write, in any part of Spring-managed code,
 	 * `@Autowired PasswordEncoder passwordEncoder`, and have it initialized
 	 * with the result of this method.
@@ -89,7 +89,7 @@ public class SecurityConfig {
 
 	/**
 	 * Declares a springDataUserDetailsService bean.
-	 * 
+	 *
 	 * This is used to translate from Spring Security users to in-application users.
 	 */
 	@Bean
@@ -99,7 +99,7 @@ public class SecurityConfig {
 
 	/**
 	 * Declares an AuthenticationManager bean.
-	 * 
+	 *
 	 * This can be used to auto-login into the site after creating new users, for
 	 * example.
 	 * See
