@@ -14,34 +14,33 @@ import lombok.NoArgsConstructor;
 @Table(name = "blocks")
 public class Block implements Transferable<Block.Transfer> {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "block_gen")
-    @SequenceGenerator(name = "block_gen", sequenceName = "block_gen")
-    private long id;
+    @EmbeddedId
+    private BlockId id;
 
     @ManyToOne
+    @MapsId("blockerId")
     @JoinColumn(name = "blocker_id", nullable = false)
     private User blocker;
 
     @ManyToOne
+    @MapsId("blockedId")
     @JoinColumn(name = "blocked_id", nullable = false)
     private User blocked;
 
     @Column(nullable = false)
-    private LocalDateTime creationDate = LocalDateTime.now();
+    private LocalDateTime blockDate = LocalDateTime.now();
 
     @Getter
     @AllArgsConstructor
     public static class Transfer {
-        private long id;
         private long blocker;
         private long blocked;
-        private String creationDate;
+        private String blockDate;
     }
 
     @Override
     public Transfer toTransfer() {
-        return new Transfer(id, blocker.getId(), blocked.getId(),
-                DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(creationDate));
+        return new Transfer(id.getBlockerId(), id.getBlockedId(),
+                DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(blockDate));
     }
 }
