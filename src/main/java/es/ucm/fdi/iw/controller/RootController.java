@@ -1,6 +1,7 @@
 package es.ucm.fdi.iw.controller;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -232,7 +233,7 @@ public class RootController {
     public String salaespera(Model model) {
         return "sala-espera";
     }
-   
+
     @GetMapping("/partida")
     public String partida(Model model) {
         return "partida";
@@ -242,30 +243,78 @@ public class RootController {
     public String resultados(Model model) {
         model.addAttribute("position", "¡Has acabado en 1ª posición!");
 
-        // Lista de jugadores
-        List<Map<String, Object>> players = Arrays.asList(
-                Map.of("username", "Eric", "photoUrl", "img/logo.jpeg", "hits", 13, "songs", 15, "score", 5750),
-                Map.of("username", "Ava", "photoUrl", "img/logo.jpeg", "hits", 11, "songs", 15, "score", 5200),
-                Map.of("username", "Sam", "photoUrl", "img/logo.jpeg", "hits", 10,  "songs", 15, "score", 4850),
-                Map.of("username", "Taylor", "photoUrl", "img/logo.jpeg", "hits", 6,  "songs", 15, "score", 2650)
-        );
-        model.addAttribute("players", players);
-
         // Información de la playlist
-        model.addAttribute("playlistImage", "img/logo.jpeg");
-        model.addAttribute("playlistName", "Top Hits 2010's");
-        model.addAttribute("playlistSongs", 30);
-        model.addAttribute("playlistAuthor", "ArenaOfMusic");
+        Map<String, Object> playlist = new HashMap<>();
+        playlist.put("image", "img/logo.jpeg");
+        playlist.put("name", "Top Hits 2010's");
+        playlist.put("songs", 30);
+        playlist.put("author", "ArenaOfMusic");
 
-        // Detalles de cada canción: título, artista, quién acertó, tiempo
-        List<Map<String, Object>> songs = Arrays.asList(
-                Map.of("title", "Sorry", "artist", "Justin Bieber", "player", "Sam", "time", 2.1),
-                Map.of("title", "God's Plan", "artist", "Drake", "player", "Eric", "time", 3.9),
-                Map.of("title", "Memories", "artist", "David Guetta ft. Kid Cudi", "player", "Eric", "time", 3.5),
-                Map.of("title", "Good Feeling", "artist", "Flo Rida", "player", null, "time", null),
-                Map.of("title", "Can't Hold Us", "artist", "Macklemore ft. Ryan Lewis", "player", "Ava", "time", 2.7)
+        // Canciones de la playlist
+        List<Map<String, String>> canciones = Arrays.asList(
+                Map.of("name", "Sorry", "artist", "Justin Bieber"),
+                Map.of("name", "God's Plan", "artist", "Drake"),
+                Map.of("name", "Memories", "artist", "David Guetta ft. Kid Cudi"),
+                Map.of("name", "Good Feeling", "artist", "Flo Rida"),
+                Map.of("name", "Can't Hold Us", "artist", "Macklemore ft. Ryan Lewis")
         );
-        model.addAttribute("songs", songs);
+        playlist.put("canciones", canciones);
+        model.addAttribute("playlist", playlist);
+
+        // Lista de participantes ordenados por puntuación
+        List<Map<String, Object>> sortedParticipants = Arrays.asList(
+            Map.of(
+                "user", Map.of("username", "Eric", "photoUrl", "img/logo.jpeg"),
+                "hits", 13,
+                "score", 5750
+            ),
+            Map.of(
+                "user", Map.of("username", "Ava", "photoUrl", "img/logo.jpeg"),
+                "hits", 11,
+                "score", 5200
+            ),
+            Map.of(
+                "user", Map.of("username", "Sam", "photoUrl", "img/logo.jpeg"),
+                "hits", 10,
+                "score", 4850
+            ),
+            Map.of(
+                "user", Map.of("username", "Taylor", "photoUrl", "img/logo.jpeg"),
+                "hits", 6,
+                "score", 2650
+            )
+        );
+        model.addAttribute("sortedParticipants", sortedParticipants);
+
+        // Resultados de cada canción
+        List<Map<String, Object>> songResults = Arrays.asList(
+            Map.of(
+                "song", Map.of("name", "Sorry", "artist", "Justin Bieber"),
+                "winnerName", "Sam",
+                "time", 2.1
+            ),
+            Map.of(
+                "song", Map.of("name", "God's Plan", "artist", "Drake"),
+                "winnerName", "Eric",
+                "time", 3.9
+            ),
+            Map.of(
+                "song", Map.of("name", "Memories", "artist", "David Guetta ft. Kid Cudi"),
+                "winnerName", "Eric",
+                "time", 3.5
+            ),
+            Map.of(
+                "song", Map.of("name", "Good Feeling", "artist", "Flo Rida"),
+                "winnerName", "Sam",
+                "time", 4.8
+            ),
+            Map.of(
+                "song", Map.of("name", "Can't Hold Us", "artist", "Macklemore ft. Ryan Lewis"),
+                "winnerName", "Ava",
+                "time", 2.7
+            )
+        );
+        model.addAttribute("songResults", songResults);
 
         return "resultados";
     }

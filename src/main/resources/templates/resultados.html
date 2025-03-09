@@ -11,7 +11,7 @@
 
     <main class="flex-shrink-0 mt-4">
         <div class="container my-5">
-            <div class="row align-items-start bg-light p-2 rounded ">
+            <div class="row align-items-start bg-light p-2 rounded">
 
                 <!-- Resultados -->
                 <div class="col-md-6 left-panel me-md-4">
@@ -27,7 +27,8 @@
                                 <span class="fw-bold fs-3" style="color: #C0C0C0;">2</span>
                             </div>
                             <img
-                                th:if="${players.size() > 1}" th:src="${players[1].photoUrl}"
+                                th:if="${sortedParticipants.size() > 1}"
+                                th:src="${sortedParticipants[1].user.photoUrl}"
                                 class="rounded-circle border border-2 border-light"
                                 style="width: 65px; height: 65px; object-fit: cover;"
                             />
@@ -39,7 +40,8 @@
                                 <span class="fw-bold fs-2" style="color: #FFD700;">1</span>
                             </div>
                             <img
-                                th:if="${!players.isEmpty()}" th:src="${players[0].photoUrl}"
+                                th:if="${!sortedParticipants.isEmpty()}"
+                                th:src="${sortedParticipants[0].user.photoUrl}"
                                 class="rounded-circle border border-2 border-light"
                                 style="width: 75px; height: 75px; object-fit: cover;"
                             />
@@ -51,7 +53,8 @@
                                 <span class="fw-bold fs-3" style="color: #CD7F32;">3</span>
                             </div>
                             <img
-                                th:if="${players.size() > 2}" th:src="${players[2].photoUrl}"
+                                th:if="${sortedParticipants.size() > 2}"
+                                th:src="${sortedParticipants[2].user.photoUrl}"
                                 class="rounded-circle border border-2 border-light"
                                 style="width: 60px; height: 60px; object-fit: cover;"
                             />
@@ -61,36 +64,38 @@
                     <!-- Lista de jugadores -->
                     <div class="container mt-5">
                         <div
-                            th:each="player, stat : ${players}"
+                            th:each="participant, stat : ${sortedParticipants}"
                             class="d-flex align-items-center justify-content-between rounded-4 mb-2 p-1 px-3 mx-5"
                             style="width: 30%; max-width: 400px;"
                             th:style="${'background-color: rgba(142, 210, 105, ' + (1 - stat.index * 0.15) + ');'}">
 
                             <!-- Información del jugador -->
                             <div class="d-flex align-items-center">
-                                <span class="fw-semibold" th:text="${player.username}">Nombre</span>
+                                <span class="fw-semibold" th:text="${participant.user.username}">Nombre</span>
                                 <span class="mx-2">·</span>
-                                <span th:text="${player.hits}">0</span>
+                                <span th:text="${participant.hits}">0</span>
                                 <span class="mx-1">/</span>
-                                <span th:text="${player.songs}">0</span>
+                                <span th:text="${playlist.canciones.size()}">0</span>
                                 <span class="mx-1">canciones</span>
                             </div>
 
                             <!-- Puntuación -->
-                            <div class="fw-bold" th:text="${player.score}">0</div>
+                            <div class="fw-bold" th:text="${participant.score}">0</div>
                         </div>
                     </div>
 
                     <!-- Botones de acción -->
                     <div class="d-flex justify-content-center gap-4 mt-5">
-                        <button
+                        <a
+                            th:href="@{/configuracion-partida}"
                             class="btn btn-light rounded-3 btn-sm px-5 py-1"
                             style="background-color: #F0F0F0; color: black; ">Volver a jugar
-                        </button>
-                        <button
+                        </a>
+                        <a
+                            th:href="@{/}"
                             class="btn btn-success rounded-3 btn-sm px-5 py-1"
                             style="background-color: #8ED269; border-color: #8ED269; color: black;">Continuar
-                        </button>
+                        </a>
                     </div>
                 </div>
 
@@ -101,15 +106,15 @@
                     <!-- Información de la playlist -->
                     <div class="d-flex align-items-center mb-5">
                         <img
-                            th:src="${playlistImage}"
+                            th:src="${playlist.image}"
                             class="me-3 rounded"
                             style="width: 60px; height: 60px; object-fit: cover;"
                         />
                         <div>
-                            <div class="fs-4 fw-semibold" th:text="${playlistName}">Playlist</div>
+                            <div class="fs-4 fw-semibold" th:text="${playlist.name}">Playlist</div>
                             <div class="text-muted">
-                                <span th:text="${playlistSongs}">0</span> canciones · by
-                                <span th:text="${playlistAuthor}">ArenaOfMusic</span>
+                                <span th:text="${playlist.canciones.size()}">0</span> canciones · by
+                                <span th:text="${playlist.author}">ArenaOfMusic</span>
                             </div>
                         </div>
                     </div>
@@ -126,14 +131,14 @@
                         </thead>
 
                         <tbody>
-                            <tr th:each="song, stat : ${songs}">
+                            <tr th:each="result, stat : ${songResults}">
                                 <td class="border-0 py-2 text-muted" th:text="${stat.index + 1}" style="background: transparent;">1</td>
                                 <td class="border-0 py-2" style="background: transparent;">
-                                    <div class="fw-medium" th:text="${song.title}">Canción</div>
-                                    <div class="text-muted small" th:text="${song.artist}">Artista</div>
+                                    <div class="fw-medium" th:text="${result.song.name}">Canción</div>
+                                    <div class="text-muted small" th:text="${result.song.artist}">Artista</div>
                                 </td>
-                                <td class="border-0 py-2" th:text="${song.player != null ? song.player : '-'}" style="background: transparent;">Nombre</td>
-                                <td class="border-0 py-2" th:text="${song.time != null ? song.time + 's' : '-'}" style="background: transparent;">0.0s</td>
+                                <td class="border-0 py-2" th:text="${result.winnerName ?: '-'}" style="background: transparent;">Nombre</td>
+                                <td class="border-0 py-2" th:text="${result.time != null ? result.time + 's' : '-'}" style="background: transparent;">0.0s</td>
                             </tr>
                         </tbody>
                     </table>
