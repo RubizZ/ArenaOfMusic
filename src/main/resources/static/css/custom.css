@@ -26,16 +26,24 @@ img.preview {
     border-radius: 10px;
 }
 
-/* --- Personalización de vistas ---*/
-
-/*---PRINCIPAL----*/
-/* Fondo y layout general*/
-.contenido-principal {
+/* --- Personalización general ---*/
+body {
     background-image: url("/img/fondo.png");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed;
+    min-height: 100vh;
+}
+
+/* --- Personalización general ---*/
+
+
+/* --- Personalización de vistas ---*/
+
+/*---PRINCIPAL----*/
+/* Fondo y layout general*/
+.contenido-principal {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -419,11 +427,28 @@ img.preview {
 /*---FIN ADMIN DASHBOARD---*/
 
 /* TIENDA */
-.tituloPagina {
-    background-color: rgba(195, 195, 195, 0.5);
-    display: flex;
-    justify-content: center;
-    padding: 0.5rem;
+
+.body-tienda {
+    background-image: url("/img/fondo.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+.titulo-tienda {
+    display: inline-block;
+    font-size: 3rem;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    background: linear-gradient(45deg, #307930, #77467b);
+    color: white;
+    padding: 1rem;
+    margin: 0.5rem;
+    border-radius: 10px;
+    text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.7);
+    margin-bottom: 20px;
+    z-index: 10;
 }
 
 .seccion {
@@ -431,10 +456,12 @@ img.preview {
     margin: 0.5rem;
     font-style: italic;
     overflow: auto;
+    background-color: rgba(255, 255, 255, 0.85);
+    border-radius: 10px;
 }
 
 .seccion h2 {
-    background-color: rgba(175, 175, 175, 0.5);
+    border-bottom: solid black;
     padding: 0.5rem;
 }
 
@@ -488,6 +515,16 @@ img.preview {
 }
 
 /* ---TIENDA--- */
+
+/* ---PARTIDA--- */
+
+.preview-match-img {
+    width: 50dvh;
+    height: auto;
+    overflow-wrap: normal;
+}
+
+/* ---PARTIDA--- */
 
 
 /* ---NAVBAR--- */
