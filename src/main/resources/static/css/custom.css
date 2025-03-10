@@ -468,6 +468,12 @@ a[disabled] {
     padding: 15px 0;
 }
 
+.sticky-filters.sticky-active {
+    backdrop-filter: blur(20px);
+    -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+}
+
 .sticky-filters .card {
     border-radius: 1rem;
     background: var(--bs-card-bg);
