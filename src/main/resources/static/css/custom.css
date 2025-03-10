@@ -390,14 +390,19 @@ body {
     left: 0;
     width: 100%;
     z-index: 2;
-    background-color: rgba(255, 255, 255, 0.85);
     padding: 15px 0;
     transition: background-color 1.5s ease-in-out;
 }
 
+.sticky-filters.sticky-active {
+    backdrop-filter: blur(20px);
+    -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+}
+
 .sticky-filters .card {
     border-radius: 1rem;
-    background: lightgray;
+    background: rgba(211, 211, 211, 0.9);
     overflow: hidden;
     z-index: 0;
 }
