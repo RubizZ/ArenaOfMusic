@@ -1,6 +1,7 @@
 package es.ucm.fdi.iw.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -11,6 +12,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.server.ResponseStatusException;
 
 import es.ucm.fdi.iw.LoginSuccessHandler;
 import es.ucm.fdi.iw.UserService;
@@ -34,6 +37,15 @@ public class RegisterController {
     public String showRegisterForm(Model model) {
         model.addAttribute("registerError", null);
         return "register";
+    }
+
+    @GetMapping("/user_available")
+    @ResponseBody
+    public String isUserAvailable(@RequestParam String username) {
+        if (userService.usernameExists(username)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already in use");
+        }
+        return "{\"avaible\": \"true\"}";
     }
 
     @PostMapping("/register")

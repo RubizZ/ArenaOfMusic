@@ -4,6 +4,41 @@
 <head>
     <th:block th:replace="~{fragments/head :: header}" />
     <title>IW: Login</title>
+
+    <!-- <script>
+        
+        
+                document.addEventListener('DOMContentLoaded', function () {
+                    const form = document.querySelector('.form-signin');
+                    form.addEventListener('submit', function (event) {
+                        event.preventDefault(); // Impediamo il submit normale
+        
+                        const username = document.getElementById('username').value;
+                        const password = document.getElementById('password').value;
+        
+        
+                        const data = {
+                            username: username,
+                            password: password
+                        };
+        
+                         go(config.rootUrl + '/login', "POST", data)
+                            .then(response => {
+                                console.log('Login success', response);
+                                // Successo: redirect o mostrare un messaggio
+                                // console.log('Login success', response);
+                                // window.location.href = '/'; // O dove vuoi reindirizzare dopo il login
+                            })
+                            .catch(error => {
+                                 console.error('Login failed', error);
+                                const errorMessage = document.querySelector('.text-danger');
+                                if (errorMessage) {
+                                    errorMessage.style.display = 'block';  
+                                }
+                            });
+                    });
+                });
+            </script> -->
 </head>
 
 <body class="d-flex flex-column h-100">

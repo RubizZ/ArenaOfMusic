@@ -90,6 +90,15 @@ public class User implements Transferable<User.Transfer> {
     @JoinColumn(name = "recipient_id")
     private List<Message> received = new ArrayList<>();
 
+    @OneToMany(mappedBy = "reporter")
+    private List<Report> reportsMade;
+
+    @OneToMany(mappedBy = "reported")
+    private List<Report> reportsReceived;
+
+    // Faltan las relaciones con amigos, bloqueos e Inventario
+    // -> faltan las clases de amigos, bloqueos e inventario en model
+
     /**
      * Checks whether this user has a given role.
      * 
@@ -137,5 +146,5 @@ public class User implements Transferable<User.Transfer> {
     public String toString() {
         return toTransfer().toString();
     }
-    
+
 }

@@ -60,11 +60,13 @@ public class SecurityConfig {
 				.authorizeHttpRequests(authorize -> authorize
 						.requestMatchers("/css/**", "/js/**", "/img/**")
 						.permitAll()
-						.requestMatchers("/api/**", "/", "/error", "/tienda", "/register")
+						.requestMatchers("/api/**", "/", "/error", "/tienda", "/register", "/user_available",
+								"/register", "/login", "/logout")
 						.permitAll() // <-- public access
 						.requestMatchers("/admin/**")
 						.hasRole("ADMIN") // <-- administration
-						.requestMatchers("/user/**", "/perfil", "/amigos", "/sala-espera", "/configuracion-partida", "/partida")
+						.requestMatchers("/user/**", "/perfil", "/amigos", "/sala-espera", "/configuracion-partida",
+								"/partida")
 						.hasRole("USER") // <-- logged-in users
 						.anyRequest().authenticated())
 				.formLogin(formLogin -> formLogin
