@@ -1,6 +1,7 @@
 package es.ucm.fdi.iw.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -57,10 +58,10 @@ public class Report implements Transferable<Report.Transfer> {
     private User admin;
 
     @Column(nullable = false)
-    private Date creationDate = java.sql.Date.valueOf(java.time.LocalDate.now());
+    private LocalDateTime creationDate = LocalDateTime.now();
 
     @Column
-    private Date resolutionDate = java.sql.Date.valueOf(java.time.LocalDate.now());
+    private LocalDateTime resolutionDate;
 
     @Getter
     @AllArgsConstructor
@@ -73,16 +74,16 @@ public class Report implements Transferable<Report.Transfer> {
         private boolean solved;
         private boolean banned;
         private long admin;
-        private Date creationDate;
-        private Date resolutionDate;
-
+        private String creationDate;
+        private String resolutionDate;
     }
 
     @Override
     public Transfer toTransfer() {
-        return new Transfer(id, reporter.getId(), reported.getId(), reason, partida, solved, banned, admin.getId(),
-                creationDate,
-                resolutionDate);
+        return new Transfer(id, reporter.getId(), reported.getId(), reason, partida, solved,
+                banned, admin.getId(),
+                DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(creationDate),
+                resolutionDate == null ? null : DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(resolutionDate));
     }
 
 }

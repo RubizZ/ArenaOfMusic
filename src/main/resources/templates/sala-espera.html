@@ -9,13 +9,13 @@
 <body class="d-flex flex-column h-100">
     <header th:replace="~{fragments/nav.html :: nav}"></header>
 
-    <main class="flex-shrink-0">
-        <div class="sala-espera">
-            <div class="espera-card">
+    <main class="flex-shrink-0 d-flex justify-content-center">
+        <div class="sala-espera bg-light p-6 m-5 d-flex justify-content-center rounded">
+            <div class="espera-card p-3">
                 <h1>Sala de Espera</h1>
                 <p>Esperando a otros jugadores para comenzar la partida...</p>
-        
-        
+
+
                 <!-- Lista de jugadores -->
                 <div>
                     <h3>Jugadores esperando:</h3>
@@ -26,13 +26,18 @@
                         <!-- Agregar más jugadores según sea necesario -->
                     </ul>
                 </div>
-        
-                <!-- Botón para empezar -->
-                <button class="btn btn-success btn-empezarEspera mt-4" id="startButton">Comenzar partida</button>
+
+                <div class="container d-flex justify-content-center">
+                    <!-- Botón para empezar -->
+                    <a th:href="@{/partida}">
+                        <button class="btn btn-success btn-empezarEspera mt-4" id="startButton" type="button">
+                            Comenzar partida</button>
+                    </a>
+                </div>
             </div>
         </div>
     </main>
-    
+
     <th:block th:replace="~{fragments/footer.html :: footer}" />
 </body>
 

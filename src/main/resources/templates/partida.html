@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html class="h-100" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <th:block th:replace="~{fragments/head :: header}" />
+    <title>Arena of Music</title>
+</head>
+
+<body class="d-flex flex-column h-100">
+
+    <main>
+        <div class="container my-3 p-3 rounded">
+            <div class="row d-flex justify-content-center text-center p-3">
+
+                <!-- BOTONES PARA OFFCANVAS EN MÓVILES -->
+                <div class="d-lg-none text-center mb-3">
+                    <div class="row justify-content-between">
+                        <button class="btn btn-primary col-4" data-bs-toggle="offcanvas"
+                            data-bs-target="#offcanvasScores">
+                            Jugadores
+                        </button>
+                        <button class="btn btn-secondary col-4" data-bs-toggle="offcanvas"
+                            data-bs-target="#offcanvasChat">
+                            Chat
+                        </button>
+                    </div>
+                </div>
+
+                <!-- JUGADORES (Oculto en móviles, visible en pantallas grandes) -->
+                <div class="col-lg-3 col-md-auto p-2 text-center d-none d-lg-block">
+                    <h1 class="p-2 bg-light rounded my-3">JUGADORES</h1>
+                    <div class="card mb-3">
+                        <div class="row p-2">
+                            <div class="col-md-4 text-center">
+                                <img src="/img/default-profile.png" class="img-fluid rounded-circle" alt="...">
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h3 class="card-title">Jugador 1</h3>
+                                    <h4 class="card-title">PUNTOS: 15</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mb-3">
+                        <div class="row p-2">
+                            <div class="col-md-4">
+                                <img src="/img/default-profile.png" class="img-fluid rounded-circle" alt="...">
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h3 class="card-title">Jugador 2</h3>
+                                    <h4 class="card-title">PUNTOS: 25</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mb-3">
+                        <div class="row p-2">
+                            <div class="col-md-4">
+                                <img src="/img/default-profile.png" class="img-fluid rounded-circle" alt="...">
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h3 class="card-title">Jugador 3</h3>
+                                    <h4 class="card-title">PUNTOS: 5</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mb-3">
+                        <div class="row p-2">
+                            <div class="col-md-4">
+                                <img src="/img/default-profile.png" class="img-fluid rounded-circle" alt="...">
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h3 class="card-title">Jugador 4</h3>
+                                    <h4 class="card-title">PUNTOS: 20</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- CONTENIDO PRINCIPAL -->
+                <div class="col-lg-6 col-md-auto justify-content-center align-items-center p-2">
+                    <h1 class="p-2 bg-light rounded my-3">RONDA 4</h1>
+                    <!-- Círculo con cuenta atrás centrado -->
+                    <div class="my-3 d-flex justify-content-center align-items-center">
+                        <div class="rounded-circle d-flex justify-content-center align-items-center bg-light border
+                            border-primary text-primary"
+                            style="width: 160px; height: 160px; font-size: 24px; font-weight: bold;">
+                            <b>
+                                <h4 id="countdown">COMIENZA!</h4>
+                            </b>
+                        </div>
+                    </div>
+                    <img src="/img/preview-song-img.jpeg" alt="Imagen de interrogación de partida"
+                        class="rounded img-fluid my-3" style="max-width: 32.5vh; max-height: 32.5vh;">
+                    <div class="input-group mt-auto border-success">
+                        <input type="text" class="form-control  border-success border-3" id="songInput"
+                            placeholder="Introduce el título de la canción...">
+                        <button class="btn btn-success">Marcar</button>
+                    </div>
+
+                </div>
+
+                <!-- CHAT (Oculto en móviles, visible en pantallas medianas en adelante) -->
+                <div class="col-lg-3 col-md-auto p-2 text-center d-none d-lg-flex flex-column">
+                    <h1 class="p-2 bg-light rounded my-3">CHAT</h1>
+
+                    <!-- Contenedor de mensajes con scroll -->
+                    <div class="chat-box border rounded p-2 mb-2 flex-grow-1 text-start"
+                        style="overflow-y: scroll; background-color: #f8f9fa; word-wrap: break-word; white-space: normal;">
+                        <p><strong>Jugador 1:</strong> ¡Buena suerte!</p>
+                        <p><strong>Jugador 2:</strong> ¡Que gane el mejor!</p>
+                    </div>
+
+                    <!-- Input y botón al final -->
+                    <div class="input-group mt-auto">
+                        <input type="text" class="form-control border-primary border-3" id="chatInput"
+                            placeholder="Escribe un mensaje...">
+                        <button class="btn btn-primary" onclick="sendMessage()">Enviar</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- OFFCANVAS PARA JUGADORES -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasScores"
+        style="background-color:rgba(70, 70, 70, 0.5);">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title text-white">Jugadores</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div class="card mb-3">
+                <div class="row p-2">
+                    <div class="col-6 text-center">
+                        <img src="/img/default-profile.png" class="img-thumbnail rounded-circle" alt="..."
+                            style="width: 125px; height: 125px;">
+                    </div>
+                    <div class="col-6">
+                        <div class="card-body">
+                            <h3 class="card-title">Jugador 1</h3>
+                            <h4 class="card-title">PUNTOS: 15</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card mb-3">
+                <div class="row p-2">
+                    <div class="col-6">
+                        <img src="/img/default-profile.png" class="img-thumbnail rounded-circle" alt="..."
+                            style="width: 125px; height: 125px;">
+                    </div>
+                    <div class="col-6">
+                        <div class="card-body">
+                            <h3 class="card-title">Jugador 2</h3>
+                            <h4 class="card-title">PUNTOS: 25</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card mb-3">
+                <div class="row p-2">
+                    <div class="col-6">
+                        <img src="/img/default-profile.png" class="img-thumbnail rounded-circle" alt="..."
+                            style="width: 125px; height: 125px;">
+                    </div>
+                    <div class="col-6">
+                        <div class="card-body">
+                            <h3 class="card-title">Jugador 3</h3>
+                            <h4 class="card-title">PUNTOS: 5</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card mb-3">
+                <div class="row p-2">
+                    <div class="col-6">
+                        <img src="/img/default-profile.png" class="img-thumbnail rounded-circle" alt="..."
+                            style="width: 125px; height: 125px;">
+                    </div>
+                    <div class="col-6">
+                        <div class="card-body">
+                            <h3 class="card-title">Jugador 4</h3>
+                            <h4 class="card-title">PUNTOS: 20</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OFFCANVAS PARA CHAT -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasChat" style="background-color:rgba(70, 70, 70, 0.5);">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title text-white">Chat</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+
+            <!-- Contenedor de mensajes con scroll -->
+            <div class="chat-box border rounded p-2 mb-2 flex-grow-1 text-start"
+                style="overflow-y: scroll; background-color: #f8f9fa; word-wrap: break-word; white-space: normal; min-height: 75dvh;">
+                <p><strong>Jugador 1:</strong> ¡Buena suerte!</p>
+                <p><strong>Jugador 2:</strong> ¡Que gane el mejor!</p>
+            </div>
+
+            <!-- Input y botón al final -->
+            <div class="input-group mt-auto">
+                <input type="text" class="form-control border-primary border-3" id="chatInputOFF"
+                    placeholder="Escribe un mensaje...">
+                <button class="btn btn-primary" onclick="sendMessage()">Enviar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap -->
+    <script th:src="@{/js/bootstrap.bundle-5.3.3.js}" src="js/bootstrap.bundle-5.3.3.js"></script>
+
+    <!-- Websockets -->
+    <script th:src="@{/js/stomp.js}" src="js/stomp.js"></script>
+    <script th:src="@{/js/iw.js}" src="js/iw.js"></script>
+
+    <script>
+        let countdown = 15;
+        const countdownElement = document.getElementById('countdown');
+
+        function updateCountdown() {
+            countdownElement.innerHTML = countdown;
+            if (countdown >= 0) {
+                countdown--;
+            } else {
+                countdownElement.innerHTML = "FIN!";
+            }
+        }
+
+        // Actualización cada segundo
+        const countdownInterval = setInterval(updateCountdown, 1000);
+    </script>
+
+    <script>
+        function sendMessage() {
+            let input = document.getElementById("chatInput");
+            let message = input.value.trim();
+            if (message === "") {
+                input = document.getElementById("chatInputOFF");
+                message = input.value.trim();
+            }
+            if (message !== "") {
+                const chatBoxes = document.querySelectorAll(".chat-box");
+                chatBoxes.forEach(chatBox => {
+                    const newMessage = document.createElement("p");
+                    newMessage.textContent = `${message}`;
+                    const strongElement = document.createElement("strong");
+                    strongElement.textContent = "Tú: ";
+                    newMessage.insertBefore(strongElement, newMessage.firstChild);
+                    chatBox.appendChild(newMessage);
+                    input.value = "";
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                })
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -27,7 +27,7 @@ img.preview {
 }
 
 /* --- Personalización general ---*/
-body{
+body {
     background-image: url("/img/fondo.png");
     background-size: cover;
     background-position: center;
@@ -35,6 +35,7 @@ body{
     background-attachment: fixed;
     min-height: 100vh;
 }
+
 /* --- Personalización general ---*/
 
 
@@ -355,6 +356,74 @@ body{
     text-transform: capitalize;
 }
 
+.select2-container--default .select2-selection--multiple {
+    padding-top: 1.5rem;
+    height: auto;
+    border-radius: 0.375rem;
+    padding-left: 0.5rem;
+}
+
+.select2-container .select2-selection--multiple .select2-selection__placeholder {
+    position: absolute;
+    top: 2rem;
+    left: 1.25rem;
+    font-size: 1rem;
+}
+
+.select2-container .select2-selection--multiple {
+    text-align: left !important;
+    white-space: nowrap;
+    overflow-x: auto;
+    padding-right: 20px;
+}
+
+.select2-container .select2-selection__choice {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sticky-filters {
+    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0px;
+    left: 0;
+    width: 100%;
+    z-index: 2;
+    background-color: rgba(255, 255, 255, 0.85);
+    padding: 15px 0;
+    transition: background-color 1.5s ease-in-out;
+}
+
+.sticky-filters .card {
+    border-radius: 1rem;
+    background: lightgray;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.sticky-filters .card * {
+    z-index: 2;
+}
+
+.sticky-filters .card::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(136, 188, 136, 0.6), rgba(85, 161, 85, 0.6));
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    z-index: 1;
+}
+
+.sticky-filters .card:hover::after {
+    opacity: 1;
+}
+
+
 /*---FIN ADMIN DASHBOARD---*/
 
 /* TIENDA */
@@ -446,6 +515,16 @@ body{
 }
 
 /* ---TIENDA--- */
+
+/* ---PARTIDA--- */
+
+.preview-match-img {
+    width: 50dvh;
+    height: auto;
+    overflow-wrap: normal;
+}
+
+/* ---PARTIDA--- */
 
 
 /* ---NAVBAR--- */
