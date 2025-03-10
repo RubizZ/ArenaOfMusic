@@ -75,10 +75,3 @@ jobs:
         run: |
           source venv/bin/activate
           python deploy.py
-      
-      - name: Deploy Application in Tmux
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.TARGET_USER }}@${{ secrets.TARGET }} << 'EOF'
-            echo "Starting the application in tmux..."
-            tmux send-keys -t myapp "SPRING_PROFILES_ACTIVE=container java -jar target/*.jar" C-m
-          EOF
