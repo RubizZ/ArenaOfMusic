@@ -3,22 +3,297 @@
 
 <head>
     <th:block th:replace="~{fragments/head :: header}" />
+
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     <title>Admin - Arena of Music</title>
+
 </head>
 
 <body class="d-flex flex-column h-100">
     <header th:replace="~{fragments/nav.html :: nav}"></header>
+    <main>
+        <h1 class="mt-5 mb-5 text-center">Administrar usuarios</h1>
+        <!-- Contenedor fijo para filtros y ordenar por -->
+        <div class="sticky-filters">
+            <div class="container">
+                <div class="row d-flex mb-3">
+                    <!--Filtros-->
+                    <div class="col-8 d-flex flex-column">
+                        <div class="card text-center flex-grow-1">
+                            <div class="row align-items-center justify-content-center ">
+                                <div class="col ps-4">
+                                    <h4>Filtros</h4>
+                                </div>
+                                <div class="col">
+                                    <div class="form-floating mb-3 mt-3">
+                                        <input type="number" class="form-control" id="floatingAdminUserID">
+                                        <label for="floatingAdminUserID">ID</label>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-floating mb-3 mt-3">
+                                        <input type="text" class="form-control" id="floatingAdminUserUsername">
+                                        <label for="floatingAdminUserUsername">Username</label>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-floating mb-3 mt-3">
+                                        <input type="email" class="form-control" id="floatingAdminUserEmail">
+                                        <label for="floatingAdminUserEmail">Email</label>
+                                    </div>
+                                </div>
+                                <div class="col align-items-center pe-4">
+                                    <div class="form-floating mb-1 mt-1">
+                                        <select class="form-select multi-select" id="floatingAdminUserRoles" multiple>
+                                            <option value="1">USER</option>
+                                            <option value="2">ADMIN</option>
+                                        </select>
+                                        <script>
+                                            $('.multi-select').select2();
+                                        </script>
+                                        <label for="floatingAdminUserRoles">Roles</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-    <main class="flex-shrink-0">
-        <div class="container">
-            <h1 class="mt-5 mb-5 text-center">Administrar usuarios</h1>
-            <div class="alert alert-info" role="alert">
-                La pagina todavia no esta disponible
+                    <!--Ordenar por-->
+                    <div class="col-4 d-flex">
+                        <div class="card flex-grow-1 align-items-center justify-content-center">
+                            <div class="row justify-content-center align-items-center text-center">
+                                <h5 class="col-auto">Ordenar por</h5>
+                                <div class="col-auto">
+                                    <div class="input-group">
+                                        <select class="form-select" id="adminUserOrder">
+                                            <option value="1">ID</option>
+                                            <option value="2">Fecha de registro</option>
+                                            <option value="3">Ultima vez visto</option>
+                                        </select>
+                                        <button id="adminUserOrderChange" class="btn btn-light" type="button">
+                                            <img id="adminUserOrderType" th:src="@{/img/admin/users/sort-down.svg}">
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-shrink-0 mt-2">
+            <div class="container">
+                <div class="container flex-grow-1 px-3">
+
+                    <!--Usuario activo-->
+                    <div class="card hoverable mb-3" style="background-color: rgba(77, 185, 34, 0.4);">
+                        <a th:href="@{#}" class="stretched-link"></a>
+                        <div class="card-body">
+                            <div class="row row-cols-5 align-items-center justify-content-center text-center">
+                                <div class="col">
+                                    <img src="https://www.mdvacationclub.com/wp-content/uploads/2018/12/Placeholder.png"
+                                        class="rounded-circle" alt="Foto de perfil" width="100" height="100">
+                                </div>
+                                <div class="col">
+                                    <h4>Nombre de usuario</h4>
+                                    <h6>ID</h6>
+                                    <h6>Roles</h6>
+
+                                </div>
+                                <div class="col">
+                                    <h6>Nombre y apellidos</h6>
+                                    <h6>Correo electrónico</h6>
+                                    <h6>Fecha de registro</h6>
+                                </div>
+                                <div class="col">
+                                    <h5>Activo</h5>
+                                </div>
+                                <div class="col">
+                                    <h5>Jugando</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Usuario inactivo-->
+                    <div class="card hoverable mb-3" style="background-color: rgba(53, 47, 47, 0.2);">
+                        <a th:href="@{#}" class="stretched-link"></a>
+                        <div class="card-body">
+                            <div class="row row-cols-5 align-items-center justify-content-center text-center">
+                                <div class="col">
+                                    <img src="https://www.mdvacationclub.com/wp-content/uploads/2018/12/Placeholder.png"
+                                        class="rounded-circle" alt="Foto de perfil" width="100" height="100">
+                                </div>
+                                <div class="col">
+                                    <h4>Nombre de usuario</h4>
+                                    <h6>ID</h6>
+                                    <h6>Roles</h6>
+
+                                </div>
+                                <div class="col">
+                                    <h6>Nombre y apellidos</h6>
+                                    <h6>Correo electrónico</h6>
+                                    <h6>Fecha de registro</h6>
+                                </div>
+                                <div class="col">
+                                    <h5>Inactivo</h5>
+                                </div>
+                                <div class="col">
+                                    <h5>Offline</h5>
+                                    <h6>Ultima vez visto:<br>DD/MM/YYYY hh:mm:ss</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Usuario baneado-->
+                    <div class="card hoverable mb-3" style="background-color: rgba(255, 0, 0, 0.2);">
+                        <a th:href="@{#}" class="stretched-link"></a>
+                        <div class="card-body">
+                            <div class="row row-cols-5 align-items-center justify-content-center text-center">
+                                <div class="col">
+                                    <img src="https://www.mdvacationclub.com/wp-content/uploads/2018/12/Placeholder.png"
+                                        class="rounded-circle" alt="Foto de perfil" width="100" height="100">
+                                </div>
+                                <div class="col">
+                                    <h4>Nombre de usuario</h4>
+                                    <h6>ID</h6>
+                                    <h6>Roles</h6>
+
+                                </div>
+                                <div class="col">
+                                    <h6>Nombre y apellidos</h6>
+                                    <h6>Correo electrónico</h6>
+                                    <h6>Fecha de registro</h6>
+                                </div>
+                                <div class="col">
+                                    <h5>Baneado</h5>
+                                </div>
+                                <div class="col">
+                                    <h5>Offline</h5>
+                                    <h6>Ultima vez visto:<br>DD/MM/YYYY hh:mm:ss</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Usuario activo-->
+                    <div class="card hoverable mb-3" style="background-color: rgba(77, 185, 34, 0.4);">
+                        <a th:href="@{#}" class="stretched-link"></a>
+                        <div class="card-body">
+                            <div class="row row-cols-5 align-items-center justify-content-center text-center">
+                                <div class="col">
+                                    <img src="https://www.mdvacationclub.com/wp-content/uploads/2018/12/Placeholder.png"
+                                        class="rounded-circle" alt="Foto de perfil" width="100" height="100">
+                                </div>
+                                <div class="col">
+                                    <h4>Nombre de usuario</h4>
+                                    <h6>ID</h6>
+                                    <h6>Roles</h6>
+
+                                </div>
+                                <div class="col">
+                                    <h6>Nombre y apellidos</h6>
+                                    <h6>Correo electrónico</h6>
+                                    <h6>Fecha de registro</h6>
+                                </div>
+                                <div class="col">
+                                    <h5>Activo</h5>
+                                </div>
+                                <div class="col">
+                                    <h5>Jugando</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Usuario inactivo-->
+                    <div class="card hoverable mb-3" style="background-color: rgba(53, 47, 47, 0.2);">
+                        <a th:href="@{#}" class="stretched-link"></a>
+                        <div class="card-body">
+                            <div class="row row-cols-5 align-items-center justify-content-center text-center">
+                                <div class="col">
+                                    <img src="https://www.mdvacationclub.com/wp-content/uploads/2018/12/Placeholder.png"
+                                        class="rounded-circle" alt="Foto de perfil" width="100" height="100">
+                                </div>
+                                <div class="col">
+                                    <h4>Nombre de usuario</h4>
+                                    <h6>ID</h6>
+                                    <h6>Roles</h6>
+
+                                </div>
+                                <div class="col">
+                                    <h6>Nombre y apellidos</h6>
+                                    <h6>Correo electrónico</h6>
+                                    <h6>Fecha de registro</h6>
+                                </div>
+                                <div class="col">
+                                    <h5>Inactivo</h5>
+                                </div>
+                                <div class="col">
+                                    <h5>Offline</h5>
+                                    <h6>Ultima vez visto:<br>DD/MM/YYYY hh:mm:ss</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Usuario baneado-->
+                    <div class="card hoverable mb-3" style="background-color: rgba(255, 0, 0, 0.2);">
+                        <a th:href="@{#}" class="stretched-link"></a>
+                        <div class="card-body">
+                            <div class="row row-cols-5 align-items-center justify-content-center text-center">
+                                <div class="col">
+                                    <img src="https://www.mdvacationclub.com/wp-content/uploads/2018/12/Placeholder.png"
+                                        class="rounded-circle" alt="Foto de perfil" width="100" height="100">
+                                </div>
+                                <div class="col">
+                                    <h4>Nombre de usuario</h4>
+                                    <h6>ID</h6>
+                                    <h6>Roles</h6>
+
+                                </div>
+                                <div class="col">
+                                    <h6>Nombre y apellidos</h6>
+                                    <h6>Correo electrónico</h6>
+                                    <h6>Fecha de registro</h6>
+                                </div>
+                                <div class="col">
+                                    <h5>Baneado</h5>
+                                </div>
+                                <div class="col">
+                                    <h5>Offline</h5>
+                                    <h6>Ultima vez visto:<br>DD/MM/YYYY hh:mm:ss</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
 
     <th:block th:replace="~{fragments/footer.html :: footer}" />
+
+    <script>
+        const imagen = document.getElementById('adminUserOrderType');
+        const boton = document.getElementById('adminUserOrderChange');
+
+        const imagenes = ['/img/admin/users/sort-down.svg', '/img/admin/users/sort-up.svg']
+
+        let actual = 0;
+
+        boton.addEventListener('click', () => {
+            actual = 1 - actual;
+            imagen.src = imagenes[actual];
+        });
+    </script>
+
 </body>
 
 </html>
