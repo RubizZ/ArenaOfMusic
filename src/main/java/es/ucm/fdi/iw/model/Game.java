@@ -25,7 +25,7 @@ public class Game implements Transferable<Game.Transfer> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hist_partidas_gen")
-    @SequenceGenerator(name = "hist_partidas_gen", sequenceName = "hist_partidas_gen")
+    @SequenceGenerator(name = "hist_partidas_gen", sequenceName = "hist_partidas_seq")
     private long id;
 
     @Column(name = "config", nullable = false)

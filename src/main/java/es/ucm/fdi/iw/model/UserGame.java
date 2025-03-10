@@ -1,12 +1,10 @@
 package es.ucm.fdi.iw.model;
 
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,33 +17,31 @@ import lombok.NoArgsConstructor;
 @Table(name = "partida_usu")
 public class UserGame implements Transferable<UserGame.Transfer> {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "partida_usu_gen")
-    @SequenceGenerator(name = "partida_usu_gen", sequenceName = "partida_usu_seq")
-    private long id;
+    @EmbeddedId
+    private UserGameId id;
 
     @ManyToOne
-    @JoinColumn(name = "partida_id", nullable = false)
+    @MapsId("gameId")
+    @JoinColumn(name = "game_id", nullable = false)
     private Game game;
 
     @ManyToOne
-    @JoinColumn(name = "usuario_id", nullable = false)
+    @MapsId("userId")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Getter
     @AllArgsConstructor
     public static class Transfer {
-        private long id;
-        private long partidaId;
+        private long gameId;
         private long userId;
     }
 
     @Override
     public Transfer toTransfer() {
         return new Transfer(
-            id,
-            game.getId(),
-            user.getId()
+            id.getGameId(),
+            id.getUserId()
         );
     }
 }
