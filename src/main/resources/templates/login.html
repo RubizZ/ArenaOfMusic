@@ -4,29 +4,84 @@
 <head>
     <th:block th:replace="~{fragments/head :: header}" />
     <title>IW: Login</title>
+
+    <!-- <script>
+        
+        
+                document.addEventListener('DOMContentLoaded', function () {
+                    const form = document.querySelector('.form-signin');
+                    form.addEventListener('submit', function (event) {
+                        event.preventDefault(); // Impediamo il submit normale
+        
+                        const username = document.getElementById('username').value;
+                        const password = document.getElementById('password').value;
+        
+        
+                        const data = {
+                            username: username,
+                            password: password
+                        };
+        
+                         go(config.rootUrl + '/login', "POST", data)
+                            .then(response => {
+                                console.log('Login success', response);
+                                // Successo: redirect o mostrare un messaggio
+                                // console.log('Login success', response);
+                                // window.location.href = '/'; // O dove vuoi reindirizzare dopo il login
+                            })
+                            .catch(error => {
+                                 console.error('Login failed', error);
+                                const errorMessage = document.querySelector('.text-danger');
+                                if (errorMessage) {
+                                    errorMessage.style.display = 'block';  
+                                }
+                            });
+                    });
+                });
+            </script> -->
 </head>
 
 <body class="d-flex flex-column h-100">
     <header th:replace="~{fragments/nav.html :: nav}"></header>
 
     <main class="flex-shrink-0">
-        <div class="container">
-            <form class="form-signin" method="post" th:action="@{/login}">
-                <h2 class="form-signin-heading">Please sign in</h2>
-                <p th:if="${loginError != false}" class="error">
-                    Error en nombre de usuario o contraseña
-                </p>
-                <p>
-                    <label for="username" class="visually-hidden">Username</label>
-                    <input type="text" id="username" name="username" class="form-control" placeholder="Username" required="required">
-                </p>
-                <p>
-                    <label for="password" class="visually-hidden">Password</label>
-                    <input type="password" id="password" name="password" class="form-control" placeholder="Password" required="required">
-                </p>
-                <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-            </form>
+        <div class="container mt-5">
+            <div class="card profile-card mx-auto shadow-lg">
+
+                <div class="card-body text-center">
+
+                    <form class="form-signin" method="post" th:action="@{/login}">
+                        <h2 class="form-signin-heading">Please sign in</h2>
+
+                        <p>
+                            <label for="username" class="visually-hidden">Username</label>
+                            <input type="text" id="username" name="username" class="form-control"
+                                placeholder="Nombre de usuario" required="required">
+                        </p>
+                        <p>
+                            <label for="password" class="visually-hidden">Password</label>
+                            <input type="password" id="password" name="password" class="form-control"
+                                placeholder="Contraseña" required="required">
+                        </p>
+                        <p th:if="${loginError != false}" class="mt-3 text-danger">
+                            Error en nombre de usuario o contraseña
+                        </p>
+                        <button class="btn btn-lg btn-success btn-block" type="submit">Acceder</button>
+
+                        <p class="mt-3 mb-3 text-muted ">
+                            <a th:href="@{/register}" class="text-decoration-none text-muted ">No tienes una cuenta?
+                                ¡Regístrate!</a>
+                        </p>
+                    </form>
+
+
+                </div>
+            </div>
         </div>
+
+
+
+
     </main>
 
     <th:block th:replace="~{fragments/footer.html :: footer}" />

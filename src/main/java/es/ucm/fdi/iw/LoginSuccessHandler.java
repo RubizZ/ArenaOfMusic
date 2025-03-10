@@ -2,12 +2,7 @@ package es.ucm.fdi.iw;
 
 import java.io.IOException;
 import java.util.Collection;
-
-import jakarta.persistence.EntityManager;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import java.util.Date;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,7 +13,12 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import es.ucm.fdi.iw.model.User;
-import es.ucm.fdi.iw.model.User.Role;
+import jakarta.persistence.EntityManager;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 
 /**
  * Called when a user is first authenticated (via login).
@@ -46,6 +46,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 	 * Called whenever a user authenticates correctly.
 	 */
 	@Override
+	@Transactional
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 			Authentication authentication) throws IOException, ServletException {
 
@@ -66,7 +67,9 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 		User u = entityManager.createNamedQuery("User.byUsername", User.class)
 				.setParameter("username", username)
 				.getSingleResult();
+		u.setLastLogin(new Date());
 		session.setAttribute("u", u);
+		entityManager.merge(u);
 
 		// add 'url' and 'ws' session variables
 		// example URLS: Root URL
