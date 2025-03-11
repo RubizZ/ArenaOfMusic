@@ -17,12 +17,12 @@
                 <div class="card-header text-center bg-success text-white position-relative">
                     <img th:src="@{/img/default-profile.png}"
                         class="rounded-circle border border-3 border-white mt-3 profile-image" alt="Foto de Perfil">
-                    <h3 class="mt-3">Nombre Usuario</h3>
+                    <h3 class="mt-3" th:text="${u.username}">Nombre Usuario</h3>
                     <!-- <span class="badge bg-light text-success position-absolute top-0 end-0 m-3 shadow-sm">Online</span> -->
                 </div>
                 <div class="card-body text-center">
-                    <p class="text-muted">profil@ucm.es</p>
-                    <p class="text-secondary">"Descripción"</p>
+                    <p class="text-muted" th:text="${u.email}">profil@ucm.es</p>
+                    <p class="text-secondary" th:text="${u.description}">"Descripción"</p>
                     <a href="#" class="btn btn-outline-success btn-sm" data-bs-toggle="modal"
                         data-bs-target="#editProfileModal">Editar
                         Perfil</a>
@@ -106,14 +106,15 @@
                             <!-- Username -->
                             <div class="mb-3">
                                 <label for="username" class="form-label text-success">Nombre de Usuario</label>
-                                <input type="text" class="form-control" id="username" placeholder="Nombre Usuario">
+                                <input type="text" class="form-control" id="username" placeholder="Nombre Usuario"
+                                    th:value="${u.username}">
                             </div>
 
                             <!-- Description -->
                             <div class="mb-3">
                                 <label for="description" class="form-label text-success">Descripción</label>
-                                <textarea class="form-control" id="description" rows="3"
-                                    placeholder="Descripción..."></textarea>
+                                <textarea class="form-control" id="description" rows="3" placeholder="Descripción..."
+                                    th:value="${u.description}"></textarea>
                             </div>
 
                             <hr class="text-muted">
@@ -121,9 +122,14 @@
                             <!-- Email -->
                             <div class="mb-3">
                                 <label for="email" class="form-label text-success">Correo Electrónico</label>
-                                <input type="email" class="form-control" id="email" placeholder="ejemplo@correo.com">
+                                <input type="email" class="form-control" id="email" placeholder="ejemplo@correo.com"
+                                    th:value="${u.email}">
                             </div>
-
+                            <!-- Old Password -->
+                            <div class="mb-3">
+                                <label for="password" class="form-label text-success">Vieja Contraseña</label>
+                                <input type="password" class="form-control" id="old-password" placeholder="********">
+                            </div>
                             <!-- Password -->
                             <div class="mb-3">
                                 <label for="password" class="form-label text-success">Nueva Contraseña</label>

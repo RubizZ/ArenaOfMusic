@@ -52,8 +52,6 @@ public class RegisterController {
     @Transactional
     public String register(@RequestParam String username,
             @RequestParam String password,
-            @RequestParam String firstName,
-            @RequestParam String lastName,
             @RequestParam String email,
 
             Model model,
@@ -66,7 +64,7 @@ public class RegisterController {
         }
 
         // Register the user
-        userService.registerUser(username, password, firstName, lastName, email);
+        userService.registerUser(username, password, email);
 
         try {
             // Do the automatic login
