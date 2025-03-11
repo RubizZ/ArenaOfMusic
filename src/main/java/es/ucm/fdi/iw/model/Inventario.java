@@ -1,18 +1,14 @@
 package es.ucm.fdi.iw.model;
 
-import java.sql.Date;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.SequenceGenerator;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.MapsId;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,28 +18,26 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Inventario implements Transferable<Inventario.Transfer> {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen")
-    @SequenceGenerator(name = "gen", sequenceName = "gen")
-    private long id;
+    @EmbeddedId
+    private InventarioId id;
 
     @ManyToOne
+    @MapsId("userId")
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
     
     @ManyToOne
+    @MapsId("objectId")
     @JoinColumn(name = "object_id", nullable = false)
     private Objeto object;
 
-    @Column
-    private LocalDateTime purchaseDate;
-
+    @Column(nullable = false)
+    private LocalDateTime purchaseDate = LocalDateTime.now();
 
 
     @Data
     @AllArgsConstructor
     public class Transfer {
-        private long id;
         private long idUser;
         private long idObject;
         private String purchaseDate;
@@ -51,7 +45,7 @@ public class Inventario implements Transferable<Inventario.Transfer> {
 
     @Override
     public Transfer toTransfer() {
-        return new Transfer(id, user.getId(), object.getId(), 
+        return new Transfer(id.getUserId(), id.getObjectId(), 
         purchaseDate == null ? null : DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(purchaseDate));
     }
     
