@@ -31,9 +31,8 @@ public class Inventario implements Transferable<Inventario.Transfer> {
     @JoinColumn(name = "object_id", nullable = false)
     private Objeto object;
 
-    @Column
-    private LocalDateTime purchaseDate;
-
+    @Column(nullable = false)
+    private LocalDateTime purchaseDate = LocalDateTime.now();
 
 
     @Data
