@@ -8,8 +8,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -38,8 +38,8 @@ public class Game implements Transferable<Game.Transfer> {
     @JoinColumn(name = "playlist_id", nullable = false)
     private Playlist playlist;
 
-    @OneToMany(mappedBy = "game")
-    private Set<UserGame> participants;
+    @ManyToMany(mappedBy = "game")
+    private Set<User> participants;
 
     @Getter
     @AllArgsConstructor
