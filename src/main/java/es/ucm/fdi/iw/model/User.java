@@ -108,8 +108,8 @@ public class User implements Transferable<User.Transfer> {
     @OneToMany(mappedBy = "blocked")
     private List<Block> blocksReceived;
 
-    // @ManyToMany(mappedBy = "user")
-    // private List<Game> partidas;
+    @OneToMany(mappedBy = "user")
+    private List<UserGame> userGames;
 
     /**
      * Checks whether this user has a given role.
