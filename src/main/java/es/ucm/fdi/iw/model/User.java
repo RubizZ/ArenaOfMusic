@@ -11,7 +11,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
@@ -109,8 +108,8 @@ public class User implements Transferable<User.Transfer> {
     @OneToMany(mappedBy = "blocked")
     private List<Block> blocksReceived;
 
-    @ManyToMany(mappedBy = "user")
-    private List<Game> partidas;
+    // @ManyToMany(mappedBy = "user")
+    // private List<Game> partidas;
 
     /**
      * Checks whether this user has a given role.
