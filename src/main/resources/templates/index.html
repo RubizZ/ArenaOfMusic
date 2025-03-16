@@ -58,7 +58,7 @@
         <!-- Tarjeta del botón -->
         <div class="card tarjeta-boton shadow-lg mt-3">
             <div class="card-body text-center">
-                <button class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#modosModal">JUGAR</button>
+                <button id="btn-jugar" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#modosModal">JUGAR</button>
             </div>
         </div>
     </main>
@@ -76,7 +76,7 @@
                         <div class="row row-cols-3 justify-content-center align-items-center g-3">
 
                             <div class="col">
-                                <div class="card hoverable mb-3">
+                                <div class="card hoverable mb-3" id="modo-solitario">
                                     <a th:href="@{configuracion-partida}" class="stretched-link"></a>
                                     <img src="/img/iconos/solitario.png" alt="Modo Solitario" class="p-2">
                                     <div class="card-body">
@@ -85,7 +85,7 @@
                                 </div>
                             </div>
                             <div class="col">
-                                <div class="card hoverable mb-3">
+                                <div class="card hoverable mb-3" id="modo-duelo">
                                     <a th:href="@{configuracion-partida}" class="stretched-link"></a>
                                     <img src="/img/iconos/duelo.png" alt="Modo Duelo" class="p-2">
                                     <div class="card-body">
@@ -94,7 +94,7 @@
                                 </div>
                             </div>
                             <div class="col">
-                                <div class="card hoverable mb-3">
+                                <div class="card hoverable mb-3" id="modo-multijugador">
                                     <a th:href="@{configuracion-partida}" class="stretched-link"></a>
                                     <img src="/img/iconos/fiesta.png" alt="Modo Multijugador" class="p-2">
                                     <div class="card-body">
