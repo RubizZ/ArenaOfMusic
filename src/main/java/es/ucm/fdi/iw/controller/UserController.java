@@ -73,8 +73,6 @@ public class UserController {
 		for (String name : new String[] { "u", "url", "ws" }) {
 			model.addAttribute(name, session.getAttribute(name));
 		}
-		List<String> adminPages = List.of("playlists", "shop", "users", "reports", "spectate", "stats");
-		model.addAttribute("adminPages", adminPages);
 	}
 
 	/**
