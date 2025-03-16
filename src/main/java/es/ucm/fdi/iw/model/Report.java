@@ -43,9 +43,9 @@ public class Report implements Transferable<Report.Transfer> {
     @Column(nullable = false)
     private int reason;
 
-    @Column
-    // TODO @JoinColumn()
-    private int partida;
+    @ManyToOne
+    @JoinColumn(name = "game_id")
+    private Game game;
 
     @Column(nullable = false)
     private boolean solved = false;
@@ -70,7 +70,7 @@ public class Report implements Transferable<Report.Transfer> {
         private long reporter;
         private long reported;
         private int reason;
-        private int partida;
+        private long game;
         private boolean solved;
         private boolean banned;
         private long admin;
@@ -80,7 +80,7 @@ public class Report implements Transferable<Report.Transfer> {
 
     @Override
     public Transfer toTransfer() {
-        return new Transfer(id, reporter.getId(), reported.getId(), reason, partida, solved,
+        return new Transfer(id, reporter.getId(), reported.getId(), reason, game == null ? -1 : game.getId(), solved,
                 banned, admin.getId(),
                 DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(creationDate),
                 resolutionDate == null ? null : DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(resolutionDate));
