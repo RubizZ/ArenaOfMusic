@@ -63,6 +63,28 @@ Scenario: solo-game completo
         # 4 Se resuelve cancion 
         # 5 se reparten puntos
         # 6 Fin ronda
+    
+    * def totalRondas = 5
+    * def i = 0
+    * while (i < totalRondas) do
+        # Esperar que se reproduzca una nueva canción
+        Given waitFor('#fragmento')
+
+        # Escribir una respuesta en el input de texto
+        When input('#respuesta', 'Respuesta ' + (i + 1))
+
+        # Enviar la respuesta
+        When click('#btn-marcar')
+
+        # Esperar resolucion de la respuesta
+        Given waitFor('#solucion')
+
+        # Avanzar a la siguiente ronda
+        Given waitFor('#btn-siguiente')
+        When click('#btn-siguiente')
+
+        * eval i = i + 1
+    * end
 
     # Ir a vista resultados y de ahí al inicio
     Given driver baseUrl + '/resultados'
