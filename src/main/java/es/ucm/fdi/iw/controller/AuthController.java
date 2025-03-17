@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
 
 import es.ucm.fdi.iw.LoginSuccessHandler;
-import es.ucm.fdi.iw.UserService;
+import es.ucm.fdi.iw.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 
 @Controller
-public class RegisterController {
+public class AuthController {
 
     @Autowired
     private UserService userService;
@@ -32,6 +32,13 @@ public class RegisterController {
 
     @Autowired
     private AuthenticationManager authenticationManager;
+
+    @GetMapping("/login")
+    public String login(Model model, HttpServletRequest request) {
+        boolean error = request.getQueryString() != null && request.getQueryString().indexOf("error") != -1;
+        model.addAttribute("loginError", error);
+        return "login";
+    }
 
     @GetMapping("/register")
     public String showRegisterForm(Model model) {
