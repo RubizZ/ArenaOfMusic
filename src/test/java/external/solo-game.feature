@@ -29,7 +29,7 @@ Scenario: solo-game completo
     Given waitFor('#playlist')
     When select('#playlist', '1')
     Then match value('#playlist') == '1'
-    
+
     # Ajustar el número de rondas a 5
     Given waitFor('#rondas')
     When script("document.querySelector('#rondas').value = '5'; document.querySelector('#rondas').dispatchEvent(new Event('input'))")
@@ -56,6 +56,13 @@ Scenario: solo-game completo
     Then waitForUrl(baseUrl + '/partida')
 
     # Jugar / simular partida (ya se añadirá)
+    # Bucle de 0 a Rondas
+        # 1 Recibir info ronda
+        # 2 Comienza Reproducción fragmento
+        # 3 Marca nombre cancion 
+        # 4 Se resuelve cancion 
+        # 5 se reparten puntos
+        # 6 Fin ronda
 
     # Ir a vista resultados y de ahí al inicio
     Given driver baseUrl + '/resultados'
