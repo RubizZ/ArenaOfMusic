@@ -27,8 +27,9 @@ Scenario: solo-game completo
     #Configuracion de Partida
     # Selección de Playlist
     Given waitFor('#playlist')
-    When select('#playlist', 'Anime Openings')
-
+    When select('#playlist', '1')
+    Then match value('#playlist') == '1'
+    
     # Ajustar el número de rondas a 5
     Given waitFor('#rondas')
     When script("document.querySelector('#rondas').value = '5'; document.querySelector('#rondas').dispatchEvent(new Event('input'))")
