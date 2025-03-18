@@ -65,13 +65,12 @@ body {
     z-index: -1;
 }
 
-.contenido-principal .profile-img {
-    width: 125px;
-    height: 125px;
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    cursor: pointer;
+
+/* Estilos para los enlaces desactivados */
+a[disabled] {
+    pointer-events: none;
+    cursor: default;
+    opacity: 0.5;
 }
 
 
@@ -81,6 +80,13 @@ body {
     backdrop-filter: blur(5px);
     color: white;
 }
+
+/* Estilos para las tarjetas desactivadas */
+.card.desactivar[disabled] {
+    background-color: #d3d3d3;
+    border-color: #a9a9a9;
+    color: #a9a9a9;
+}*/
 
 .contenido-principal .tarjeta-boton {
     height: 85px;
