@@ -1,4 +1,5 @@
 package es.ucm.fdi.iw.model;
+import java.util.UUID;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -70,7 +71,7 @@ public class Report implements Transferable<Report.Transfer> {
         private long reporter;
         private long reported;
         private int reason;
-        private long game;
+        private UUID game;
         private boolean solved;
         private boolean banned;
         private long admin;
@@ -80,7 +81,7 @@ public class Report implements Transferable<Report.Transfer> {
 
     @Override
     public Transfer toTransfer() {
-        return new Transfer(id, reporter.getId(), reported.getId(), reason, game == null ? -1 : game.getId(), solved,
+        return new Transfer(id, reporter.getId(), reported.getId(), reason, game == null ? null : game.getId(), solved,
                 banned, admin.getId(),
                 DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(creationDate),
                 resolutionDate == null ? null : DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(resolutionDate));
