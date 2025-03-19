@@ -1,15 +1,14 @@
 package es.ucm.fdi.iw.model;
 
+
 import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -20,8 +19,8 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @NoArgsConstructor
-@Table(name = "canciones")
-public class Cancion implements Transferable<Cancion.Transfer> {
+@Table(name = "object")
+public class Object implements Transferable<Object.Transfer> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen")
@@ -35,14 +34,15 @@ public class Cancion implements Transferable<Cancion.Transfer> {
     private String name;
 
     @Column(nullable = false)
-    private String artist;
+    private int price;
 
-    @Column
-    private String album;
+    @Column(nullable = false)
+    private String objectType;
 
-    @ManyToMany
-    @JoinTable(name = "playlist_cancion", joinColumns = @JoinColumn(name = "cancion_id"), inverseJoinColumns = @JoinColumn(name = "playlist_id"))
-    private Set<Playlist> playlists;
+    @OneToMany(mappedBy = "object")
+    private Set<Inventory> inventarios;
+
+
 
     @Getter
     @AllArgsConstructor
@@ -50,12 +50,14 @@ public class Cancion implements Transferable<Cancion.Transfer> {
         private long id;
         private boolean active;
         private String name;
-        private String artist;
-        private String album;
+        private int price;
+        private String objectType;
     }
 
     @Override
     public Transfer toTransfer() {
-        return new Transfer(id, active, name, artist, album);
+        return new Transfer(id, active, name, price, objectType);
     }
+    
+    
 }

@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @NoArgsConstructor
-@Table(name = "friendships")
+@Table(name = "friendship")
 public class Friendship implements Transferable<Friendship.Transfer> {
 
     @EmbeddedId

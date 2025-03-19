@@ -1,15 +1,17 @@
 package es.ucm.fdi.iw.model;
 
-
 import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -18,7 +20,8 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @NoArgsConstructor
-public class Objeto implements Transferable<Objeto.Transfer> {
+@Table(name = "song")
+public class Song implements Transferable<Song.Transfer> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen")
@@ -32,15 +35,14 @@ public class Objeto implements Transferable<Objeto.Transfer> {
     private String name;
 
     @Column(nullable = false)
-    private int price;
+    private String artist;
 
-    @Column(nullable = false)
-    private String objectType;
+    @Column
+    private String album;
 
-    @OneToMany(mappedBy = "object")
-    private Set<Inventario> inventarios;
-
-
+    @ManyToMany
+    @JoinTable(name = "playlist_cancion", joinColumns = @JoinColumn(name = "cancion_id"), inverseJoinColumns = @JoinColumn(name = "playlist_id"))
+    private Set<Playlist> playlists;
 
     @Getter
     @AllArgsConstructor
@@ -48,14 +50,12 @@ public class Objeto implements Transferable<Objeto.Transfer> {
         private long id;
         private boolean active;
         private String name;
-        private int price;
-        private String objectType;
+        private String artist;
+        private String album;
     }
 
     @Override
     public Transfer toTransfer() {
-        return new Transfer(id, active, name, price, objectType);
+        return new Transfer(id, active, name, artist, album);
     }
-    
-    
 }

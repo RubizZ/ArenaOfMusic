@@ -14,11 +14,11 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @NoArgsConstructor
-@Table(name = "partida_usu")
-public class UserGame implements Transferable<UserGame.Transfer> {
+@Table(name = "Players-Game")
+public class PlayersGame implements Transferable<PlayersGame.Transfer> {
 
     @EmbeddedId
-    private UserGameId id;
+    private PlayerGameID id;
 
     @ManyToOne
     @MapsId("gameId")
