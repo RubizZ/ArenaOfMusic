@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @NoArgsConstructor
-@Table(name = "reports")
+@Table(name = "report")
 public class Report implements Transferable<Report.Transfer> {
 
     @Id

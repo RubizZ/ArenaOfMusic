@@ -94,7 +94,7 @@ public class User implements Transferable<User.Transfer> {
     private List<Report> reportsReceived;
 
     @OneToMany(mappedBy = "user")
-    private List<Inventario> inventory;
+    private List<Inventory> inventory;
 
     @OneToMany(mappedBy = "user1")
     private List<Friendship> friendsRequested;
