@@ -27,13 +27,36 @@ img.preview {
 }
 
 /* --- Personalización general ---*/
+
+* {
+    transition: background-color 0.3s ease-in-out;
+}
+
 body {
-    background-image: url("/img/fondo.png");
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+
+    font-family: "Work Sans", "Helvetica Neue", Helvetica, Helvetica, Arial, sans-serif;
+
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed;
     min-height: 100vh;
+
+}
+
+nav,
+footer {
+    background-color: var(--bs-secondary-bg);
+    color: var(--bs-secondary-color);
+}
+
+.input-group>.btn {
+    background-color: var(--bs-body-bg) !important;
+    color: var(--bs-body-color) !important;
+    border: 1px solid var(--bs-border-color) !important;
+
 }
 
 /* --- Personalización general ---*/
@@ -86,9 +109,9 @@ a[disabled] {
     background-color: #d3d3d3;
     border-color: #a9a9a9;
     color: #a9a9a9;
-}*/
+}
 
-.contenido-principal .tarjeta-boton {
+*/ .contenido-principal .tarjeta-boton {
     height: 85px;
     width: 125px;
     margin-bottom: 20px;
@@ -535,6 +558,7 @@ a[disabled] {
 
 /* ---NAVBAR--- */
 
+/*
 .navbar {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
@@ -556,3 +580,4 @@ a[disabled] {
 .navbar-nav .nav-link:hover {
     color: #d1d1d1 !important;
 }
+    */
