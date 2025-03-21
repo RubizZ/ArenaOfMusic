@@ -54,9 +54,6 @@ public class User implements Transferable<User.Transfer> {
     @Column(nullable = false)
     private String password;
 
-    private String firstName;
-    private String lastName;
-
     @Column(nullable = false)
     private boolean enabled = true;
 
@@ -96,8 +93,23 @@ public class User implements Transferable<User.Transfer> {
     @OneToMany(mappedBy = "reported")
     private List<Report> reportsReceived;
 
-    // Faltan las relaciones con amigos, bloqueos e Inventario
-    // -> faltan las clases de amigos, bloqueos e inventario en model
+    @OneToMany(mappedBy = "user")
+    private List<Inventario> inventory;
+
+    @OneToMany(mappedBy = "user1")
+    private List<Friendship> friendsRequested;
+
+    @OneToMany(mappedBy = "user2")
+    private List<Friendship> friendsReceived;
+
+    @OneToMany(mappedBy = "blocker")
+    private List<Block> blocksMade;
+
+    @OneToMany(mappedBy = "blocked")
+    private List<Block> blocksReceived;
+
+    // @ManyToMany(mappedBy = "user")
+    // private List<Game> partidas;
 
     /**
      * Checks whether this user has a given role.
