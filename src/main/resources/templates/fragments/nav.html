@@ -60,10 +60,24 @@
                                         <span class="visually-hidden">Toggle Dropdown</span>
                                     </button>
                                     <ul class="dropdown-menu">
-                                        <li th:each="adminpage : ${adminPages}">
-                                            <a class="dropdown-item capitalize"
-                                                th:href="@{/admin/{adminpage}(adminpage=${adminpage})}"
-                                                th:text="${adminpage}">adminpage</a>
+                                        <li>
+                                            <a class="dropdown-item" th:href="@{/admin/playlists}">Playlists</a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" th:href="@{/admin/shop}">Shop</a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" th:href="@{/admin/users}">Administrar usuarios</a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" th:href="@{/admin/reports}">Reportes</a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" th:href="@{/admin/spectate}">Espectar partidas</a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" th:href="@{/admin/stats}">Estatisticas
+                                                generales</a>
                                         </li>
                                     </ul>
                                 </div>
