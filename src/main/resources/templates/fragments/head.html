@@ -23,6 +23,19 @@
             };
             config.admin = config.admin == "true"; // ensure boolean
         </script>
+
+        <script>
+            const htmlElement = document.documentElement;
+            const savedTheme = localStorage.getItem("theme");
+
+            // Si hay un tema guardado, aplicar directamente el tema
+            if (savedTheme === "dark") {
+                htmlElement.setAttribute("data-bs-theme", "dark");
+            } else {
+                htmlElement.setAttribute("data-bs-theme", "light");
+            }
+        </script>
+
     </th:block>
 </head>
 

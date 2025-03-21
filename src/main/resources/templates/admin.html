@@ -18,7 +18,7 @@
                 <div class="row row-cols-3 justify-content-center align-items-center g-3">
 
                     <div class="col">
-                        <div class="card hoverable mb-3">
+                        <div class="card admin-card hoverable mb-3">
                             <a th:href="@{playlists}" class="stretched-link"></a>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
                                 class="bi bi-music-note-list card-img-top mt-5" viewBox="0 0 16 16">
@@ -33,7 +33,7 @@
                             </div>
                         </div>
 
-                        <div class="card hoverable mb-3">
+                        <div class="card admin-card hoverable mb-3">
                             <a th:href="@{shop}" class="stretched-link"></a>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
                                 class="bi bi-shop card-img-top mt-5" viewBox="0 0 16 16">
@@ -47,7 +47,7 @@
                     </div>
 
                     <div class="col">
-                        <div class="card hoverable mb-3">
+                        <div class="card admin-card hoverable mb-3">
                             <a th:href="@{users}" class="stretched-link"></a>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
                                 class="bi bi-person-lines-fill card-img-top mt-5" viewBox="0 0 16 16">
@@ -58,7 +58,7 @@
                                 <h5 class="card-title">Administrar usuarios</h5>
                             </div>
                         </div>
-                        <div class="card hoverable mb-3">
+                        <div class="card admin-card hoverable mb-3">
                             <a th:href="@{reports}" class="stretched-link"></a>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
                                 class="bi bi-flag card-img-top mt-5" viewBox="0 0 16 16">
@@ -72,7 +72,7 @@
                     </div>
 
                     <div class="col">
-                        <div class="card hoverable mb-3">
+                        <div class="card admin-card hoverable mb-3">
                             <a th:href="@{spectate}" class="stretched-link"></a>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
                                 class="bi bi-controller card-img-top mt-5" viewBox="0 0 16 16">
@@ -85,7 +85,7 @@
                                 <h5 class="card-title">Espectar partidas</h5>
                             </div>
                         </div>
-                        <div class="card hoverable mb-3">
+                        <div class="card admin-card hoverable mb-3">
                             <a th:href="@{stats}" class="stretched-link"></a>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
                                 class="bi bi-list-columns card-img-top mt-5" viewBox="0 0 16 16">
@@ -97,11 +97,9 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
-
-
             </div>
+        </div>
     </main>
 
     <th:block th:replace="~{fragments/footer.html :: footer}" />
