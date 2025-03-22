@@ -38,7 +38,7 @@ public class Game implements Transferable<Game.Transfer> {
     private Playlist playlist;
 
     @OneToMany(mappedBy = "game")
-    private Set<PlayersGame> participants;
+    private Set<PlayerGame> participants;
 
     @Getter
     @AllArgsConstructor

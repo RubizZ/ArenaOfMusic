@@ -1,5 +1,6 @@
 package es.ucm.fdi.iw.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -14,11 +15,11 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @NoArgsConstructor
-@Table(name = "Players-Game")
-public class PlayersGame implements Transferable<PlayersGame.Transfer> {
+@Table(name = "Players_Game")
+public class PlayerGame implements Transferable<PlayerGame.Transfer> {
 
     @EmbeddedId
-    private PlayerGameID id;
+    private PlayerGameId id;
 
     @ManyToOne
     @MapsId("gameId")
@@ -30,18 +31,30 @@ public class PlayersGame implements Transferable<PlayersGame.Transfer> {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(name = "score", nullable = false)
+    private int score;
+
+    @Column(name = "position", nullable = false)
+    private int position;
+
+
+
     @Getter
     @AllArgsConstructor
     public static class Transfer {
         private long gameId;
         private long userId;
+        private int score;
+        private int position;
     }
 
     @Override
     public Transfer toTransfer() {
         return new Transfer(
             id.getGameId(),
-            id.getUserId()
+            id.getUserId(),
+            score,
+            position
         );
     }
 }

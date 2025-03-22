@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PlayerGameID implements Serializable {
+public class PlayerGameId implements Serializable {
     @Column(name = "game_id", nullable = false)
     private Long gameId;
 
