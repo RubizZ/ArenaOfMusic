@@ -26,7 +26,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import es.ucm.fdi.iw.model.Cancion;
+import es.ucm.fdi.iw.model.Song;
 import es.ucm.fdi.iw.service.SongService;
 import es.ucm.fdi.iw.service.SongService.NoDataException;
 import es.ucm.fdi.iw.dto.NewSongDTO;
@@ -79,7 +79,7 @@ public class PlaylistsController {
     }
 
     @GetMapping("/searchSongs")
-    public ResponseEntity<Page<Cancion.Transfer>> searchSongs(@ModelAttribute SongSearchFiltersDTO filters,
+    public ResponseEntity<Page<Song.Transfer>> searchSongs(@ModelAttribute SongSearchFiltersDTO filters,
             @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
         return ResponseEntity.ok(songService.searchSongs(filters, pageable));
     }

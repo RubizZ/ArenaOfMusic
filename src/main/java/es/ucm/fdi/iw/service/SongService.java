@@ -30,7 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 import es.ucm.fdi.iw.AudioConverter;
 import es.ucm.fdi.iw.dto.NewSongDTO;
 import es.ucm.fdi.iw.dto.SongSearchFiltersDTO;
-import es.ucm.fdi.iw.model.Cancion;
+import es.ucm.fdi.iw.model.Song;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
@@ -52,7 +52,7 @@ public class SongService {
     private static final String UPLOAD_DIR = "iwdata/songs/";
 
     public void addNewSong(NewSongDTO data) throws IOException {
-        Cancion song = new Cancion();
+        Song song = new Song();
 
         song.setActive(true);
         song.setName(data.getName());
@@ -97,12 +97,12 @@ public class SongService {
         }
     }
 
-    public void modifyExistingSong(Cancion.Transfer song, @Nullable MultipartFile audio, @Nullable MultipartFile img)
+    public void modifyExistingSong(Song.Transfer song, @Nullable MultipartFile audio, @Nullable MultipartFile img)
             throws IllegalArgumentException, RuntimeException {
 
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaUpdate<Cancion> update = cb.createCriteriaUpdate(Cancion.class);
-        Root<Cancion> updateRoot = update.from(Cancion.class);
+        CriteriaUpdate<Song> update = cb.createCriteriaUpdate(Song.class);
+        Root<Song> updateRoot = update.from(Song.class);
         update.where(cb.equal(updateRoot.get("id"), song.getId()));
         update.set("active", song.isActive());
         update.set("name", song.getName());
@@ -188,8 +188,8 @@ public class SongService {
 
     public void deleteExistingSong(long id) throws IllegalArgumentException {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaDelete<Cancion> delete = cb.createCriteriaDelete(Cancion.class);
-        Root<Cancion> deleteRoot = delete.from(Cancion.class);
+        CriteriaDelete<Song> delete = cb.createCriteriaDelete(Song.class);
+        Root<Song> deleteRoot = delete.from(Song.class);
         delete.where(cb.equal(deleteRoot.get("id"), id));
         entityManager.getTransaction().begin();
         int n = entityManager.createQuery(delete).executeUpdate();
@@ -208,8 +208,8 @@ public class SongService {
 
     public void disableExistingSong(long id) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaUpdate<Cancion> update = cb.createCriteriaUpdate(Cancion.class);
-        Root<Cancion> updateRoot = update.from(Cancion.class);
+        CriteriaUpdate<Song> update = cb.createCriteriaUpdate(Song.class);
+        Root<Song> updateRoot = update.from(Song.class);
         update.where(cb.equal(updateRoot.get("id"), id));
         update.set("active", false);
         entityManager.getTransaction().begin();
@@ -237,11 +237,11 @@ public class SongService {
         }
     }
 
-    public Page<Cancion.Transfer> searchSongs(SongSearchFiltersDTO filters, Pageable pageable) {
+    public Page<Song.Transfer> searchSongs(SongSearchFiltersDTO filters, Pageable pageable) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
-        CriteriaQuery<Cancion> select = cb.createQuery(Cancion.class);
-        Root<Cancion> selectRoot = select.from(Cancion.class);
+        CriteriaQuery<Song> select = cb.createQuery(Song.class);
+        Root<Song> selectRoot = select.from(Song.class);
 
         List<Predicate> predicates = buildPredicates(cb, selectRoot, filters);
 
@@ -255,21 +255,21 @@ public class SongService {
             select.orderBy(orders);
         }
 
-        TypedQuery<Cancion> query = entityManager.createQuery(select);
+        TypedQuery<Song> query = entityManager.createQuery(select);
         query.setFirstResult((int) pageable.getOffset());
         query.setMaxResults(pageable.getPageSize());
-        List<Cancion> resultList = query.getResultList();
+        List<Song> resultList = query.getResultList();
 
         long totalElements = countTotalElements(filters);
 
-        Page<Cancion> page = new PageImpl<>(resultList, pageable, totalElements);
+        Page<Song> page = new PageImpl<>(resultList, pageable, totalElements);
 
-        return page.map((Cancion c) -> {
+        return page.map((Song c) -> {
             return c.toTransfer();
         });
     }
 
-    private List<Predicate> buildPredicates(CriteriaBuilder cb, Root<Cancion> root, SongSearchFiltersDTO filters) {
+    private List<Predicate> buildPredicates(CriteriaBuilder cb, Root<Song> root, SongSearchFiltersDTO filters) {
         List<Predicate> predicates = new ArrayList<>();
 
         if (filters.getId() != null) {
@@ -304,7 +304,7 @@ public class SongService {
     }
 
     private long countTotalElements(SongSearchFiltersDTO filters) {
-        StringBuilder jpql = new StringBuilder("SELECT COUNT(c) FROM Cancion c WHERE 1=1");
+        StringBuilder jpql = new StringBuilder("SELECT COUNT(c) FROM Song c WHERE 1=1");
 
         Map<String, Object> parameters = new HashMap<>();
 
@@ -370,7 +370,7 @@ public class SongService {
     private boolean existsSong(long id) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Long> query = cb.createQuery(Long.class);
-        Root<Cancion> root = query.from(Cancion.class);
+        Root<Song> root = query.from(Song.class);
         query.select(cb.count(root)).where(cb.equal(root.get("id"), id));
         Long count = entityManager.createQuery(query).getSingleResult();
 
