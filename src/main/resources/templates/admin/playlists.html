@@ -15,14 +15,14 @@
 
             <div th:if="${viewType} == 'list'">
                 <!-- View: Lista de playlists/canciones existentes -->
-                <div class="container d-flex justify-content-center">
-                    <h2 class="mb-3">
-                        Lista de
-                        <select id="listSelector">
+                <div class="container">
+                    <div class="d-flex justify-content-center align-items-center mb-3">
+                        <h2 class="mb-0 me-2">Lista de</h2>
+                        <select class="form-control" style="width: auto;" id="listSelector">
                             <option value="playlists" th:selected="${list == 'playlists'}">playlists</option>
                             <option value="songs" th:selected="${list == 'songs'}">canciones</option>
                         </select>
-                    </h2>
+                    </div>
                 </div>
 
                 <!-- Playlists -->
