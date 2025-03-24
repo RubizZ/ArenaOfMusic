@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 
 @Embeddable
 @Data
-@NoArgsConstructor
+@NoArgsConstructor 
 @AllArgsConstructor
 public class PlayerGameId implements Serializable {
     @Column(name = "game_id", nullable = false)
