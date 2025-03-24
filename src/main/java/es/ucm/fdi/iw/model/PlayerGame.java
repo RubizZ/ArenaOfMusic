@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 public class PlayerGame implements Transferable<PlayerGame.Transfer> {
 
     @EmbeddedId
-    private PlayerGameID id;
+    private PlayerGameId id;
 
     @ManyToOne
     @MapsId("gameId")
@@ -39,8 +39,6 @@ public class PlayerGame implements Transferable<PlayerGame.Transfer> {
     @Column(name = "position", nullable = false)
     private int position;
 
-
-
     @Getter
     @AllArgsConstructor
     public static class Transfer {
@@ -53,10 +51,9 @@ public class PlayerGame implements Transferable<PlayerGame.Transfer> {
     @Override
     public Transfer toTransfer() {
         return new Transfer(
-            id.getGameId(),
-            id.getUserId(),
-            score,
-            position
-        );
+                id.getGameId(),
+                id.getUserId(),
+                score,
+                position);
     }
 }
