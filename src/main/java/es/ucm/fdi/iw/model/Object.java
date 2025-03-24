@@ -10,6 +10,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -18,7 +19,8 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @NoArgsConstructor
-public class Objeto implements Transferable<Objeto.Transfer> {
+@Table(name = "object")
+public class Object implements Transferable<Object.Transfer> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen")
@@ -38,7 +40,7 @@ public class Objeto implements Transferable<Objeto.Transfer> {
     private String objectType;
 
     @OneToMany(mappedBy = "object")
-    private Set<Inventario> inventarios;
+    private Set<Inventory> inventarios;
 
 
 

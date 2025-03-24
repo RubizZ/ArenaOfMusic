@@ -28,8 +28,8 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @NoArgsConstructor
-@Table(name = "canciones")
-public class Cancion implements Transferable<Cancion.Transfer> {
+@Table(name = "song")
+public class Song implements Transferable<Song.Transfer> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen")
