@@ -41,11 +41,6 @@ public class AdminController {
         return "admin";
     }
 
-    @GetMapping({ "/playlists", "/playlists/" })
-    public String playlists(Model model) {
-        return "admin/playlists";
-    }
-
     @GetMapping({ "/shop", "/shop/" })
     public String shop(Model model) {
         return "admin/shop";

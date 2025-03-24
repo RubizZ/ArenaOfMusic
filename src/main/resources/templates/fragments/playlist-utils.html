@@ -1,0 +1,634 @@
+<div th:fragment="existing-song-card(id)" class="card bg-body-secondary p-3 my-2" th:id="|existing-song-${id}|">
+    <div class="row align-items-center justify-content-center g-3">
+        <div class="col-12 col-xl-2 d-flex flex-column align-items-center justify-content-center text-center">
+            <input id="cover-image" type="image" class="form-control img-fluid" th:src="@{/img/preview-song-img.jpeg}"
+                alt="Imagen de la canción" style="height: 128px; width: 128px; object-fit: contain;" disabled>
+            <div id="id" class="form-text"></div>
+        </div>
+        <div class="col-12 col-xl-6 row">
+            <div class="col-12 col-xl-4">
+                <div class="form-floating">
+                    <input name="name" id="name" type="text" class="form-control" disabled>
+                    <label th:text="'Nombre'"></label>
+                </div>
+            </div>
+            <div class="col-12 col-xl-4">
+                <div class="form-floating">
+                    <input name="artists" id="artists" type="text" class="form-control" disabled>
+                    <label th:text="'Artistas'"></label>
+                </div>
+            </div>
+            <div class="col-12 col-xl-4">
+                <div class="form-floating">
+                    <input name="album" id="album" type="text" class="form-control" disabled>
+                    <label th:text="'Album'"></label>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-xl-3 d-flex flex-column text-center ms-xl-2">
+            <audio id="player" class="flex-grow-1 w-100" controls></audio>
+        </div>
+
+        <div class="col-12 col-xl-1">
+            <button id="delete" type="button" class="btn btn-danger">
+                <img th:src="@{/img/admin/trash3-fill.svg}">
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<div th:fragment="new-song-card(id)" class="card bg-body-secondary p-3 my-2" th:id="|new-song-${id}|">
+    <div class="row align-items-center justify-content-center g-3">
+        <div class="col-12 col-xl-2 d-flex flex-column align-items-center justify-content-center text-center">
+            <input id="cover-image" type="image" class="form-control img-fluid" th:src="@{/img/upload.svg}"
+                alt="Imagen de la canción" style="height: 128px; width: 128px; object-fit: contain;">
+            <input name="cover" id="cover-input" type="file" style="display:none" accept="image/*">
+        </div>
+
+        <div class="col-12 col-xl-6 row g-3">
+            <div class="col-12 col-xl-4">
+                <div class="form-floating">
+                    <input name="name" id="name" type="text" class="form-control" aria-describedby="name-help">
+                    <label th:text="'Nombre'"></label>
+                    <div class="form-text" id="name-help" th:text="'Diferencia entre mayúsculas y minúsculas'"></div>
+                </div>
+            </div>
+            <div class="col-12 col-xl-4">
+                <div class="form-floating">
+                    <input name="artists" id="artists" type="text" class="form-control" aria-describedby="artists-help">
+                    <label th:text="'Artistas'"></label>
+                    <div class="form-text" id="artists-help"
+                        th:text="'Separa varios artistas con \'/\'. Diferencia entre mayúsculas y minúsculas'"></div>
+                </div>
+            </div>
+            <div class="col-12 col-xl-4">
+                <div class="form-floating">
+                    <input name="album" id="album" type="text" class="form-control" aria-describedby="album-help">
+                    <label th:text="'Album'"></label>
+                    <div class="form-text" id="album-help" th:text="'Diferencia entre mayúsculas y minúsculas'"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-xl-3 d-flex flex-column text-center ms-xl-2">
+            <audio id="player" class="flex-grow-1 w-100" controls></audio>
+            <div id="file-name" class="form-text"></div>
+        </div>
+
+        <div class="col-12 col-xl-1 text-center">
+            <button id="delete" type="button" class="btn btn-danger">
+                <img th:src="@{/img/admin/trash3-fill.svg}">
+            </button>
+        </div>
+    </div>
+    <script th:src="@{/js/image-preview.js}"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener("DOMContentLoaded", function () {
+            let id = /*[[${id}]]*/ 'default';
+
+            const coverImage = document.querySelector(`#new-song-${id} #cover-image`);
+            const coverInput = document.querySelector(`#new-song-${id} #cover-input`);
+
+            imagePreview(coverImage, coverInput);
+            document.querySelector(`#new-song-${id} #player`).volume = 0.25;
+        });
+
+        /*]]>*/
+    </script>
+</div>
+
+
+<div th:fragment="playlist-creator">
+    <div id="new-playlist-1" class="container flex-grow-1 my-4 rounded-4">
+        <div class="row g-3">
+            <div class="col-12 col-lg-4">
+                <label for="adminPlaylistNewName" class="form-label">Nombre</label>
+                <input id="adminPlaylistNewName" type="text" class="form-control">
+            </div>
+            <div class="col-12 col-lg">
+                <label for="adminPlaylistNewIcon" class="form-label">Portada</label>
+                <input id="adminPlaylistNewIcon" type="file" class="form-control" accept="image/*">
+            </div>
+            <div class="col-12">
+                <label for="adminPlaylistNewDesc" class="form-label">Descripcion</label>
+                <textarea id="adminPlaylistNewDesc" class="form-control"></textarea>
+            </div>
+            <div class="col-12">
+                <div class="form-check">
+                    <label class="form-check-label" for="adminPlaylistNewActive">Activar al crear</label>
+                    <input type="checkbox" class="form-check-input" id="adminPlaylistNewActive">
+                </div>
+            </div>
+            <div class="col mb-3">
+                <button id="adminPlaylistNewNext" class="btn btn-primary" type="button"
+                    onclick="document.getElementById('new-playlist-1').hidden = true; document.getElementById('new-playlist-2').hidden = false;">Siguiente</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="new-playlist-2" class="container flex-grow-1 my-4 rounded-4" hidden="true">
+        <label for="adminPlaylistNewSongs" class="form-label">Subir canciones</label>
+        <input id="adminPlaylistNewSongs" type="file" class="form-control" accept="audio/*" multiple>
+
+        <div id="newSongsContainer" class="container my-2"
+            style="max-height:400px; overflow-y: auto; overflow-x:hidden">
+        </div>
+
+        <button id="adminPlaylistNewNext2" class="btn btn-primary" type="button"
+            onclick="document.getElementById('new-playlist-2').hidden = true; document.getElementById('new-playlist-3').hidden = false;">Siguiente/Omitir</button>
+
+    </div>
+
+    <div id="new-playlist-3" class="container flex-grow-1 my-4 rounded-4" hidden="true">
+        <p>Añadir canciones ya existentes</p>
+
+        <div class="container my-2" style="max-height:400px; overflow-y: auto; overflow-x:hidden">
+            <th:block th:replace="~{ :: song-search}"></th:block>
+        </div>
+
+        <button id="adminPlaylistNewNext3" class="btn btn-primary" type="submit">Terminar</button>
+
+    </div>
+</div>
+
+<div th:fragment="playlist-search" class="container">
+    <div class="container sticky-filters" id="playlist-search-filters">
+        <!-- Contenedor fijo para filtros y ordenar por -->
+
+        <div class="row d-flex mb-3">
+            <!--Filtros-->
+            <div class="col-8 d-flex flex-column">
+                <div class="card text-center flex-grow-1">
+                    <div class="row align-items-center justify-content-center">
+                        <div class="col ps-4">
+                            <h4>Filtros</h4>
+                        </div>
+                        <div class="col">
+                            <div class="form-floating mb-3 mt-3">
+                                <input type="number" class="form-control" id="playlist-filter-id">
+                                <label for="playlist-filter-id">ID</label>
+                            </div>
+                        </div>
+                        <div class="col pe-4">
+                            <div class="form-floating mb-3 mt-3">
+                                <input type="text" class="form-control" id="playlist-filter-name">
+                                <label for="playlist-filter-name">Nombre</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--Ordenar por-->
+            <div class="col-4 d-flex">
+                <div class="card flex-grow-1 align-items-center justify-content-center">
+                    <div class="row justify-content-center align-items-center text-center">
+                        <h5 class="col-auto">Ordenar por</h5>
+                        <div class="col-auto">
+                            <div class="input-group">
+                                <select class="form-select" id="playlist-order-select">
+                                    <option value="1">ID</option>
+                                    <option value="2">Nombre</option>
+                                </select>
+                                <button id="playlist-order-change" class="btn" type="button">
+                                    <img id="playlist-order-type" th:src="@{/img/admin/sort-down.svg}">
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            const playlistImage = document.getElementById('playlist-order-type');
+            const playlistButton = document.getElementById('playlist-order-change');
+
+            const orderImages = ['/img/admin/sort-down.svg', '/img/admin/sort-up.svg'];
+            let playlistOrderState = 0;
+
+            playlistButton.addEventListener('click', () => {
+                playlistOrderState = 1 - playlistOrderState;
+                playlistImage.src = orderImages[playlistOrderState];
+            });
+        </script>
+
+        <script th:src="@{/js/sticky-filters.js}"></script>
+        <script>
+            stickyFilters("playlist-search-filters");
+        </script>
+    </div>
+    <div id="playlists-container">
+
+    </div>
+</div>
+
+<div th:fragment="song-creator">
+    <label for="audio" class="form-label">Archivo de audio</label>
+    <input name="audio" id="audio" type="file" class="form-control mb-3" accept="audio/*">
+
+    <div id="new-song-card-container" class="my-3" hidden>
+        <th:block th:replace="~{ :: new-song-card(0)}"></th:block>
+    </div>
+
+    <div id="new-song-metadata-warning" class="alert alert-warning text-center my-3" role="alert" hidden>Asegurate de
+        que los metadatos han sido obtenidos
+        correctamente y
+        cambialos a mano si fuera necesario</div>
+
+    <button id="new-song-submit" type="submit" class="btn btn-primary w-100" hidden>Subir</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/jsmediatags@3.9.1/dist/jsmediatags.min.js"></script>
+    <script>
+        const songFile = document.getElementById('audio');
+        document.addEventListener('DOMContentLoaded', function () {
+            if (songFile.files.length > 0) {
+                songFile.dispatchEvent(new Event('change'));
+            } // TODO: Fix (si envías formulario y das para atrás, la card no sale)
+        });
+
+        document.querySelector('#new-song-0 #delete').addEventListener('click', function () {
+            songFile.value = '';
+            songFile.dispatchEvent(new Event('change'));
+        });
+
+        /* Song metadata extractor */
+        songFile.addEventListener('change', function (event) {
+            const file = event.target.files[0];
+
+            const songImg = document.getElementById('cover-image');
+            const songImgInput = document.getElementById('cover-input');
+            const songPlayer = document.getElementById('player');
+            const songFileName = document.getElementById('file-name');
+            const songName = document.getElementById('name');
+            const songArtists = document.getElementById('artists');
+            const songAlbum = document.getElementById('album');
+
+            if (file) {
+
+                songFileName.textContent = file.name;
+                songPlayer.src = URL.createObjectURL(file);
+
+                jsmediatags.read(file, {
+                    onSuccess: function (tags) {
+                        const img = tags.tags.picture;
+                        const title = tags.tags.title;
+                        const artist = tags.tags.artist;
+                        const album = tags.tags.album;
+
+                        // Si hay una imagen en los metadatos
+                        if (img) {
+                            const fileExtension = img.format.split("/")[1];
+                            const fileName = `cover.${fileExtension}`;
+
+                            const blob = new Blob([new Uint8Array(img.data)], { type: img.format });
+                            const extractedFile = new File([blob], fileName, { type: img.format });
+
+                            // Usar DataTransfer para asignar el archivo al input file
+                            const dataTransfer = new DataTransfer();
+                            dataTransfer.items.add(extractedFile);
+                            songImgInput.files = dataTransfer.files;
+
+                            const imageBase64 = 'data:' + img.format + ';base64,' + arrayBufferToBase64(img.data);
+                            songImg.src = imageBase64;
+                        } else {
+                            songImg.src = '/img/upload.svg';
+                            songImgInput = '';
+                        }
+
+                        // Asignar los metadatos de la canción
+                        songName.value = title || "";
+                        songArtists.value = artist || "";
+                        songAlbum.value = album || "";
+                    },
+                    onError: function (error) {
+                        console.error('Error al leer los metadatos:', error);
+                        songImg.src = '/img/upload.svg';
+                        songImgInput.value = '';
+                        songName.value = "";
+                        songArtists.value = "";
+                        songAlbum.value = "";
+                    }
+                });
+
+                document.getElementById('new-song-card-container').removeAttribute("hidden");
+                document.getElementById('new-song-submit').removeAttribute("hidden");
+                document.getElementById('new-song-metadata-warning').removeAttribute("hidden");
+
+            } else {
+                songImg.src = '/img/upload.svg';
+                songImgInput.value = '';
+                songName.value = "";
+                songArtists.value = "";
+                songAlbum.value = "";
+
+                songFileName.textContent = '';
+                songPlayer.src = '';
+
+                document.getElementById('new-song-card-container').setAttribute("hidden", true);
+                document.getElementById('new-song-submit').setAttribute("hidden", true);
+                document.getElementById('new-song-metadata-warning').setAttribute("hidden", true);
+            }
+        });
+
+        // Función auxiliar para convertir ArrayBuffer a base64
+        function arrayBufferToBase64(buffer) {
+            let binary = '';
+            let bytes = new Uint8Array(buffer);
+            let length = bytes.byteLength;
+            for (let i = 0; i < length; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return window.btoa(binary);
+        }
+    </script>
+
+</div>
+
+<div th:fragment="song-search" class="container p-0">
+    <div class="container sticky-filters" id="song-search-filters">
+        <!-- Contenedor fijo para filtros y ordenar por -->
+        <div class="row d-flex g-3">
+            <!--Filtros-->
+            <div class="col-12 col-xl-9 d-flex flex-column">
+                <div class="card text-center flex-grow-1 px-3 justify-content-center">
+                    <div class="row align-items-center justify-content-center">
+                        <div class="col-12 col-xl-2 mt-4 mt-xl-0">
+                            <h4>Filtros</h4>
+                        </div>
+                        <div class="col-12 col-xl-2">
+                            <div class="form-floating my-3">
+                                <input type="number" class="form-control" id="song-filter-id">
+                                <label for="song-filter-id">ID</label>
+                            </div>
+                        </div>
+                        <div class="col-12 col-xl-3">
+                            <div class="form-floating my-3">
+                                <input type="text" class="form-control" id="song-filter-name">
+                                <label for="song-filter-name">Nombre</label>
+                            </div>
+                        </div>
+                        <div class="col-12 col-xl-3">
+                            <div class="form-floating my-3">
+                                <div class="input-container form-control"
+                                    onclick="document.getElementById('song-filter-artists').focus()">
+                                    <div id="tagsWrapper">
+                                        <div id="tagsContainer"></div>
+                                        <input type="text" class="border-0 flex-grow-1 bg-transparent"
+                                            id="song-filter-artists">
+                                    </div>
+                                </div>
+                                <label for="song-filter-artists">Artistas</label>
+                            </div>
+
+                            <script>
+                                const input = document.getElementById("song-filter-artists");
+                                const container = document.getElementById("tagsContainer");
+                                const wrapper = document.getElementById("tagsWrapper");
+
+                                input.addEventListener("keydown", function (event) {
+                                    if (event.key === "Enter" && input.value.trim() !== "") {
+                                        event.preventDefault();
+
+                                        // Crear etiqueta tipo "pill"
+                                        const tag = document.createElement("span");
+                                        tag.className = "badge bg-primary d-flex align-items-center me-1";
+                                        tag.textContent = input.value;
+
+                                        // Botón para eliminar
+                                        const removeBtn = document.createElement("button");
+                                        removeBtn.className = "btn-close btn-close-white ms-2";
+                                        removeBtn.style.fontSize = "10px";
+                                        removeBtn.onclick = () => {
+                                            tag.remove();
+                                            updateScroll();  // Actualizar el scroll después de eliminar
+                                        };
+                                        tag.appendChild(removeBtn);
+
+                                        // Insertar la pill antes del input
+                                        container.appendChild(tag);
+                                        input.value = "";
+                                        updateScroll();  // Actualizar el scroll después de agregar
+                                    }
+                                });
+
+                                input.addEventListener("keydown", function (event) {
+                                    if (event.key === "Backspace" && input.value === "" && container.lastChild) {
+                                        container.lastChild.remove();
+                                        updateScroll();  // Actualizar el scroll después de eliminar
+                                    }
+                                });
+
+                                // Función para desplazar automáticamente al final cuando se agregan nuevas pills
+                                function updateScroll() {
+                                    // Comprobar si el contenido se desborda horizontalmente
+                                    if (wrapper.scrollWidth > wrapper.clientWidth) {
+                                        wrapper.style.overflowX = "auto";  // Activar scroll si es necesario
+                                    } else {
+                                        wrapper.style.overflowX = "hidden"; // Desactivar scroll si no es necesario
+                                    }
+                                }
+                            </script>
+                        </div>
+                        <div class="col-12 col-xl-2">
+                            <div class="form-floating mb-3 mt-3">
+                                <input type="text" class="form-control" id="song-filter-album">
+                                <label for="song-filter-album">Album</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--Ordenar por-->
+            <div class="col-12 col-xl-3 d-flex flex-column">
+                <div class="card flex-grow-1 align-items-center justify-content-center py-3">
+                    <div class="row justify-content-center align-items-center text-center px-3 px-xl-0">
+                        <h5 class="col-auto">Ordenar por</h5>
+                        <div class="col-auto">
+                            <div class="input-group">
+                                <select class="form-select" id="song-order-select">
+                                    <option value="id">ID</option>
+                                    <option value="name">Nombre</option>
+                                    <option value="artists">Artista</option>
+                                    <option value="album">Album</option>
+                                </select>
+                                <button id="song-sort-order-button" class="btn" type="button">
+                                    <img id="song-sort-order-img" src="/img/admin/sort-down.svg">
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="/js/sticky-filters.js"></script>
+        <script>
+            stickyFilters("song-search-filters");
+        </script>
+    </div>
+
+    <div id="songs-container"></div>
+
+    <div class="audio-loader-container">
+        <div class="audio-loader">
+            <div class="audio-bar"></div>
+            <div class="audio-bar"></div>
+            <div class="audio-bar"></div>
+            <div class="audio-bar"></div>
+            <div class="audio-bar"></div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/song-utils.js}"></script>
+    <script>
+
+        //Sort dir (0 des, 1 asc)
+        let songOrderState = 0;
+
+        //Sort
+        const songSortOrderImage = document.getElementById('song-sort-order-img');
+        const songSortOrderButton = document.getElementById('song-sort-order-button');
+        const songSortSelect = document.getElementById('song-order-select');
+
+        //Filters
+        const songIdFilter = document.getElementById("song-filter-id");
+        const songNameFilter = document.getElementById("song-filter-name");
+        const songArtistsFilter = document.getElementById("song-filter-artists");
+        const songAlbumFilter = document.getElementById("song-filter-album");
+
+        //Song container
+        const songsContainer = document.getElementById("songs-container");
+
+        //Funcion para obtener por ajax canciones segun los filtros y pagina
+        let filterTimeout;
+        function handleFilterInput() {
+            clearTimeout(filterTimeout);
+            filterTimeout = setTimeout(function () {
+
+                songsContainer.innerHTML = '';
+
+                showLoader();
+
+                let filters = {
+                    id: songIdFilter.value.trim(),
+                    name: songNameFilter.value.trim(),
+                    artists: songArtistsFilter.value.trim(),
+                    album: songAlbumFilter.value.trim(),
+                    sort: songSortSelect.value + (songOrderState == 0 ? ",DESC" : ",ASC")
+                };
+
+                let queryParams = new URLSearchParams();
+
+                for (const key in filters) {
+                    if (filters[key] !== "") {
+                        queryParams.append(key, filters[key]);
+                    }
+                }
+
+                fetch(`/admin/playlists/searchSongs?${queryParams.toString()}`, {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRF-TOKEN': config.csrf.value
+                    },
+                    credentials: 'same-origin'
+                }).then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error("No se ha podido obtener las canciones del servidor");
+                    }
+                }).then(data => {
+
+                    data.content.forEach(song => {
+
+                        const id = song.id;
+                        const active = song.active;
+                        const name = song.name;
+                        const artists = song.artists;
+                        const album = song.album;
+
+                        const songCard = document.createElement('div');
+                        songCard.innerHTML = `<div class="card existing-song-card p-3 my-2" style="background-color: var(--bs-${active ? 'success' : 'danger'}-bg-subtle); display:none;">
+                                                <div class="row align-items-center justify-content-center g-3">
+                                                    <div class="col-12 col-xl-2 d-flex flex-column align-items-center justify-content-center text-center">
+                                                        <input id="cover-image" type="image" class="form-control img-fluid" src="/img/preview-song-img.jpeg"
+                                                            alt="Imagen de la canción" style="height: 128px; width: 128px; object-fit: contain;" disabled>
+                                                        <div id="id" class="form-text">ID ${id}</div>
+                                                    </div>
+                                                    
+                                                    <div class="col-12 col-xl-2">
+                                                        <div class="form-floating">
+                                                            <input name="name" id="name" type="text" class="form-control" value="${name}" disabled>
+                                                            <label>Nombre</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12 col-xl-2">
+                                                        <div class="form-floating">
+                                                            <input name="artists" id="artists" type="text" class="form-control" value="${artists.join('/')}" disabled>
+                                                            <label>Artistas</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12 col-xl-2">
+                                                        <div class="form-floating">
+                                                            <input name="album" id="album" type="text" class="form-control" value="${album}" disabled>
+                                                            <label>Album</label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-12 col-xl-3 d-flex flex-column text-center">
+                                                        <audio id="player" class="flex-grow-1 w-100" controls></audio>
+                                                    </div>
+
+                                                    <div class="col-12 col-xl-1">
+                                                        <button id="delete" type="button" class="btn btn-danger">
+                                                            <img src="/img/admin/trash3-fill.svg">
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>`;
+                        songsContainer.appendChild(songCard);
+
+                        let songPlayer = songCard.querySelector(`#player`);
+                        songPlayer.volume = 0.25;
+                        getSongAudio(id, songPlayer);
+
+                        getSongCover(id, songCard.querySelector(`#cover-image`));
+                    });
+
+                    songsContainer.querySelectorAll('.existing-song-card').forEach(card => {
+                        card.style.display = 'block';
+                    });
+
+                }).catch(error => {
+                    console.error('Error:', error);
+                }).finally(() => {
+                    hideLoader();
+                });
+            }, 250);
+        }
+
+        songIdFilter.addEventListener("input", handleFilterInput);
+        songNameFilter.addEventListener("input", handleFilterInput);
+        songArtistsFilter.addEventListener("input", handleFilterInput);
+        songAlbumFilter.addEventListener("input", handleFilterInput);
+
+        songSortSelect.addEventListener("change", handleFilterInput);
+        songSortOrderButton.addEventListener("click", handleFilterInput);
+
+        //Cambio de imagen de direccion de sort
+        songSortOrderButton.addEventListener('click', () => {
+            songOrderState = 1 - songOrderState;
+            songSortOrderImage.src = songOrderState === 0 ? /*[[${'/img/admin/sort-down.svg'}]]*/ '/img/admin/sort-down.svg' : /*[[${'/img/admin/sort-up.svg'}]]*/ '/img/admin/sort-up.svg';
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            handleFilterInput();
+        })
+    </script>
+
+</div>

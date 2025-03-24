@@ -1,8 +1,16 @@
 package es.ucm.fdi.iw.model;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Converter;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -35,7 +43,8 @@ public class Cancion implements Transferable<Cancion.Transfer> {
     private String name;
 
     @Column(nullable = false)
-    private String artist;
+    @Convert(converter = ListConverter.class)
+    private List<String> artists;
 
     @Column
     private String album;
@@ -50,12 +59,43 @@ public class Cancion implements Transferable<Cancion.Transfer> {
         private long id;
         private boolean active;
         private String name;
-        private String artist;
+        private List<String> artists;
         private String album;
     }
 
     @Override
     public Transfer toTransfer() {
-        return new Transfer(id, active, name, artist, album);
+        return new Transfer(id, active, name, artists, album);
+    }
+
+    /**
+     * Convierte entre una lista de strings, a un JSON, y viceversa
+     */
+    @Converter
+    public static class ListConverter implements AttributeConverter<List<String>, String> {
+
+        private final ObjectMapper objectMapper = new ObjectMapper();
+
+        @Override
+        public String convertToDatabaseColumn(List<String> artistas) {
+            try {
+                return objectMapper.writeValueAsString(artistas);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        @Override
+        public List<String> convertToEntityAttribute(String dbData) {
+            try {
+                return objectMapper.readValue(dbData,
+                        new com.fasterxml.jackson.core.type.TypeReference<List<String>>() {
+                        });
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
     }
 }

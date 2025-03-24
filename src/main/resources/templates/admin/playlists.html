@@ -11,14 +11,136 @@
 
     <main class="flex-shrink-0">
         <div class="container">
-            <h1 class="mt-5 mb-5 text-center">Playlists</h1>
-            <div class="alert alert-info" role="alert">
-                La pagina todavia no esta disponible
+            <h1 class="mt-5 mb-5 text-center fw-bold">Playlists</h1>
+
+            <div th:if="${viewType} == 'list'">
+                <!-- View: Lista de playlists/canciones existentes -->
+                <div class="container d-flex justify-content-center">
+                    <h2 class="mb-3">
+                        Lista de
+                        <select id="listSelector">
+                            <option value="playlists" th:selected="${list == 'playlists'}">playlists</option>
+                            <option value="songs" th:selected="${list == 'songs'}">canciones</option>
+                        </select>
+                    </h2>
+                </div>
+
+                <!-- Playlists -->
+                <div id="playlistsList" style="display: none;">
+                    <div class="d-flex justify-content-end">
+                        <a class="btn btn-primary" th:href="@{?view=new-playlist}" th:text="'Crear nueva playlist'"></a>
+                    </div>
+                    <th:block th:replace="~{fragments/playlist-utils :: playlist-search}"></th:block>
+                </div>
+
+                <!-- Canciones -->
+                <div id="songsList" style="display: none;">
+                    <div class="d-flex justify-content-end">
+                        <a class="btn btn-primary" th:href="@{?view=new-song}" th:text="'Crear nueva cancion'"></a>
+                    </div>
+                    <th:block th:replace="~{fragments/playlist-utils :: song-search}"></th:block>
+                </div>
             </div>
+
+
+            <div th:if="${viewType} == 'new-playlist'">
+                <!-- View: Crear nueva playlist -->
+                <h2 class="mb-3 text-center">Nueva playlist</h2>
+                <form th:action="@{/admin/playlists/submitPlaylist}" method="POST" enctype="multipart/form-data">
+                    <th:block th:replace="~{fragments/playlist-utils :: playlist-creator}"></th:block>
+                </form>
+            </div>
+
+
+            <div th:if="${viewType} == 'new-song'">
+                <!-- View: Crear nueva cancion -->
+                <h2 class="mb-3 text-center">Nueva cancion</h2>
+                <form id="submitSong" th:action="@{/admin/playlists/submitSong}" method="POST"
+                    enctype="multipart/form-data">
+                    <th:block th:replace="~{fragments/playlist-utils :: song-creator}"></th:block>
+                </form>
+                <div class="audio-loader-container mt-3" style="display:none;">
+                    <div class="audio-loader">
+                        <div class="audio-bar"></div>
+                        <div class="audio-bar"></div>
+                        <div class="audio-bar"></div>
+                        <div class="audio-bar"></div>
+                        <div class="audio-bar"></div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </main>
 
     <th:block th:replace="~{fragments/footer.html :: footer}" />
+
+    <script th:if="${viewType} == 'list'">
+        /* List view changer */
+        document.addEventListener("DOMContentLoaded", function () {
+            const selector = document.getElementById("listSelector");
+            const playlistsList = document.getElementById("playlistsList");
+            const songsList = document.getElementById("songsList");
+
+            function updateView() {
+                switch (selector.value) {
+                    case "playlists":
+                        playlistsList.style.display = "";
+                        songsList.style.display = "none";
+                        break;
+                    case "songs":
+                        playlistsList.style.display = "none";
+                        songsList.style.display = "";
+                        break;
+                }
+            }
+
+            // Esperar un pequeño tiempo para que el navegador restaure el estado del select
+            setTimeout(updateView, 50);
+
+            selector.addEventListener("change", updateView);
+
+        });
+
+    </script>
+    <script th:if="${viewType} == 'new-song'" th:src="@{/js/song-utils.js}"></script>
+    <script th:if="${viewType} == 'new-song'">
+        document.getElementById('submitSong').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            showLoader();
+
+            const songPlayer = document.getElementById('player');
+            songPlayer.pause();
+
+            const fileInput = document.getElementById("cover-input");
+            if (!fileInput.files.length) { //TODO mejorar validacion
+                e.preventDefault();
+                alert("Debes seleccionar una imagen antes de enviar.");
+            }
+
+            const formData = new FormData();
+
+            formData.set("audio", document.getElementById("audio").files[0]);
+            formData.set("cover", fileInput.files[0]);
+            formData.set("name", document.getElementById("name").value);
+            formData.set("artists", document.getElementById("artists").value.split("/"));
+            formData.set("album", document.getElementById("album").value);
+
+            fetch('/admin/playlists/submitSong', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': config.csrf.value
+                },
+                credentials: 'same-origin',
+                redirect: 'follow'
+            })
+                .then(response => {
+                    window.location.href = response.url; //TODO Redirigir a buscador de canciones con filtro de id de la cancion subida aplicado
+                });
+        });
+    </script>
 </body>
 
 </html>
