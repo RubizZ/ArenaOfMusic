@@ -76,17 +76,45 @@ footer {
     padding-top: 20px;
 }
 
-/* Capa semitransparente */
-.contenido-principal::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: -1;
+
+/* Estilos específicos para la tarjeta con el id modo-solitario en modo claro */
+#modo-solitario {
+    background-color: var(--bs-white); /* Color de fondo para modo claro */
+    transition: transform 0.2s, box-shadow 0.2s; /* Transición para el hover */
 }
+
+#modo-solitario:hover {
+    transform: scale(1.05); /* Aumenta el tamaño al hacer hover */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Sombra al hacer hover */
+}
+
+#modo-solitario img {
+    border-radius: 10px; /* Borde redondeado para la imagen */
+}
+
+#modo-solitario .card-body {
+    text-align: center; /* Centra el texto */
+}
+
+#modo-solitario .card-title {
+    font-size: 1.5rem; /* Tamaño de la fuente del título */
+}
+
+/* Estilos específicos para la tarjeta con el id modo-solitario en modo oscuro */
+[data-bs-theme="dark"] #modo-solitario {
+    background-color: var(--bs-secondary-color); /* Color de fondo para modo oscuro */
+}
+
+[data-bs-theme="dark"] #modo-solitario:hover {
+    transform: scale(1.05); /* Aumenta el tamaño al hacer hover */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Sombra al hacer hover */
+}
+
+[data-bs-theme="dark"] #modo-solitario .card-title {
+    color: var(--bs-body-bg); /* Color del título para modo oscuro */
+}
+
+
 
 
 /* Estilos para los enlaces desactivados */
@@ -99,9 +127,10 @@ a[disabled] {
 
 /* Estilos generales para las tarjetas */
 .contenido-principal .card {
-    background-color: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(5px);
-    color: white;
+    background-color: var(--bs-body-bg);
+    background-color: var(--bs-secondary-bg);
+    color: var(--bs-secondary-color);
+    border: 2px solid var(--bs-border-color);
 }
 
 /* Estilos para las tarjetas desactivadas */
@@ -111,11 +140,12 @@ a[disabled] {
     color: #a9a9a9;
 }
 
-*/ .contenido-principal .tarjeta-boton {
-    height: 85px;
-    width: 125px;
-    margin-bottom: 20px;
-}
+
+
+[data-bs-theme=dark] .card.desactivar {
+    color: var(--bs-body-color);
+    background-color: var(--bs-tertiary-color);
+  }
 
 .contenido-principal .tarjeta-bienvenida .card-body {
     font-size: 16px;
