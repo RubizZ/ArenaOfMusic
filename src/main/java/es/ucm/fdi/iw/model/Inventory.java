@@ -9,6 +9,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,7 +17,8 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @NoArgsConstructor
-public class Inventario implements Transferable<Inventario.Transfer> {
+@Table(name = "inventory")
+public class Inventory implements Transferable<Inventory.Transfer> {
 
     @EmbeddedId
     private InventarioId id;
@@ -29,7 +31,7 @@ public class Inventario implements Transferable<Inventario.Transfer> {
     @ManyToOne
     @MapsId("objectId")
     @JoinColumn(name = "object_id", nullable = false)
-    private Objeto object;
+    private Object object;
 
     @Column(nullable = false)
     private LocalDateTime purchaseDate = LocalDateTime.now();

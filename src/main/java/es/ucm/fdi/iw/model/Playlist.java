@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @NoArgsConstructor
-@Table(name = "playlists")
+@Table(name = "playlist")
 public class Playlist implements Transferable<Playlist.Transfer> {
 
     @Id
@@ -36,7 +36,7 @@ public class Playlist implements Transferable<Playlist.Transfer> {
     private String description;
 
     @ManyToMany(mappedBy = "playlists")
-    private Set<Cancion> canciones;
+    private Set<Song> canciones;
 
     @Getter
     @AllArgsConstructor
