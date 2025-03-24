@@ -65,7 +65,7 @@ public class User implements Transferable<User.Transfer> {
     private String description;
 
     @Column(nullable = false)
-    private Integer EXP_totale = 0;
+    private Integer EXP_total = 0;
 
     @Column(nullable = false)
     private Integer EXP = 0;
@@ -108,8 +108,8 @@ public class User implements Transferable<User.Transfer> {
     @OneToMany(mappedBy = "blocked")
     private List<Block> blocksReceived;
 
-    // @ManyToMany(mappedBy = "user")
-    // private List<Game> partidas;
+    @OneToMany(mappedBy = "user")
+    private List<PlayerGame> partidas;
 
     /**
      * Checks whether this user has a given role.
@@ -130,7 +130,7 @@ public class User implements Transferable<User.Transfer> {
         private String email;
         private boolean enabled;
         private boolean banned;
-        private int EXP_totale;
+        private int EXP_total;
         private int EXP;
         private Date creationDateTime;
         private Date lastLogin;
@@ -146,7 +146,7 @@ public class User implements Transferable<User.Transfer> {
                 email,
                 enabled,
                 banned,
-                EXP_totale,
+                EXP_total,
                 EXP,
                 creationDateTime,
                 lastLogin,
