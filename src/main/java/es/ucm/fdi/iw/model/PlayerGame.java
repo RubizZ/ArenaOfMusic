@@ -1,5 +1,7 @@
 package es.ucm.fdi.iw.model;
 
+import java.util.UUID;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -42,7 +44,7 @@ public class PlayerGame implements Transferable<PlayerGame.Transfer> {
     @Getter
     @AllArgsConstructor
     public static class Transfer {
-        private long gameId;
+        private UUID gameId;
         private long userId;
         private int score;
         private int position;
