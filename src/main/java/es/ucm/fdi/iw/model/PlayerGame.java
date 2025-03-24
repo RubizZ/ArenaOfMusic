@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 public class PlayerGame implements Transferable<PlayerGame.Transfer> {
 
     @EmbeddedId
-    private PlayerGameId id;
+    private PlayerGameID id;
 
     @ManyToOne
     @MapsId("gameId")
