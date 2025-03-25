@@ -105,13 +105,11 @@
     </script>
     <script th:if="${viewType} == 'new-song'" th:src="@{/js/song-utils.js}"></script>
     <script th:if="${viewType} == 'new-song'">
+        //Subida del formulario de nueva cancion
         document.getElementById('submitSong').addEventListener('submit', function (e) {
             e.preventDefault();
 
             showLoader();
-
-            const songPlayer = document.getElementById('player');
-            songPlayer.pause();
 
             const fileInput = document.getElementById("cover-input");
             if (!fileInput.files.length) { //TODO mejorar validacion
