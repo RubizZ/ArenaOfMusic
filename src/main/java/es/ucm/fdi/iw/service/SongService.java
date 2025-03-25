@@ -11,7 +11,6 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,11 +22,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.multipart.MultipartFile;
 
 import es.ucm.fdi.iw.AudioConverter;
+import es.ucm.fdi.iw.dto.ModifiedSongDTO;
 import es.ucm.fdi.iw.dto.NewSongDTO;
 import es.ucm.fdi.iw.dto.SongSearchFiltersDTO;
 import es.ucm.fdi.iw.model.Song;
@@ -41,6 +41,7 @@ import jakarta.persistence.criteria.CriteriaUpdate;
 import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import jakarta.transaction.Transactional;
 import lombok.experimental.StandardException;
 
 @Service
@@ -51,6 +52,7 @@ public class SongService {
 
     private static final String UPLOAD_DIR = "iwdata/songs/";
 
+    @Transactional
     public void addNewSong(NewSongDTO data) throws IOException {
         Song song = new Song();
 
@@ -97,27 +99,38 @@ public class SongService {
         }
     }
 
-    public void modifyExistingSong(Song.Transfer song, @Nullable MultipartFile audio, @Nullable MultipartFile img)
-            throws IllegalArgumentException, RuntimeException {
+    @Transactional(rollbackOn = { IOException.class, RuntimeException.class })
+    public void modifyExistingSong(ModifiedSongDTO song)
+            throws IllegalArgumentException, IOException {
 
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaUpdate<Song> update = cb.createCriteriaUpdate(Song.class);
         Root<Song> updateRoot = update.from(Song.class);
         update.where(cb.equal(updateRoot.get("id"), song.getId()));
-        update.set("active", song.isActive());
-        update.set("name", song.getName());
-        update.set("artists", song.getArtists());
-        update.set("album", song.getAlbum());
+        if (song.getActive() != null) {
+            update.set("active", song.getActive());
+        }
+        if (song.getName() != null) {
+            update.set("name", song.getName());
+        }
+        if (song.getArtists() != null) {
+            update.set("artists", song.getArtists());
+        }
+        if (song.getAlbum() != null) {
+            update.set("album", song.getAlbum());
+        }
 
-        entityManager.getTransaction().begin();
         int n = entityManager.createQuery(update).executeUpdate();
 
         if (n < 1)
             throw new IllegalArgumentException("No existe la cancion con id " + song.getId());
 
-        String timestamp = String.valueOf(new Date().getTime());
+        String timestamp = String.valueOf(System.currentTimeMillis());
         Path mainPath = Paths.get(UPLOAD_DIR + song.getId());
         Path oldPath = Paths.get(UPLOAD_DIR + song.getId() + "/old");
+
+        MultipartFile audio = song.getAudio();
+        MultipartFile img = song.getCover();
 
         try {
             if (audio != null || img != null) {
@@ -138,24 +151,26 @@ public class SongService {
                     File imgDest = new File(UPLOAD_DIR + song.getId() + "/cover.webp");
                     BufferedImage bufferedImage = ImageIO.read(img.getInputStream());
                     ImageIO.write(bufferedImage, "webp", imgDest);
-                }
+                } else
+                    Files.copy(oldPath.resolve(timestamp + ".webp"),
+                            new File(UPLOAD_DIR + song.getId() + "/cover.webp").toPath());
 
                 if (audio != null) {
                     File songDest = new File(UPLOAD_DIR + song.getId() + "/audio.mp3");
                     AudioConverter.convertToMP3(audio, songDest);
-                }
+                } else
+                    Files.copy(oldPath.resolve(timestamp + ".mp3"),
+                            new File(UPLOAD_DIR + song.getId() + "/audio.mp3").toPath());
             }
 
-            entityManager.getTransaction().commit();
-
         } catch (IOException e) {
-            try {
-                entityManager.getTransaction().rollback();
+            // Signal to Spring to rollback the transaction
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 
+            try {
                 if (Files.list(oldPath).findAny().isEmpty()) {
                     Files.delete(oldPath);
                 } else {
-
                     Path mainImgPath = mainPath.resolve("cover.webp");
                     if (!Files.exists(mainImgPath)) {
                         Files.move(oldPath.resolve("cover.webp"), mainImgPath);
@@ -166,55 +181,53 @@ public class SongService {
                     }
                 }
 
-                throw new RuntimeException("No se ha podido convertir la nueva cancion, se han revertido los cambios",
+                throw new IOException("No se ha podido convertir la nueva cancion, se han revertido los cambios",
                         e);
             } catch (IOException ex) {
                 disableExistingSong(song.getId());
 
                 e.addSuppressed(ex);
-                throw new RuntimeException(
+                throw new IOException(
                         "No se ha podido convertir la nueva cancion y se han perdido los archivos antiguos, la cancion se ha desactivado",
                         e);
-
             }
         }
     }
 
-    private String getFileExtension(Path file) {
-        String fileName = file.getFileName().toString();
-        int lastDotIndex = fileName.lastIndexOf(".");
-        return (lastDotIndex == -1) ? "" : fileName.substring(lastDotIndex + 1);
-    }
-
-    public void deleteExistingSong(long id) throws IllegalArgumentException {
+    @Transactional(rollbackOn = { IOException.class, RuntimeException.class })
+    public void deleteExistingSong(long id) throws IllegalArgumentException, IOException {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaDelete<Song> delete = cb.createCriteriaDelete(Song.class);
         Root<Song> deleteRoot = delete.from(Song.class);
         delete.where(cb.equal(deleteRoot.get("id"), id));
-        entityManager.getTransaction().begin();
         int n = entityManager.createQuery(delete).executeUpdate();
         if (n < 1)
             throw new IllegalArgumentException("No existe ninguna cancion con el id " + id);
         try {
             deleteDirectoryCascade(Paths.get(UPLOAD_DIR + id));
         } catch (IOException e) {
-            entityManager.getTransaction().rollback();
-            disableExistingSong(id);
+            // Signal to Spring to rollback the transaction
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 
-            throw new RuntimeException(
-                    "No se han podido eliminar los archivos de la cancion", e);
+            disableExistingSong(id);
+            throw new IOException("No se han podido eliminar los archivos de la cancion", e);
         }
     }
 
+    @Transactional
     public void disableExistingSong(long id) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaUpdate<Song> update = cb.createCriteriaUpdate(Song.class);
         Root<Song> updateRoot = update.from(Song.class);
         update.where(cb.equal(updateRoot.get("id"), id));
         update.set("active", false);
-        entityManager.getTransaction().begin();
         entityManager.createQuery(update).executeUpdate();
-        entityManager.getTransaction().commit();
+    }
+
+    private String getFileExtension(Path file) {
+        String fileName = file.getFileName().toString();
+        int lastDotIndex = fileName.lastIndexOf(".");
+        return (lastDotIndex == -1) ? "" : fileName.substring(lastDotIndex + 1);
     }
 
     private void deleteDirectoryCascade(Path dirPath) throws IOException {
@@ -247,7 +260,7 @@ public class SongService {
 
         select.where(predicates.toArray(new Predicate[0]));
 
-        if (pageable.getSort().isSorted()) {
+        if (pageable.isPaged() && pageable.getSort().isSorted()) {
             List<Order> orders = pageable.getSort().stream()
                     .map(order -> order.isAscending() ? cb.asc(selectRoot.get(order.getProperty()))
                             : cb.desc(selectRoot.get(order.getProperty())))
@@ -256,8 +269,10 @@ public class SongService {
         }
 
         TypedQuery<Song> query = entityManager.createQuery(select);
-        query.setFirstResult((int) pageable.getOffset());
-        query.setMaxResults(pageable.getPageSize());
+        if (pageable.isPaged()) {
+            query.setFirstResult((int) pageable.getOffset());
+            query.setMaxResults(pageable.getPageSize());
+        }
         List<Song> resultList = query.getResultList();
 
         long totalElements = countTotalElements(filters);

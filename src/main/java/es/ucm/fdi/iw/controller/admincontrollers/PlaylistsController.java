@@ -3,8 +3,6 @@ package es.ucm.fdi.iw.controller.admincontrollers;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,22 +19,15 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import es.ucm.fdi.iw.model.Song;
 import es.ucm.fdi.iw.service.SongService;
 import es.ucm.fdi.iw.service.SongService.NoDataException;
+import es.ucm.fdi.iw.dto.ModifiedSongDTO;
 import es.ucm.fdi.iw.dto.NewSongDTO;
 import es.ucm.fdi.iw.dto.SongSearchFiltersDTO;
 import jakarta.servlet.http.HttpSession;
-import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
@@ -62,7 +53,6 @@ public class PlaylistsController {
     }
 
     @PostMapping("/submitSong")
-    @Transactional
     public String submitSong(RedirectAttributes redirectAttributes,
             @ModelAttribute NewSongDTO song, Model model) throws IOException {
 
@@ -70,12 +60,43 @@ public class PlaylistsController {
             songService.addNewSong(song);
         } catch (IOException e) {
             // TODO
+            e.printStackTrace();
         } catch (RuntimeException e) {
             // TODO
+            e.printStackTrace();
         }
 
         redirectAttributes.addFlashAttribute("list", "songs"); // TODO fix
         return "redirect:/admin/playlists";
+    }
+
+    @PostMapping("/modifySong")
+    public ResponseEntity<Void> modifySong(RedirectAttributes redirectAttributes,
+            @ModelAttribute ModifiedSongDTO song, Model model) throws IOException {
+
+        try {
+            songService.modifyExistingSong(song);
+        } catch (IOException e) {
+            // TODO
+            e.printStackTrace();
+        } catch (RuntimeException e) {
+            // TODO
+            e.printStackTrace();
+        }
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/deleteSong")
+    public ResponseEntity<Void> deleteSong(@RequestParam Long id) {
+        try {
+            songService.deleteExistingSong(id);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).build();
+        } catch (IOException e) {
+            return ResponseEntity.status(500).build();
+        }
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/searchSongs")
