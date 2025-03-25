@@ -11,7 +11,7 @@
 
     <main class="flex-shrink-0">
         <div class="container">
-            <h1 class="mt-5 mb-5 text-center fw-bold">Playlists</h1>
+            <h1 th:unless="${viewType} == 'new-playlist'" class="mt-5 mb-5 text-center fw-bold">Playlists</h1>
 
             <div th:if="${viewType} == 'list'">
                 <!-- View: Lista de playlists/canciones existentes -->
@@ -45,8 +45,8 @@
 
             <div th:if="${viewType} == 'new-playlist'">
                 <!-- View: Crear nueva playlist -->
-                <h2 class="mb-3 text-center">Nueva playlist</h2>
-                <form th:action="@{/admin/playlists/submitPlaylist}" method="POST" enctype="multipart/form-data">
+                <form id="submitPlaylist" th:action="@{/admin/playlists/submitPlaylist}" method="POST"
+                    enctype="multipart/form-data">
                     <th:block th:replace="~{fragments/playlist-utils :: playlist-creator}"></th:block>
                 </form>
             </div>
@@ -141,6 +141,23 @@
     </script>
     <script th:if="${viewType} == 'new-playlist'">
         //TODO Subida del formulario de nueva playlist
+        document.getElementById('submitPlaylist').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+
+        });
+
+
+    </script>
+
+    <script>
+        function validateNewPlaylist(form) {
+
+        }
+
+        function validateNewSong(songContainer) {
+
+        }
     </script>
 </body>
 
