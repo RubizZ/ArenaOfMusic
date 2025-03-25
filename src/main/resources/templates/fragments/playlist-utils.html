@@ -241,7 +241,7 @@
 
     <button id="new-song-submit" type="submit" class="btn btn-primary w-100" hidden>Subir</button>
 
-    <script src="https://cdn.jsdelivr.net/npm/jsmediatags@3.9.1/dist/jsmediatags.min.js"></script>
+    <script th:src="@{/js/jsmediatags.min.js}"></script>
     <script>
         const songFile = document.getElementById('audio');
         document.addEventListener('DOMContentLoaded', function () {
