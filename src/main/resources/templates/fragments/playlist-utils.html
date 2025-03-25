@@ -474,7 +474,7 @@
 
     <div id="songs-container"></div>
 
-    <div class="audio-loader-container">
+    <div class="audio-loader-container" id="searchLoader">
         <div class="audio-loader">
             <div class="audio-bar"></div>
             <div class="audio-bar"></div>
@@ -484,6 +484,7 @@
         </div>
     </div>
 
+    <script th:src="@{/js/image-preview.js}"></script>
     <script th:src="@{/js/song-utils.js}"></script>
     <script>
 
@@ -512,7 +513,7 @@
 
                 songsContainer.innerHTML = '';
 
-                showLoader();
+                document.getElementById('searchLoader').style.display = 'flex';
 
                 let filters = {
                     id: songIdFilter.value.trim(),
@@ -542,10 +543,9 @@
                     } else {
                         throw new Error("No se ha podido obtener las canciones del servidor");
                     }
-                }).then(data => {
+                }).then(async data => {
 
-                    data.content.forEach(song => {
-
+                    const promises = data.content.map(async song => {
                         const id = song.id;
                         const active = song.active;
                         const name = song.name;
@@ -553,61 +553,251 @@
                         const album = song.album;
 
                         const songCard = document.createElement('div');
-                        songCard.innerHTML = `<div class="card existing-song-card p-3 my-2" style="background-color: var(--bs-${active ? 'success' : 'danger'}-bg-subtle); display:none;">
+                        songCard.style.display = 'none';
+                        songCard.innerHTML = `<div id="${id}" class="card existing-song-card p-3 my-2" style = "background-color: var(--bs-${active ? 'success' : 'danger'}-bg-subtle);">
                                                 <div class="row align-items-center justify-content-center g-3">
                                                     <div class="col-12 col-xl-2 d-flex flex-column align-items-center justify-content-center text-center">
                                                         <input id="cover-image" type="image" class="form-control img-fluid" src="/img/preview-song-img.jpeg"
                                                             alt="Imagen de la canción" style="height: 128px; width: 128px; object-fit: contain;" disabled>
-                                                        <div id="id" class="form-text">ID ${id}</div>
-                                                    </div>
-                                                    
-                                                    <div class="col-12 col-xl-2">
-                                                        <div class="form-floating">
-                                                            <input name="name" id="name" type="text" class="form-control" value="${name}" disabled>
-                                                            <label>Nombre</label>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-12 col-xl-2">
-                                                        <div class="form-floating">
-                                                            <input name="artists" id="artists" type="text" class="form-control" value="${artists.join('/')}" disabled>
-                                                            <label>Artistas</label>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-12 col-xl-2">
-                                                        <div class="form-floating">
-                                                            <input name="album" id="album" type="text" class="form-control" value="${album}" disabled>
-                                                            <label>Album</label>
-                                                        </div>
-                                                    </div>
+                                                            <input name="cover" id="cover-input" type="file" style="display:none" accept="image/*" disabled>
+                                                                <div id="id" class="form-text">ID ${id}</div>
+                                                            </div>
 
-                                                    <div class="col-12 col-xl-3 d-flex flex-column text-center">
-                                                        <audio id="player" class="flex-grow-1 w-100" controls></audio>
-                                                    </div>
+                                                            <div class="col-12 col-xl-2">
+                                                                <div class="form-floating">
+                                                                    <input name="name" id="name" type="text" class="form-control" value="${name}" disabled>
+                                                                        <label>Nombre</label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-12 col-xl-2">
+                                                                <div class="form-floating">
+                                                                    <input name="artists" id="artists" type="text" class="form-control" value="${artists.join('/')}" disabled>
+                                                                        <label>Artistas</label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-12 col-xl-2">
+                                                                <div class="form-floating">
+                                                                    <input name="album" id="album" type="text" class="form-control" value="${album}" disabled>
+                                                                        <label>Album</label>
+                                                                </div>
+                                                            </div>
 
-                                                    <div class="col-12 col-xl-1">
-                                                        <button id="delete" type="button" class="btn btn-danger">
-                                                            <img src="/img/admin/trash3-fill.svg">
-                                                        </button>
+                                                            <div class="col-12 col-xl-3 d-flex flex-column text-center">
+                                                                <div id="audio-file-container" class="d-none">
+                                                                    <label for="audio" class="form-label">Archivo de audio</label>
+                                                                    <input name="audio" id="audio" type="file" class="form-control mb-3" accept="audio/*">
+                                                                </div>
+                                                                <audio id="player" class="flex-grow-1 w-100" controls></audio>
+                                                            </div>
+
+                                                            <div id="buttons-container" class="col-12 col-xl-1 d-flex justify-content-center">
+                                                                <button id="edit" type="button" class="btn btn-warning mx-2 mx-xl-1">
+                                                                    <img src="/img/admin/pencil-square.svg">
+                                                                </button>
+                                                                <button id="delete" type="button" class="btn btn-danger mx-2 mx-xl-1">
+                                                                    <img src="/img/admin/trash3-fill.svg">
+                                                                </button>
+
+                                                                <button id="confirm" type="button" class="btn btn-success mx-2 mx-xl-1 d-none">
+                                                                    <img src="/img/admin/check-lg.svg">
+                                                                </button>
+                                                                <button id="discard" type="button" class="btn btn-danger mx-2 mx-xl-1 d-none">
+                                                                    <img src="/img/admin/x-lg.svg">
+                                                                </button>
+
+                                                                <div class="audio-loader-container" style="display:none;">
+                                                                    <div class="audio-loader">
+                                                                        <div class="audio-bar"></div>
+                                                                        <div class="audio-bar"></div>
+                                                                        <div class="audio-bar"></div>
+                                                                        <div class="audio-bar"></div>
+                                                                        <div class="audio-bar"></div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
                                                     </div>
-                                                </div>
-                                            </div>`;
+                                                </div>`;
+
                         songsContainer.appendChild(songCard);
 
-                        let songPlayer = songCard.querySelector(`#player`);
+                        const songName = songCard.querySelector('#name');
+                        const songArtists = songCard.querySelector('#artists');
+                        const songAlbum = songCard.querySelector('#album');
+
+                        const songFileContainer = songCard.querySelector('#audio-file-container');
+                        const audioInput = songCard.querySelector('#audio');
+                        const songPlayer = songCard.querySelector(`#player`);
                         songPlayer.volume = 0.25;
-                        getSongAudio(id, songPlayer);
+                        let audioUrl = await getSongAudio(id);
+                        songPlayer.src = audioUrl;
 
-                        getSongCover(id, songCard.querySelector(`#cover-image`));
+                        audioInput.addEventListener('change', function () {
+                            if (audioInput.files.length > 0) {
+                                songPlayer.src = URL.createObjectURL(audioInput.files[0]);
+                            }
+                            else
+                                songPlayer.src = audioUrl;
+                        });
+
+                        const coverImgInput = songCard.querySelector('#cover-input');
+                        const coverImg = songCard.querySelector(`#cover-image`);
+                        let coverUrl = await getSongCover(id);
+                        coverImg.src = coverUrl;
+                        imagePreview(coverImg, coverImgInput);
+
+                        songCard.style.display = 'block'
+
+                        const editButton = songCard.querySelector(`#edit`);
+                        const deleteButton = songCard.querySelector('#delete');
+                        const confirmButton = songCard.querySelector('#confirm');
+                        const discardButton = songCard.querySelector(`#discard`);
+
+                        editButton.addEventListener('click', function () {
+                            songCard.querySelectorAll('input').forEach(input => input.removeAttribute('disabled'));
+
+                            editButton.classList.add('d-none');
+                            deleteButton.classList.add('d-none');
+                            confirmButton.classList.remove('d-none');
+                            discardButton.classList.remove('d-none');
+
+                            songPlayer.pause();
+
+                            songFileContainer.classList.remove('d-none');
+                        });
+
+                        deleteButton.addEventListener('click', function () {
+                            fetch(`/admin/playlists/deleteSong?id=${id}`, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': config.csrf.value
+                                },
+                                credentials: 'same-origin'
+                            })
+                                .then(response => {
+                                    if (response.status === 404) {
+                                        alert(`No existe ninguna cancion con id ${id}`);
+                                        return;
+                                    }
+
+                                    if (response.status === 500) {
+                                        alert(`El servidor ha tenido un error interno al eliminar la cancion ${id}, por favor, avisa a los programadores`);
+                                        handleFilterInput();
+                                        return;
+                                    }
+
+                                    if (!response.ok) {
+                                        alert('Ha sucedido un error inesperado al eliminar la cancion');
+                                        handleFilterInput();
+                                        return;
+                                    }
+
+                                    alert(`Se ha eliminado la cancion ${id}`);
+                                    handleFilterInput();
+                                });
+                        });
+
+                        confirmButton.addEventListener('click', function () {
+                            songCard.querySelectorAll('input').forEach(input => input.setAttribute('disabled', true));
+
+                            confirmButton.classList.add('d-none');
+                            discardButton.classList.add('d-none');
+
+                            songCard.querySelector('.audio-loader-container').style.display = 'flex';
+
+                            const formData = new FormData();
+
+                            formData.set("id", id);
+
+                            if (audioInput.files.length > 0 && songPlayer.src != audioUrl)
+                                formData.set("audio", audioInput.files[0]);
+                            if (coverImgInput.files.length > 0 && coverImg.src != coverUrl)
+                                formData.set("cover", coverImgInput.files[0]);
+                            if (songName.value !== name)
+                                formData.set("name", songName.value);
+                            if (songArtists.value.split("/") !== artists.join('/'))
+                                formData.set("artists", songArtists.value.split("/"));
+                            if (songAlbum.value !== album)
+                                formData.set("album", songAlbum.value);
+
+                            fetch('/admin/playlists/modifySong', {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-CSRF-TOKEN': config.csrf.value
+                                },
+                                credentials: 'same-origin'
+                            })
+                                .then(async response => {
+                                    if (response.status === 404) {
+                                        songFileContainer.classList.add('d-none');
+                                        alert(`No existe ninguna cancion con id ${id} para modificar`);
+                                        return;
+                                    }
+
+                                    if (response.status === 500) {
+                                        songFileContainer.classList.add('d-none');
+                                        alert(`El servidor ha tenido un error interno al modificar la cancion ${id}, por favor, avisa a los programadores`);
+                                        handleFilterInput();
+                                        return;
+                                    }
+
+                                    if (!response.ok) {
+                                        songFileContainer.classList.add('d-none');
+                                        alert('Ha sucedido un error inesperado al modificar la cancion');
+                                        handleFilterInput();
+                                        return;
+                                    }
+
+                                    alert(`Se ha modificado la cancion ${id}`);
+                                    audioUrl = await getSongAudio(id);
+                                    coverUrl = await getSongCover(id);
+
+
+                                    audioInput.value = '';
+                                    coverImgInput.value = '';
+
+                                    songPlayer.src = audioUrl;
+                                    coverImg.src = coverUrl;
+
+                                    songCard.querySelector('.audio-loader-container').style.display = 'none';
+
+                                    songFileContainer.classList.add('d-none');
+                                    editButton.classList.remove('d-none');
+                                    deleteButton.classList.remove('d-none');
+                                });
+                        });
+
+                        discardButton.addEventListener('click', function () {
+                            songCard.querySelectorAll('input').forEach(input => input.setAttribute('disabled', true));
+
+                            editButton.classList.remove('d-none');
+                            deleteButton.classList.remove('d-none');
+                            confirmButton.classList.add('d-none');
+                            discardButton.classList.add('d-none');
+
+                            songPlayer.pause();
+
+                            songFileContainer.classList.add('d-none');
+
+                            audioInput.value = '';
+                            coverImgInput.value = '';
+
+                            songName.value = name;
+                            songArtists.value = artists.join('/');
+                            songAlbum.value = album;
+
+                            if (coverImg.src != coverUrl)
+                                coverImg.src = coverUrl;
+                            if (songPlayer.src != audioUrl)
+                                songPlayer.src = audioUrl;
+                        });
                     });
 
-                    songsContainer.querySelectorAll('.existing-song-card').forEach(card => {
-                        card.style.display = 'block';
-                    });
+                    await Promise.all(promises);
+                    document.getElementById('searchLoader').style.display = 'none';
 
                 }).catch(error => {
                     console.error('Error:', error);
-                }).finally(() => {
-                    hideLoader();
                 });
             }, 250);
         }
