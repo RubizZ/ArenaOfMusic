@@ -133,25 +133,212 @@
         <label for="adminPlaylistNewSongs" class="form-label">Subir canciones</label>
         <input id="adminPlaylistNewSongs" type="file" class="form-control" accept="audio/*" multiple>
 
+        <script th:src="@{/js/image-preview.js}"></script>
+
         <div id="newSongsContainer" class="container my-2"
             style="max-height:400px; overflow-y: auto; overflow-x:hidden">
         </div>
 
         <button id="adminPlaylistNewNext2" class="btn btn-primary" type="button"
-            onclick="document.getElementById('new-playlist-2').hidden = true; document.getElementById('new-playlist-3').hidden = false;">Siguiente/Omitir</button>
+            onclick="document.getElementById('new-playlist-2').hidden = true; document.getElementById('new-playlist-2').querySelectorAll('#player').forEach(player => player.pause()); document.getElementById('new-playlist-3').hidden = false;">Siguiente/Omitir</button>
 
     </div>
 
     <div id="new-playlist-3" class="container flex-grow-1 my-4 rounded-4" hidden="true">
         <p>Añadir canciones ya existentes</p>
 
-        <div class="container my-2" style="max-height:400px; overflow-y: auto; overflow-x:hidden">
+        <div class="container my-2" style="max-height:500px; overflow-y: auto; overflow-x:hidden">
             <th:block th:replace="~{ :: song-search}"></th:block>
         </div>
 
         <button id="adminPlaylistNewNext3" class="btn btn-primary" type="submit">Terminar</button>
 
     </div>
+    <script th:src="@{/js/jsmediatags.min.js}"></script>
+    <!-- New song receiver -->
+    <script>
+        document.getElementById('adminPlaylistNewSongs').addEventListener('change', function () {
+
+            const newSongsContainer = document.getElementById('newSongsContainer');
+
+            for (const file of this.files) {
+
+                const card = document.createElement('div');
+                card.innerHTML =
+                    `<div class="card new-song-card bg-body-secondary p-3 my-2">
+                        <div class="row align-items-center justify-content-center g-3">
+                            <div class="col-12 col-xl-2 d-flex flex-column align-items-center justify-content-center text-center">
+                                <input id="cover-image" type="image" class="form-control img-fluid" src="/img/upload.svg"
+                                    alt="Imagen de la canción" style="height: 128px; width: 128px; object-fit: contain;">
+                                <input name="cover" id="cover-input" type="file" style="display:none" accept="image/*">
+                            </div>
+
+                            <div class="col-12 col-xl-6 row g-3">
+                                <div class="col-12 col-xl-4">
+                                    <div class="form-floating">
+                                        <input name="name" id="name" type="text" class="form-control" aria-describedby="name-help">
+                                        <label>Nombre</label>
+                                        <div class="form-text" id="name-help">Diferencia entre mayúsculas y minúsculas</div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-xl-4">
+                                    <div class="form-floating">
+                                        <input name="artists" id="artists" type="text" class="form-control" aria-describedby="artists-help">
+                                        <label>Artistas</label>
+                                        <div class="form-text" id="artists-help">Separa varios artistas con \'/\'. Diferencia entre mayúsculas y minúsculas</div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-xl-4">
+                                    <div class="form-floating">
+                                        <input name="album" id="album" type="text" class="form-control" aria-describedby="album-help">
+                                        <label>Album</label>
+                                        <div class="form-text" id="album-help">Diferencia entre mayúsculas y minúsculas</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-xl-3 d-flex flex-column text-center ms-xl-2">
+                                <audio id="player" class="flex-grow-1 w-100" controls></audio>
+                                <div id="file-name" class="form-text"></div>
+                            </div>
+
+                            <div class="col-12 col-xl-1 text-center">
+                                <button id="delete" type="button" class="btn btn-danger">
+                                    <img src="/img/admin/trash3-fill.svg">
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                const coverImage = card.querySelector(`#cover-image`);
+                const coverInput = card.querySelector(`#cover-input`);
+
+                imagePreview(coverImage, coverInput);
+
+                const player = card.querySelector(`#player`)
+
+                player.volume = 0.25;
+                player.src = URL.createObjectURL(file);
+
+                const fileName = card.querySelector('#file-name');
+                fileName.textContent = file.name;
+
+                const songName = card.querySelector('#name');
+                const songArtists = card.querySelector('#artists');
+                const songAlbum = card.querySelector('#album');
+
+                jsmediatags.read(file, {
+                    onSuccess: function (tags) {
+                        const img = tags.tags.picture;
+                        const title = tags.tags.title;
+                        const artist = tags.tags.artist;
+                        const album = tags.tags.album;
+
+                        // Si hay una imagen en los metadatos
+                        if (img) {
+                            const fileExtension = img.format.split("/")[1];
+                            const fileName = `cover.${fileExtension}`;
+
+                            const blob = new Blob([new Uint8Array(img.data)], { type: img.format });
+                            const extractedFile = new File([blob], fileName, { type: img.format });
+
+                            // Usar DataTransfer para asignar el archivo al input file
+                            const dataTransfer = new DataTransfer();
+                            dataTransfer.items.add(extractedFile);
+                            coverInput.files = dataTransfer.files;
+
+                            const imageBase64 = 'data:' + img.format + ';base64,' + arrayBufferToBase64(img.data);
+                            coverImage.src = imageBase64;
+                        } else {
+                            coverImage.src = '/img/upload.svg';
+                            coverInput = '';
+                        }
+
+                        // Asignar los metadatos de la canción
+                        songName.value = title || "";
+                        songArtists.value = artist || "";
+                        songAlbum.value = album || "";
+                    },
+                    onError: function (error) {
+                        console.error('Error al leer los metadatos:', error);
+                        coverImage.src = '/img/upload.svg';
+                        coverInput.value = '';
+                        songName.value = "";
+                        songArtists.value = "";
+                        songAlbum.value = "";
+                    }
+                });
+
+
+                newSongsContainer.appendChild(card);
+            }
+        });
+
+        // Función auxiliar para convertir ArrayBuffer a base64
+        function arrayBufferToBase64(buffer) {
+            let binary = '';
+            let bytes = new Uint8Array(buffer);
+            let length = bytes.byteLength;
+            for (let i = 0; i < length; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return window.btoa(binary);
+        }
+    </script>
+    <!-- Existing songs add button -->
+    <script>
+        let addedSongs = [];
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'style' && mutation.target.style.display === 'none') {
+                    document.querySelectorAll('.existing-song-card').forEach(card => {
+
+                        const buttonsContainer = card.querySelector('#buttons-container');
+
+                        buttonsContainer.querySelectorAll("button").forEach(button => button.style.display = 'none');
+
+                        const addBtn = document.createElement('button');
+                        addBtn.type = 'button';
+                        addBtn.classList.add('btn');
+                        addBtn.classList.add('btn-success');
+                        addBtn.innerHTML = '<img src="/img/admin/plus.svg">';
+
+                        const removeBtn = document.createElement('button');
+                        removeBtn.type = 'button';
+                        removeBtn.classList.add('btn');
+                        removeBtn.classList.add('btn-danger');
+
+                        removeBtn.innerHTML = '<img src="/img/admin/dash.svg">';
+
+                        if (addedSongs.includes(card.id)) {
+                            addBtn.style.display = 'none';
+                        } else {
+                            removeBtn.style.display = 'none';
+                        }
+
+                        addBtn.addEventListener('click', function () {
+                            addedSongs.push(card.id);
+                            addBtn.style.display = 'none';
+                            removeBtn.style.display = 'block';
+                        });
+
+                        removeBtn.addEventListener('click', function () {
+                            addedSongs = addedSongs.filter(item => item !== card.id);
+                            addBtn.style.display = 'block';
+                            removeBtn.style.display = 'none';
+                        });
+
+                        buttonsContainer.appendChild(addBtn);
+                        buttonsContainer.appendChild(removeBtn);
+                    });
+                }
+            });
+        });
+
+        const searchLoader = document.getElementById('searchLoader');
+        observer.observe(searchLoader, { attributes: true });
+
+    </script>
 </div>
 
 <div th:fragment="playlist-search" class="container">
