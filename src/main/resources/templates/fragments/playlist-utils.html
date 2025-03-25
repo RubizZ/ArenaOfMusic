@@ -287,7 +287,7 @@
             return window.btoa(binary);
         }
     </script>
-    <!-- Existing songs add button -->
+    <!-- Existing songs add/remove button -->
     <script>
         let addedSongs = [];
         const observer = new MutationObserver((mutations) => {
@@ -305,12 +305,17 @@
                         addBtn.classList.add('btn-success');
                         addBtn.innerHTML = '<img src="/img/admin/plus.svg">';
 
+                        addBtn.setAttribute('data-bs-toggle', "tooltip");
+                        addBtn.setAttribute('title', "Añadir a playlist");
+
                         const removeBtn = document.createElement('button');
                         removeBtn.type = 'button';
                         removeBtn.classList.add('btn');
                         removeBtn.classList.add('btn-danger');
-
                         removeBtn.innerHTML = '<img src="/img/admin/dash.svg">';
+
+                        removeBtn.setAttribute('data-bs-toggle', "tooltip");
+                        removeBtn.setAttribute('title', "Eliminar de playlist");
 
                         if (addedSongs.includes(card.id)) {
                             addBtn.style.display = 'none';
@@ -332,6 +337,9 @@
 
                         buttonsContainer.appendChild(addBtn);
                         buttonsContainer.appendChild(removeBtn);
+
+                        new bootstrap.Tooltip(addBtn);
+                        new bootstrap.Tooltip(removeBtn);
                     });
                 }
             });
