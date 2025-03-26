@@ -100,32 +100,34 @@
     </script>
 </div>
 
-
 <div th:fragment="playlist-creator">
     <div id="new-playlist-1" class="container flex-grow-1 my-4 rounded-4">
         <h2 class="mb-3 text-center">Nueva playlist</h2>
         <div class="row g-3">
             <div class="col-12 col-lg-4">
-                <label for="adminPlaylistNewName" class="form-label">Nombre</label>
-                <input id="adminPlaylistNewName" type="text" class="form-control">
+                <label for="playlist-name" class="form-label">Nombre</label>
+                <input id="playlist-name" type="text" class="form-control">
             </div>
             <div class="col-12 col-lg">
-                <label for="adminPlaylistNewIcon" class="form-label">Portada</label>
-                <input id="adminPlaylistNewIcon" type="file" class="form-control" accept="image/*">
+                <label for="playlist-cover" class="form-label">Portada</label>
+                <input id="playlist-cover" type="file" class="form-control" accept="image/*">
             </div>
             <div class="col-12">
-                <label for="adminPlaylistNewDesc" class="form-label">Descripcion</label>
-                <textarea id="adminPlaylistNewDesc" class="form-control"></textarea>
+                <label for="playlist-desc" class="form-label">Descripcion</label>
+                <textarea id="playlist-desc" class="form-control"></textarea>
             </div>
             <div class="col-12">
                 <div class="form-check">
-                    <label class="form-check-label" for="adminPlaylistNewActive">Activar al crear</label>
-                    <input type="checkbox" class="form-check-input" id="adminPlaylistNewActive">
+                    <label class="form-check-label" for="playlist-active">Activar al crear</label>
+                    <input type="checkbox" class="form-check-input" id="playlist-active">
                 </div>
             </div>
             <div class="col mb-3">
-                <button id="adminPlaylistNewNext" class="btn btn-primary" type="button"
-                    onclick="document.getElementById('new-playlist-1').hidden = true; document.getElementById('new-playlist-2').hidden = false;">Siguiente</button>
+                <button id="adminPlaylistNewNext" class="btn btn-primary" type="button" onclick="
+                    if(!validateNewPlaylist(document.getElementById('new-playlist-1'))) return;
+                    document.getElementById('new-playlist-1').hidden = true; 
+                    document.getElementById('new-playlist-2').hidden = false;">
+                    Siguiente</button>
             </div>
         </div>
     </div>
@@ -140,8 +142,13 @@
             style="max-height:400px; overflow-y: auto; overflow-x:hidden">
         </div>
 
-        <button id="adminPlaylistNewNext2" class="btn btn-primary" type="button"
-            onclick="document.getElementById('new-playlist-2').hidden = true; document.getElementById('new-playlist-2').querySelectorAll('#player').forEach(player => player.pause()); document.getElementById('new-playlist-3').hidden = false;">Siguiente/Omitir</button>
+        <button id="adminPlaylistNewNext2" class="btn btn-primary" type="button" onclick="
+            if (Array.from(form.querySelectorAll('#new-playlist-2 #newSongsContainer .new-song-card')).filter(song => !validateNewSong(song)).length > 0) return;
+            document.getElementById('new-playlist-2').hidden = true;
+            document.getElementById('new-playlist-2').querySelectorAll('#player').forEach(player => player.pause());
+            document.getElementById('new-playlist-3').hidden = false;">
+            Siguiente/Omitir
+        </button>
 
     </div>
 
@@ -210,6 +217,7 @@
                                 </button>
                             </div>
                         </div>
+                        <input id="audio" name="audio" type="file" style="display:none;"></input>
                     </div>
                 `;
                 const coverImage = card.querySelector(`#cover-image`);
@@ -218,9 +226,14 @@
                 imagePreview(coverImage, coverInput);
 
                 const player = card.querySelector(`#player`)
+                const audioFile = card.querySelector(`#audio`);
 
                 player.volume = 0.25;
                 player.src = URL.createObjectURL(file);
+
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(new File([file], file.name, { type: file.format }));
+                audioFile.files = dataTransfer.files;
 
                 const fileName = card.querySelector('#file-name');
                 fileName.textContent = file.name;
@@ -271,9 +284,14 @@
                     }
                 });
 
-
                 newSongsContainer.appendChild(card);
+
+                card.querySelector('#delete').addEventListener('click', function () {
+                    newSongsContainer.removeChild(card);
+                });
             }
+
+            this.value = '';
         });
 
         // Función auxiliar para convertir ArrayBuffer a base64
