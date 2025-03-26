@@ -105,25 +105,59 @@
     </script>
     <script th:if="${viewType} == 'new-song'" th:src="@{/js/song-utils.js}"></script>
     <script th:if="${viewType} == 'new-song'">
+
+        // Validación de nueva canción
+        function validateNewSong(songCard) {
+            const name = songCard.querySelector('#name').value.trim();
+            const artists = songCard.querySelector('#artists').value.trim();
+            const audioFile = songCard.querySelector('#audio').files[0];
+            const coverFile = songCard.querySelector('#cover-input').files[0];
+            const album = songCard.querySelector('#album').value.trim();
+
+            if (!name) {
+                showErrorNotification('El nombre de la canción es obligatorio', 'error');
+                return false;
+            }
+
+            if (!artists) {
+                showErrorNotification('El/los artista(s) de la canción son obligatorios', 'error');
+                return false;
+            }
+
+            if (!album) {
+                showErrorNotification('El álbum de la canción es obligatorio', 'error');
+                return false;
+            }
+
+            if (!audioFile) {
+                showErrorNotification('El archivo de audio es obligatorio', 'error');
+                return false;
+            }
+
+            if (!coverFile) {
+                showErrorNotification('La imagen de portada es obligatoria', 'error');
+                return false;
+            }
+
+            return true;
+        }
+
         //Subida del formulario de nueva cancion
         document.getElementById('submitSong').addEventListener('submit', function (e) {
             e.preventDefault();
 
-            showLoader();
+            if (!validateNewSong(document.getElementById('submitSong'))) return;
 
-            const fileInput = document.getElementById("cover-input");
-            if (!fileInput.files.length) { //TODO mejorar validacion
-                e.preventDefault();
-                alert("Debes seleccionar una imagen antes de enviar.");
-            }
+            showLoader();
 
             const formData = new FormData();
 
             formData.set("audio", document.getElementById("audio").files[0]);
-            formData.set("cover", fileInput.files[0]);
+            formData.set("cover", document.getElementById("cover-input").files[0]);
             formData.set("name", document.getElementById("name").value);
             formData.set("artists", document.getElementById("artists").value.split("/"));
             formData.set("album", document.getElementById("album").value);
+            formData.set("active", true); //TODO implementar
 
             fetch('/admin/playlists/submitSong', {
                 method: 'POST',
@@ -134,31 +168,294 @@
                 credentials: 'same-origin',
                 redirect: 'follow'
             })
-                .then(response => {
-                    window.location.href = response.url; //TODO Redirigir a buscador de canciones con filtro de id de la cancion subida aplicado
+                .then(async response => {
+                    if (response.ok) {
+                        window.location.href = '/admin/playlists?view=list&list=songs&songUpload=success&id=' + await response.json();
+                    } else {
+                        showErrorNotification("Ha ocurrido un error al subir la cancion. ERROR: " + response.status, "error");
+                    }
                 });
         });
     </script>
     <script th:if="${viewType} == 'new-playlist'">
-        //TODO Subida del formulario de nueva playlist
-        document.getElementById('submitPlaylist').addEventListener('submit', function (event) {
-            event.preventDefault();
+
+        // Validación de nueva playlist
+        function validateNewPlaylist(playlistWindow) {
+            const playlistName = playlistWindow.querySelector('#playlist-name').value.trim();
+
+            if (!playlistName) {
+                showErrorNotification('El nombre de la playlist es obligatorio');
+                return false;
+            }
+
+            return true;
+        }
+
+        // Validación de nueva canción
+        function validateNewSong(songCard) {
+            const audioFile = songCard.querySelector('#audio').files[0];
+            const name = songCard.querySelector('#name').value.trim();
+            const artists = songCard.querySelector('#artists').value.trim();
+            const coverFile = songCard.querySelector('#cover-input').files[0];
+            const album = songCard.querySelector('#album').value.trim();
+
+            if (!name && audioFile) {
+                showErrorNotification('El nombre de la canción con archivo "' + audioFile.name + '" es obligatorio', 'error');
+                return false;
+            }
+
+            if (!audioFile && name) {
+                showErrorNotification('El archivo de audio de la canción "' + name + '" es obligatorio', 'error');
+                return false;
+            }
+
+            if (!audioFile && !name) {
+                showErrorNotification('Por favor, añade un nombre a todas las canciones', 'error');
+                return false;
+            }
+
+            if (!artists) {
+                showErrorNotification('El/los artista(s) de la canción "' + name + '" son obligatorios', 'error');
+                return false;
+            }
+
+            if (!album) {
+                showErrorNotification('El álbum de la canción "' + name + '" es obligatorio', 'error');
+                return false;
+            }
 
 
+            if (!coverFile) {
+                showErrorNotification('La imagen de portada de la canción "' + name + '" es obligatoria', 'error');
+                return false;
+            }
+
+            return true;
+        }
+
+        // Enviar playlist al servidor
+        async function submitPlaylist(playlistData) {
+            const response = await fetch('/admin/playlists/submitPlaylist', {
+                method: 'POST',
+                body: playlistData,
+                headers: {
+                    'X-CSRF-TOKEN': config.csrf.value
+                },
+                credentials: 'same-origin'
+            });
+
+            if (!response.ok) {
+                switch (response.status) {
+                    case 500:
+                        throw new Error("El servidor no ha podido crear la playlist");
+                    case 400:
+                        throw new Error("No se ha podido crear la playlist, comprueba los campos");
+                    default:
+                        throw new Error("Error desconocido al crear la playlist");
+                }
+            }
+
+            return await response.json();
+        }
+
+        // Enviar canción al servidor
+        async function submitSong(songData) {
+            const response = await fetch('/admin/playlists/submitSong', {
+                method: 'POST',
+                body: songData,
+                headers: {
+                    'X-CSRF-TOKEN': config.csrf.value
+                },
+                credentials: 'same-origin'
+            });
+
+            if (!response.ok) {
+                switch (response.status) {
+                    case 400:
+                        throw new Error(`No se ha podido subir la canción`);
+                    case 500:
+                        throw new Error(`Error del servidor al subir la canción`);
+                    default:
+                        throw new Error(`Error inesperado al añadir la canción`);
+                }
+            }
+
+            return await response.json();
+        }
+
+        // Añadir canción a playlist
+        async function addSongToPlaylist(songId, playlistId) {
+            const response = await fetch(`/admin/playlists/addSongToPlaylist?songId=${songId}&playlistId=${playlistId}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': config.csrf.value
+                },
+                credentials: 'same-origin'
+            });
+
+            if (!response.ok) {
+                switch (response.status) {
+                    case 404:
+                        throw new Error(`Canción o playlist no encontrada`);
+                    default:
+                        throw new Error(`Error al añadir la canción a la playlist`);
+                }
+            }
+        }
+
+        // Manejar rollback de playlist
+        async function rollbackPlaylist(playlistId) {
+            try {
+                await fetch(`/admin/playlists/deletePlaylist?id=${playlistId}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': config.csrf.value
+                    },
+                    credentials: 'same-origin'
+                });
+            } catch (error) {
+                console.error('Error en rollback de playlist', error);
+            }
+        }
+
+        // Manejar rollback de canciones
+        async function rollbackSongs(newSongIds, playlistId) {
+            for (const songId of newSongIds) {
+                try {
+                    // Quitar canción de playlist
+                    await fetch(`/admin/playlists/removeSongFromPlaylist?songId=${songId}&playlistId=${playlistId}`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': config.csrf.value
+                        },
+                        credentials: 'same-origin'
+                    });
+
+                    // Eliminar canción
+                    await fetch(`/admin/playlists/deleteSong?id=${songId}`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': config.csrf.value
+                        },
+                        credentials: 'same-origin'
+                    });
+                } catch (error) {
+                    console.error(`Error en rollback de canción ${songId}`, error);
+                }
+            }
+        }
+
+        // Manejador principal de envío de formulario
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('submitPlaylist');
+            if (!form) return;
+
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                const playlistWindow = form.querySelector('#new-playlist-1');
+                const newSongsWindow = form.querySelector('#new-playlist-2');
+                const newSongs = newSongsWindow.querySelectorAll('#newSongsContainer .new-song-card');
+
+                try {
+                    // Validaciones
+                    if (!validateNewPlaylist(playlistWindow)) return;
+
+                    const invalidSongs = Array.from(newSongs).filter(song => !validateNewSong(song));
+                    if (invalidSongs.length > 0) return;
+
+                    // Preparar datos de playlist
+                    const playlistData = new FormData();
+                    playlistData.append('name', playlistWindow.querySelector('#playlist-name').value);
+                    playlistData.append('active', playlistWindow.querySelector('#playlist-active').checked);
+
+                    const description = playlistWindow.querySelector('#playlist-desc').value;
+                    const coverFile = playlistWindow.querySelector('#playlist-cover').files[0];
+
+                    if (description) playlistData.append('desc', description);
+                    if (coverFile) playlistData.append('cover', coverFile);
+
+                    // Crear playlist
+                    const playlistId = await submitPlaylist(playlistData);
+
+                    // Añadir nuevas canciones
+                    const newSongIds = [];
+                    for (const song of newSongs) {
+                        const songData = new FormData();
+                        songData.append('name', song.querySelector('#name').value);
+                        songData.append('artists', song.querySelector('#artists').value);
+                        songData.append('album', song.querySelector('#album').value);
+                        songData.append('audio', song.querySelector('#audio').files[0]);
+                        songData.append('cover', song.querySelector('#cover-input').files[0]);
+                        songData.append('active', true);
+
+                        try {
+                            const songId = await submitSong(songData);
+                            await addSongToPlaylist(songId, playlistId);
+                            newSongIds.push(songId);
+                        } catch (error) {
+                            // Rollback de canciones añadidas previamente
+                            await rollbackSongs(newSongIds, playlistId);
+                            throw error;
+                        }
+                    }
+
+                    // Añadir canciones existentes
+                    for (const songId of addedSongs) {
+                        await addSongToPlaylist(songId, playlistId);
+                    }
+
+                    // Éxito
+                    window.location.href = '/admin/playlists/?view=list&list=playlists&playlistUpload=success&id=' + playlistId;
+
+                } catch (error) {
+                    showErrorNotification(error.message, 'error');
+
+                    // Intentar rollback de playlist si hay un ID
+                    if (playlistId) {
+                        await rollbackPlaylist(playlistId);
+                    }
+                }
+            });
         });
+    </script>
+    <script th:inline="javascript">
+        //Script para manejo de parametros de URL
+        document.addEventListener('DOMContentLoaded', () => {
 
+            var songUpload = /*[[${songUpload}]]*/ null;
+            var playlistUpload = /*[[${playlistUpload}]]*/ null;
+            var id = /*[[${id}]]*/ null;
+            var list = /*[[${list}]]*/ null;
 
+            if (songUpload === 'success' && id !== null) {
+                showErrorNotification('Canción subida correctamente con ID: ' + id, 'success');
+            }
+
+            if (playlistUpload === 'success' && id !== null) {
+                showErrorNotification('Playlist creada correctamente con ID: ' + id, 'success');
+            }
+
+            /* Si la lista es "songs" y hay un ID, actualizar el filtro */
+            if (list === 'songs' && id !== null) {
+                var songFilter = document.getElementById('song-filter-id');
+                if (songFilter) {
+                    songFilter.value = id;
+                    songFilter.dispatchEvent(new Event('input'));
+                }
+            }
+
+            /* Si la lista es "playlists" y hay un ID, actualizar el filtro */
+            if (list === 'playlists' && id !== null) {
+                var playlistFilter = document.getElementById('playlist-filter-id');
+                if (playlistFilter) {
+                    playlistFilter.value = id;
+                    playlistFilter.dispatchEvent(new Event('input'));
+                }
+            }
+        });
     </script>
 
-    <script>
-        function validateNewPlaylist(form) {
-
-        }
-
-        function validateNewSong(songContainer) {
-
-        }
-    </script>
 </body>
 
 </html>
