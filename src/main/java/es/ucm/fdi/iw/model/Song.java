@@ -49,8 +49,7 @@ public class Song implements Transferable<Song.Transfer> {
     @Column
     private String album;
 
-    @ManyToMany
-    @JoinTable(name = "playlist_cancion", joinColumns = @JoinColumn(name = "cancion_id"), inverseJoinColumns = @JoinColumn(name = "playlist_id"))
+    @ManyToMany(mappedBy = "songs")
     private Set<Playlist> playlists;
 
     @Getter
