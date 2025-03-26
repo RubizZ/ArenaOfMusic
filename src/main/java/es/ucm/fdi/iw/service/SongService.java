@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
@@ -54,10 +55,27 @@ public class SongService {
     private static final String UPLOAD_DIR = "iwdata/songs/";
 
     @Transactional
-    public void addNewSong(NewSongDTO data) throws IOException {
+    public long addNewSong(NewSongDTO data) throws IOException, IllegalArgumentException {
+
+        if (data.getName() == null || data.getName().isEmpty()) {
+            throw new IllegalArgumentException("El nombre de la canción no puede estar vacío");
+        }
+        if (data.getArtists() == null || data.getArtists().isEmpty()) {
+            throw new IllegalArgumentException("Los artistas de la canción no pueden estar vacíos");
+        }
+        if (data.getAlbum() == null || data.getAlbum().isEmpty()) {
+            throw new IllegalArgumentException("El álbum de la canción no puede estar vacío");
+        }
+        if (data.getCover() == null || data.getCover().isEmpty()) {
+            throw new IllegalArgumentException("La portada de la canción no puede estar vacía");
+        }
+        if (data.getAudio() == null || data.getAudio().isEmpty()) {
+            throw new IllegalArgumentException("El audio de la canción no puede estar vacío");
+        }
+
         Song song = new Song();
 
-        song.setActive(true);
+        song.setActive(data.isActive());
         song.setName(data.getName());
         song.setArtists(data.getArtists());
         song.setAlbum(data.getAlbum());
@@ -80,6 +98,8 @@ public class SongService {
 
             File songDest = new File(UPLOAD_DIR + song.getId() + "/audio.mp3");
             AudioConverter.convertToMP3(data.getAudio(), songDest);
+
+            return song.getId();
 
         } catch (IOException e) {
             entityManager.remove(song);
@@ -246,6 +266,8 @@ public class SongService {
                     return FileVisitResult.CONTINUE;
                 }
             });
+        } catch (NoSuchFileException ex) {
+            // No hacer nada, el directorio ya no existe
         } catch (IOException ex) {
             throw new IOException("Error al eliminar el directorio o su contenido: " + dirPath, ex);
         }

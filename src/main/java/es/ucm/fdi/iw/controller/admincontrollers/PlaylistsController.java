@@ -22,9 +22,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import es.ucm.fdi.iw.model.Song;
+import es.ucm.fdi.iw.service.PlaylistService;
 import es.ucm.fdi.iw.service.SongService;
-import es.ucm.fdi.iw.service.SongService.NoDataException;
+import es.ucm.fdi.iw.NoDataException;
 import es.ucm.fdi.iw.dto.ModifiedSongDTO;
+import es.ucm.fdi.iw.dto.NewPlaylistDTO;
 import es.ucm.fdi.iw.dto.NewSongDTO;
 import es.ucm.fdi.iw.dto.SongSearchFiltersDTO;
 import jakarta.servlet.http.HttpSession;
@@ -37,6 +39,9 @@ public class PlaylistsController {
     @Autowired
     private SongService songService;
 
+    @Autowired
+    private PlaylistService playlistService;
+
     private static final List<String> availableViewTypes = List.of("new-playlist", "new-song", "list");
 
     @ModelAttribute
@@ -47,32 +52,41 @@ public class PlaylistsController {
     }
 
     @GetMapping({ "", "/" })
-    public String index(@RequestParam(name = "view", required = false) String viewType, Model model) {
+    public String index(Model model, @RequestParam(name = "view", required = false) String viewType,
+            @RequestParam(required = false) String list, @RequestParam(required = false) String songUpload,
+            @RequestParam(required = false) String playlistUpload,
+            @RequestParam(required = false) String id) {
         model.addAttribute("viewType", viewType == null || viewType.isBlank() ? "list" : viewType);
+        model.addAttribute("list", list == null || list.isBlank() ? "playlists" : list);
+        if (songUpload != null) {
+            model.addAttribute("songUpload", songUpload);
+        }
+        if (playlistUpload != null) {
+            model.addAttribute("playlistUpload", playlistUpload);
+        }
+        if (id != null) {
+            model.addAttribute("id", id);
+        }
         return "admin/playlists";
     }
 
     @PostMapping("/submitSong")
-    public String submitSong(RedirectAttributes redirectAttributes,
-            @ModelAttribute NewSongDTO song, Model model) throws IOException {
+    public ResponseEntity<Long> submitSong(@ModelAttribute NewSongDTO song, Model model) {
 
         try {
-            songService.addNewSong(song);
+            long id = songService.addNewSong(song);
+            return ResponseEntity.ok(id);
         } catch (IOException e) {
-            // TODO
-            e.printStackTrace();
-        } catch (RuntimeException e) {
-            // TODO
-            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         }
 
-        redirectAttributes.addFlashAttribute("list", "songs"); // TODO fix
-        return "redirect:/admin/playlists";
     }
 
     @PostMapping("/modifySong")
     public ResponseEntity<Void> modifySong(RedirectAttributes redirectAttributes,
-            @ModelAttribute ModifiedSongDTO song, Model model) throws IOException {
+            @ModelAttribute ModifiedSongDTO song, Model model) {
 
         try {
             songService.modifyExistingSong(song);
@@ -134,6 +148,74 @@ public class PlaylistsController {
     public ResponseEntity<byte[]> getSongAudio(@PathVariable Long id) {
         try {
             File file = songService.getSongAudio(id);
+
+            byte[] fileContent = Files.readAllBytes(file.toPath());
+            String contentType = Files.probeContentType(file.toPath());
+
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.valueOf(contentType))
+                    .body(fileContent);
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body(new byte[0]);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(new byte[0]);
+        } catch (NoDataException e) {
+            return ResponseEntity.status(410).body(new byte[0]);
+        }
+    }
+
+    @PostMapping("/submitPlaylist")
+    public ResponseEntity<Long> submitPlaylist(@ModelAttribute NewPlaylistDTO npdto) {
+        try {
+            return ResponseEntity.ok(playlistService.addNewPlaylist(npdto));
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/addSongToPlaylist")
+    public ResponseEntity<Void> addSongToPlaylist(@RequestParam Long playlistId, @RequestParam Long songId) {
+        try {
+            playlistService.addSongToPlaylist(playlistId, songId);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/removeSongFromPlaylist")
+    public ResponseEntity<Void> removeSongFromPlaylist(@RequestParam Long playlistId, @RequestParam Long songId) {
+        try {
+            playlistService.removeSongFromPlaylist(playlistId, songId);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/deletePlaylist")
+    public ResponseEntity<Void> deletePlaylist(@RequestParam Long id) {
+        try {
+            playlistService.deletePlaylist(id);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/playlist/{id}/cover")
+    public ResponseEntity<byte[]> getPlaylistCover(@PathVariable Long id) {
+        try {
+            File file = playlistService.getPlaylistCover(id);
 
             byte[] fileContent = Files.readAllBytes(file.toPath());
             String contentType = Files.probeContentType(file.toPath());
