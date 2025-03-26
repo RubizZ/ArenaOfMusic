@@ -1,0 +1,82 @@
+<!-- Notificacion de error (generada por Claude) -->
+<div th:fragment="error-message">
+    <div id="error-container"></div>
+
+    <script>
+        class ErrorNotificationManager {
+            constructor() {
+                this.container = document.getElementById('error-container');
+                this.notifications = [];
+                this.maxNotifications = 5; // Límite máximo de notificaciones
+                this.icons = {
+                    error: '❌',   // Icono de error
+                    warning: '⚠️', // Icono de advertencia
+                    info: 'ℹ️',    // Icono de información
+                    success: '✅',  // Icono de éxito
+                };
+            }
+
+            show(message, type = 'error', duration = 5000) {
+                // Si ya hay el máximo de notificaciones, eliminar la más antigua
+                if (this.notifications.length >= this.maxNotifications) {
+                    this.removeOldestNotification();
+                }
+
+                const notification = this.createNotification(message, type);
+                this.container.appendChild(notification);
+                this.notifications.push(notification);
+
+                // Programar eliminación
+                const removeTimer = setTimeout(() => {
+                    this.removeNotification(notification);
+                }, duration);
+
+                // Añadir evento de cierre manual
+                notification.querySelector('.error-close').addEventListener('click', () => {
+                    clearTimeout(removeTimer);
+                    this.removeNotification(notification);
+                });
+            }
+
+            createNotification(message, type) {
+                const notification = document.createElement('div');
+                notification.className = `error-notification error-${type}`;
+
+                notification.innerHTML = `
+                    <div class="error-icon">${this.icons[type]}</div>
+                    <div class="error-content">${message}</div>
+                    <button class="error-close">&times;</button>
+                `;
+
+                return notification;
+            }
+
+            removeNotification(notification) {
+                if (notification && this.container.contains(notification)) { // Verifica si sigue en el DOM
+                    notification.classList.add('fade-out');
+                    setTimeout(() => {
+                        if (this.container.contains(notification)) { // Segunda verificación antes de eliminar
+                            this.container.removeChild(notification);
+                        }
+                        this.notifications = this.notifications.filter(n => n !== notification);
+                    }, 300);
+                }
+            }
+
+            removeOldestNotification() {
+                if (this.notifications.length > 0) {
+                    const oldestNotification = this.notifications.shift();
+                    this.removeNotification(oldestNotification);
+                }
+            }
+        }
+
+        // Crear una instancia global
+        window.errorNotificationManager = new ErrorNotificationManager();
+
+        // Función global para mostrar notificaciones
+        function showErrorNotification(message, type = 'error') {
+            window.errorNotificationManager.show(message, type);
+        }
+    </script>
+</div>

@@ -24,6 +24,8 @@
             </button>
         </div>
 
+        <th:block th:include="~{fragments/error-message :: error-message}"></th:block>
+
         <script>
             const toggleButton = document.getElementById("theme-toggle");
             const img = document.getElementById("theme-toggle-img");
