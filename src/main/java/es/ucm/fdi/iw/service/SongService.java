@@ -27,6 +27,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.multipart.MultipartFile;
 
 import es.ucm.fdi.iw.AudioConverter;
+import es.ucm.fdi.iw.NoDataException;
 import es.ucm.fdi.iw.dto.ModifiedSongDTO;
 import es.ucm.fdi.iw.dto.NewSongDTO;
 import es.ucm.fdi.iw.dto.SongSearchFiltersDTO;
@@ -390,13 +391,6 @@ public class SongService {
         Long count = entityManager.createQuery(query).getSingleResult();
 
         return count != 0;
-    }
-
-    // Excepcion usada para comunicar que no existe un archivo de una cancion si
-    // existente en BD
-    @StandardException
-    public class NoDataException extends Exception {
-
     }
 
 }
