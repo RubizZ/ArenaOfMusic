@@ -5,11 +5,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.data.repository.core.NamedQueries;
 import org.springframework.stereotype.Service;
+
+import es.ucm.fdi.iw.model.Playlist;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 
 @Service
 public class PartidaService {
-    
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
     public Map<String, Object> getPlaylist() {
         Map<String, Object> playlist = new HashMap<>();
         playlist.put("image", "img/logo.jpeg");
@@ -75,6 +84,11 @@ public class PartidaService {
                         "time", 2.7));
         return songResults;
 
+    }
+
+    public List<Playlist> getActivePlaylists() {
+        TypedQuery<Playlist> playlists = entityManager.createNamedQuery("Playlist.findActivas", Playlist.class);
+        return playlists.getResultList();
     }
 
 }
