@@ -1,5 +1,7 @@
 package es.ucm.fdi.iw.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,6 +26,7 @@ public class PartidaController {
 
     @GetMapping("/configuracion-partida")
     public String configPartida(Model model) {
+        model.addAttribute("playlists", partidaService.getActivePlaylists());
         return "configuracion-partida";
     }
 
