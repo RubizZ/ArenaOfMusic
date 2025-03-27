@@ -27,11 +27,14 @@ public class Game implements Transferable<Game.Transfer> {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @Column(name = "config", nullable = false)
+    @Column(name = "configuration", nullable = false)
     private String configJson;
 
-    @Column(name = "ronda", nullable = false)
+    @Column(name = "rounds", nullable = false)
     private String roundJson;
+
+    @Column(name = "state", nullable = false)
+    private String gameState;
 
     @ManyToOne
     @JoinColumn(name = "playlist_id", nullable = false)
@@ -47,6 +50,7 @@ public class Game implements Transferable<Game.Transfer> {
         private String configJson;
         private String roundJson;
         private long playlistId;
+        private String gameState;
     }
 
     @Override
@@ -55,7 +59,8 @@ public class Game implements Transferable<Game.Transfer> {
             id,
             configJson,
             roundJson,
-            playlist.getId()
+            playlist.getId(),
+            gameState
         );
     }
 }
