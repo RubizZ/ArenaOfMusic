@@ -36,12 +36,16 @@ public class Game implements Transferable<Game.Transfer> {
     @Column(name = "state", nullable = false)
     private String gameState;
 
+    @Column(name = "active", nullable = false)
+    private Boolean active = true;
+
     @ManyToOne
     @JoinColumn(name = "playlist_id", nullable = false)
     private Playlist playlist;
 
     @OneToMany(mappedBy = "game")
     private Set<PlayerGame> participants;
+
 
     @Getter
     @AllArgsConstructor
