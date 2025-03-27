@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
@@ -24,7 +23,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import es.ucm.fdi.iw.model.Song;
 import es.ucm.fdi.iw.service.PlaylistService;
 import es.ucm.fdi.iw.service.SongService;
-import es.ucm.fdi.iw.NoDataException;
+import es.ucm.fdi.iw.util.FileGetter;
+import es.ucm.fdi.iw.util.NoDataException;
+import es.ucm.fdi.iw.util.AudioConverter.AudioConversionException;
+import es.ucm.fdi.iw.util.ImageConverter.ImageConversionException;
+import es.ucm.fdi.iw.util.ImageConverter.UnsupportedImageException;
 import es.ucm.fdi.iw.dto.ModifiedSongDTO;
 import es.ucm.fdi.iw.dto.NewPlaylistDTO;
 import es.ucm.fdi.iw.dto.NewSongDTO;
@@ -71,34 +74,33 @@ public class PlaylistsController {
     }
 
     @PostMapping("/submitSong")
-    public ResponseEntity<Long> submitSong(@ModelAttribute NewSongDTO song, Model model) {
-
+    public ResponseEntity<?> submitSong(@ModelAttribute NewSongDTO song, Model model) {
         try {
             long id = songService.addNewSong(song);
             return ResponseEntity.ok(id);
         } catch (IOException e) {
-            return ResponseEntity.internalServerError().build();
+            return ResponseEntity.internalServerError().body(e.getMessage());
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (AudioConversionException | UnsupportedImageException | ImageConversionException e) {
+            return ResponseEntity.status(415).body("Error en la conversion de archivos: " + e.getMessage());
         }
-
     }
 
     @PostMapping("/modifySong")
-    public ResponseEntity<Void> modifySong(RedirectAttributes redirectAttributes,
+    public ResponseEntity<?> modifySong(RedirectAttributes redirectAttributes,
             @ModelAttribute ModifiedSongDTO song, Model model) {
-
         try {
             songService.modifyExistingSong(song);
+            return ResponseEntity.ok().build();
         } catch (IOException e) {
-            // TODO
-            e.printStackTrace();
-        } catch (RuntimeException e) {
-            // TODO
-            e.printStackTrace();
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (AudioConversionException | ImageConversionException | UnsupportedImageException e) {
+            return ResponseEntity.status(415).body("Error en la conversion de archivos: " + e.getMessage());
         }
 
-        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/deleteSong")
@@ -119,64 +121,16 @@ public class PlaylistsController {
         return ResponseEntity.ok(songService.searchSongs(filters, pageable));
     }
 
-    @GetMapping("/song/{id}/cover")
-    public ResponseEntity<byte[]> getSongCover(@PathVariable Long id) {
-
-        try {
-            File file = songService.getSongCover(id);
-
-            byte[] fileContent = Files.readAllBytes(file.toPath());
-            String contentType = Files.probeContentType(file.toPath());
-
-            if (contentType == null) {
-                contentType = "application/octet-stream";
-            }
-
-            return ResponseEntity.ok()
-                    .contentType(MediaType.valueOf(contentType))
-                    .body(fileContent);
-        } catch (IOException e) {
-            return ResponseEntity.status(500).body(new byte[0]);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(404).body(new byte[0]);
-        } catch (NoDataException e) {
-            return ResponseEntity.status(410).body(new byte[0]);
-        }
-    }
-
-    @GetMapping("/song/{id}/audio")
-    public ResponseEntity<byte[]> getSongAudio(@PathVariable Long id) {
-        try {
-            File file = songService.getSongAudio(id);
-
-            byte[] fileContent = Files.readAllBytes(file.toPath());
-            String contentType = Files.probeContentType(file.toPath());
-
-            if (contentType == null) {
-                contentType = "application/octet-stream";
-            }
-
-            return ResponseEntity.ok()
-                    .contentType(MediaType.valueOf(contentType))
-                    .body(fileContent);
-        } catch (IOException e) {
-            return ResponseEntity.status(500).body(new byte[0]);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(404).body(new byte[0]);
-        } catch (NoDataException e) {
-            return ResponseEntity.status(410).body(new byte[0]);
-        }
-    }
-
     @PostMapping("/submitPlaylist")
-    public ResponseEntity<Long> submitPlaylist(@ModelAttribute NewPlaylistDTO npdto) {
+    public ResponseEntity<?> submitPlaylist(@ModelAttribute NewPlaylistDTO npdto) {
         try {
             return ResponseEntity.ok(playlistService.addNewPlaylist(npdto));
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
             return ResponseEntity.badRequest().build();
         } catch (IOException e) {
-            return ResponseEntity.internalServerError().build();
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        } catch (UnsupportedImageException | ImageConversionException e) {
+            return ResponseEntity.status(415).body("Error en la conversion de la portada: " + e.getMessage());
         }
     }
 
@@ -212,10 +166,26 @@ public class PlaylistsController {
         }
     }
 
+    @GetMapping("/song/{id}/cover")
+    public ResponseEntity<byte[]> getSongCover(@PathVariable Long id) {
+        return responseEntityFromFileGetter(() -> songService.getSongCover(id));
+    }
+
+    @GetMapping("/song/{id}/audio")
+    public ResponseEntity<byte[]> getSongAudio(@PathVariable Long id) {
+        return responseEntityFromFileGetter(() -> songService.getSongAudio(id));
+    }
+
     @GetMapping("/playlist/{id}/cover")
     public ResponseEntity<byte[]> getPlaylistCover(@PathVariable Long id) {
+        return responseEntityFromFileGetter(() -> playlistService.getPlaylistCover(id));
+    }
+
+    // Funcion que se encarga de obtener un archivo por su id segun el proveedor que
+    // se le pase
+    private ResponseEntity<byte[]> responseEntityFromFileGetter(FileGetter fileGetter) {
         try {
-            File file = playlistService.getPlaylistCover(id);
+            File file = fileGetter.get();
 
             byte[] fileContent = Files.readAllBytes(file.toPath());
             String contentType = Files.probeContentType(file.toPath());
@@ -227,6 +197,7 @@ public class PlaylistsController {
             return ResponseEntity.ok()
                     .contentType(MediaType.valueOf(contentType))
                     .body(fileContent);
+
         } catch (IOException e) {
             return ResponseEntity.status(500).body(new byte[0]);
         } catch (IllegalArgumentException e) {
