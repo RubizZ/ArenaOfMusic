@@ -17,6 +17,8 @@ function imagePreview(previewImage, fileInput) {
 
         if (file) {
             reader.readAsDataURL(file);
+        } else {
+            previewImage.src = "/img/upload.svg";
         }
     });
 }
