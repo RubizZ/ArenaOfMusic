@@ -46,15 +46,20 @@ public class PartidaController {
             @RequestParam int rondas,
             @RequestParam int tiempo,
             @RequestParam String modoJuego) {
-        // GameConfigDTO gameConfig = new GameConfigDTO(playlistId, modoJuego, rondas, tiempo);
-        // try {
-        //     partidaService.createPartida(gameConfig);
-        // } catch (Exception e) {
-        //     model.addAttribute("error", e.getMessage());
-        //     model.addAttribute("playlists", partidaService.getActivePlaylists());
-        //     return "configuracion-partida";
-        // }
-            return new ResponseEntity<>(HttpStatus.OK);
+        GameConfigDTO gameConfig = new GameConfigDTO(playlistId, modoJuego, rondas, tiempo);
+        try {
+            partidaService.createPartida(gameConfig);
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("playlists", partidaService.getActivePlaylists());
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch(Exception e)
+        {
+            model.addAttribute("error", "Error al crear la partida: " + e.getMessage());
+            model.addAttribute("playlists", partidaService.getActivePlaylists());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping("/partida/sala-espera")
