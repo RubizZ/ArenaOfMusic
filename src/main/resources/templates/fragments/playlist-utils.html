@@ -714,7 +714,7 @@
         //Filters
         const songIdFilter = document.getElementById("song-filter-id");
         const songNameFilter = document.getElementById("song-filter-name");
-        const songArtistsFilter = document.getElementById("song-filter-artists");
+        const songArtistsFilter = document.getElementById("tagsContainer");
         const songAlbumFilter = document.getElementById("song-filter-album");
 
         //Song container
@@ -733,7 +733,7 @@
                 let filters = {
                     id: songIdFilter.value.trim(),
                     name: songNameFilter.value.trim(),
-                    artists: songArtistsFilter.value.trim(),
+                    artists: Array.from(songArtistsFilter.children).map(tag => tag.textContent.trim()).join('/'),
                     album: songAlbumFilter.value.trim(),
                     sort: songSortSelect.value + (songOrderState == 0 ? ",DESC" : ",ASC")
                 };
@@ -1019,7 +1019,8 @@
 
         songIdFilter.addEventListener("input", handleFilterInput);
         songNameFilter.addEventListener("input", handleFilterInput);
-        songArtistsFilter.addEventListener("input", handleFilterInput);
+        const artistObserver = new MutationObserver(handleFilterInput);
+        artistObserver.observe(songArtistsFilter, { childList: true, subtree: true });
         songAlbumFilter.addEventListener("input", handleFilterInput);
 
         songSortSelect.addEventListener("change", handleFilterInput);
