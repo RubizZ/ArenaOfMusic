@@ -4,10 +4,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
-import org.springframework.data.repository.core.NamedQueries;
 import org.springframework.stereotype.Service;
 
+import es.ucm.fdi.iw.dto.GameConfigDTO;
+import es.ucm.fdi.iw.model.Game;
 import es.ucm.fdi.iw.model.Playlist;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -87,8 +89,30 @@ public class PartidaService {
     }
 
     public List<Playlist> getActivePlaylists() {
-        TypedQuery<Playlist> playlists = entityManager.createNamedQuery("Playlist.findActivas", Playlist.class);
+        TypedQuery<Playlist> playlists = entityManager.createNamedQuery("Playlist.active", Playlist.class);
         return playlists.getResultList();
+    }
+
+    public Game createPartida(GameConfigDTO gameConfig) {
+        try {
+            Playlist playlist = entityManager.find(Playlist.class, gameConfig.getPlaylistId());
+            if (playlist == null || !playlist.isActive()) {
+                throw new IllegalArgumentException("La playlist seleccionada no existe o no se encuentra disponible.");
+            }
+
+            Game game = new Game();
+            game.setId(UUID.randomUUID());
+            game.setConfigJson(gameConfig.toString());
+            game.setRoundJson("[]");
+            game.setGameState("WAITING");
+            game.setPlaylist(playlist);
+
+            entityManager.persist(game);
+            return game;
+        } catch (Exception e) {
+            System.err.println("Error al crear la partida: " + e.getMessage());
+            throw new RuntimeException("No se pudo crear la partida, intenta nuevamente.");
+        }
     }
 
 }
