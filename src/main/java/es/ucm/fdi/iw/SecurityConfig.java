@@ -65,8 +65,7 @@ public class SecurityConfig {
 						.permitAll() // <-- public access
 						.requestMatchers("/admin/**")
 						.hasRole("ADMIN") // <-- administration
-						.requestMatchers("/user/**", "/perfil", "/amigos", "/sala-espera", "/configuracion-partida",
-								"/partida", "/resultados")
+						.requestMatchers("/user/**", "/perfil", "/amigos", "/partida/**")
 						.hasRole("USER") // <-- logged-in users
 						.anyRequest().authenticated())
 				.formLogin(formLogin -> formLogin
