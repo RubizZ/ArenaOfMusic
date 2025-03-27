@@ -17,10 +17,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import es.ucm.fdi.iw.NoDataException;
 import es.ucm.fdi.iw.dto.NewPlaylistDTO;
 import es.ucm.fdi.iw.model.Playlist;
 import es.ucm.fdi.iw.model.Song;
+import es.ucm.fdi.iw.util.ImageConverter.ImageConversionException;
+import es.ucm.fdi.iw.util.ImageConverter.UnsupportedImageException;
+import es.ucm.fdi.iw.util.ImageConverter;
+import es.ucm.fdi.iw.util.NoDataException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 
@@ -33,7 +36,8 @@ public class PlaylistService {
     private static final String UPLOAD_DIR = "iwdata/playlists/";
 
     @Transactional
-    public long addNewPlaylist(NewPlaylistDTO npdto) throws IllegalArgumentException, IOException {
+    public long addNewPlaylist(NewPlaylistDTO npdto) throws IllegalArgumentException, IOException,
+            UnsupportedImageException, ImageConversionException {
 
         if (npdto.getName() == null || npdto.getName().isBlank()) {
             throw new IllegalArgumentException("El nombre de la playlist no puede estar vacio");
@@ -60,8 +64,7 @@ public class PlaylistService {
             }
 
             File imgDest = new File(UPLOAD_DIR + playlist.getId() + "/cover.webp");
-            BufferedImage bufferedImage = ImageIO.read(npdto.getCover().getInputStream());
-            ImageIO.write(bufferedImage, "webp", imgDest);
+            ImageConverter.readAndConvertImage(npdto.getCover().getInputStream(), imgDest.toPath());
             return playlist.getId();
 
         } catch (IOException e) {
@@ -80,7 +83,7 @@ public class PlaylistService {
                 e.addSuppressed(cleanupException);
             }
 
-            throw new IllegalArgumentException("Error al guardar la imagen de la playlist", e);
+            throw e;
         }
     }
 

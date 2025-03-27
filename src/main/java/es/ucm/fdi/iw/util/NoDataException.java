@@ -1,4 +1,4 @@
-package es.ucm.fdi.iw;
+package es.ucm.fdi.iw.util;
 
 import lombok.experimental.StandardException;
 

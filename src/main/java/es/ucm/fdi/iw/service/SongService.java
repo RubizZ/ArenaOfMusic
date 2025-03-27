@@ -1,8 +1,10 @@
 package es.ucm.fdi.iw.service;
 
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -27,12 +29,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.multipart.MultipartFile;
 
-import es.ucm.fdi.iw.AudioConverter;
-import es.ucm.fdi.iw.NoDataException;
 import es.ucm.fdi.iw.dto.ModifiedSongDTO;
 import es.ucm.fdi.iw.dto.NewSongDTO;
 import es.ucm.fdi.iw.dto.SongSearchFiltersDTO;
 import es.ucm.fdi.iw.model.Song;
+import es.ucm.fdi.iw.util.AudioConverter;
+import es.ucm.fdi.iw.util.NoDataException;
+import es.ucm.fdi.iw.util.AudioConverter.AudioConversionException;
+import es.ucm.fdi.iw.util.ImageConverter;
+import es.ucm.fdi.iw.util.ImageConverter.ImageConversionException;
+import es.ucm.fdi.iw.util.ImageConverter.UnsupportedImageException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
@@ -55,7 +61,9 @@ public class SongService {
     private static final String UPLOAD_DIR = "iwdata/songs/";
 
     @Transactional
-    public long addNewSong(NewSongDTO data) throws IOException, IllegalArgumentException {
+    public long addNewSong(NewSongDTO data)
+            throws IllegalArgumentException, IOException, UnsupportedImageException, ImageConversionException,
+            AudioConversionException {
 
         if (data.getName() == null || data.getName().isEmpty()) {
             throw new IllegalArgumentException("El nombre de la canción no puede estar vacío");
@@ -93,15 +101,14 @@ public class SongService {
             }
 
             File imgDest = new File(UPLOAD_DIR + song.getId() + "/cover.webp");
-            BufferedImage bufferedImage = ImageIO.read(data.getCover().getInputStream());
-            ImageIO.write(bufferedImage, "webp", imgDest);
+            ImageConverter.readAndConvertImage(data.getCover().getInputStream(), imgDest.toPath());
 
             File songDest = new File(UPLOAD_DIR + song.getId() + "/audio.mp3");
             AudioConverter.convertToMP3(data.getAudio(), songDest);
 
             return song.getId();
 
-        } catch (IOException e) {
+        } catch (UnsupportedImageException | ImageConversionException | AudioConversionException | IOException e) {
             entityManager.remove(song);
             Path dirPath = Paths.get(UPLOAD_DIR + song.getId());
 
@@ -116,13 +123,14 @@ public class SongService {
                 e.addSuppressed(cleanupException);
             }
 
-            throw new RuntimeException("Error al guardar la cancion", e);
+            throw e;
         }
     }
 
-    @Transactional(rollbackOn = { IOException.class, RuntimeException.class })
+    @Transactional(rollbackOn = { IOException.class, RuntimeException.class, AudioConversionException.class })
     public void modifyExistingSong(ModifiedSongDTO song)
-            throws IllegalArgumentException, IOException {
+            throws IllegalArgumentException, IOException, AudioConversionException, UnsupportedImageException,
+            ImageConversionException {
 
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaUpdate<Song> update = cb.createCriteriaUpdate(Song.class);
@@ -170,8 +178,7 @@ public class SongService {
 
                 if (img != null) {
                     File imgDest = new File(UPLOAD_DIR + song.getId() + "/cover.webp");
-                    BufferedImage bufferedImage = ImageIO.read(img.getInputStream());
-                    ImageIO.write(bufferedImage, "webp", imgDest);
+                    ImageConverter.readAndConvertImage(img.getInputStream(), imgDest.toPath());
                 } else
                     Files.copy(oldPath.resolve(timestamp + ".webp"),
                             new File(UPLOAD_DIR + song.getId() + "/cover.webp").toPath());
@@ -184,7 +191,7 @@ public class SongService {
                             new File(UPLOAD_DIR + song.getId() + "/audio.mp3").toPath());
             }
 
-        } catch (IOException e) {
+        } catch (IOException | AudioConversionException e) {
             // Signal to Spring to rollback the transaction
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 
@@ -194,24 +201,21 @@ public class SongService {
                 } else {
                     Path mainImgPath = mainPath.resolve("cover.webp");
                     if (!Files.exists(mainImgPath)) {
-                        Files.move(oldPath.resolve("cover.webp"), mainImgPath);
+                        Files.move(oldPath.resolve(timestamp + ".webp"), mainImgPath);
                         Path mainSongPath = mainPath.resolve("audio.mp3");
                         if (!Files.exists(mainSongPath)) {
-                            Files.move(oldPath.resolve("audio.mp3"), mainSongPath);
+                            Files.move(oldPath.resolve(timestamp + ".mp3"), mainSongPath);
                         }
                     }
                 }
-
-                throw new IOException("No se ha podido convertir la nueva cancion, se han revertido los cambios",
-                        e);
             } catch (IOException ex) {
                 disableExistingSong(song.getId());
 
                 e.addSuppressed(ex);
-                throw new IOException(
-                        "No se ha podido convertir la nueva cancion y se han perdido los archivos antiguos, la cancion se ha desactivado",
-                        e);
+                throw e;
             }
+
+            throw e;
         }
     }
 
@@ -302,9 +306,7 @@ public class SongService {
 
         Page<Song> page = new PageImpl<>(resultList, pageable, totalElements);
 
-        return page.map((Song c) -> {
-            return c.toTransfer();
-        });
+        return page.map(Song::toTransfer);
     }
 
     private List<Predicate> buildPredicates(CriteriaBuilder cb, Root<Song> root, SongSearchFiltersDTO filters) {
@@ -414,5 +416,4 @@ public class SongService {
 
         return count != 0;
     }
-
 }
