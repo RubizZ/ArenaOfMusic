@@ -119,12 +119,15 @@
                     body: formData
                 }).then(response => {
                     if (!response.ok) {
-                        return response.json().then(error => { throw new Error(error.message || 'Error en la solicitud'); });
+                        return response.json().then(error => { throw new Error(error.error || 'Error en la solicitud'); });
                     }
-                    // Redirigir a sala de espera(ToDo: recuperar id de partida y redirigir a sala de espera de esa partida) 
-                    window.location.href = '/partida/sala-espera'; 
+                    return response.json();
+                }).then(data => {
+                    console.log('Partida creada con éxito:', data);
+                    alert(`Partida creada con ID: ${data.gameId}`);
+                    // Redirigir a la sala de espera con el ID de la partida
+                    window.location.href = `/partida/sala-espera`;
                 }).catch(error => {
-                    //Errores
                     console.error('Error al crear la partida:', error);
                     alert('Hubo un error al crear la partida. Intenta nuevamente.');
                 });

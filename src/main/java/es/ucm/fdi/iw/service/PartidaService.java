@@ -14,6 +14,7 @@ import es.ucm.fdi.iw.model.Playlist;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
+import jakarta.transaction.Transactional;
 
 @Service
 public class PartidaService {
@@ -93,7 +94,8 @@ public class PartidaService {
         return playlists.getResultList();
     }
 
-    public Game createPartida(GameConfigDTO gameConfig) {
+    @Transactional 
+    public String createPartida(GameConfigDTO gameConfig) {
         try {
             Playlist playlist = entityManager.find(Playlist.class, gameConfig.getPlaylistId());
             if (playlist == null || !playlist.isActive()) {
@@ -101,14 +103,14 @@ public class PartidaService {
             }
 
             Game game = new Game();
-            game.setId(UUID.randomUUID());
             game.setConfigJson(gameConfig.toString());
             game.setRoundJson("[]");
             game.setGameState("WAITING");
             game.setPlaylist(playlist);
 
             entityManager.persist(game);
-            return game;
+
+            return game.getId().toString();
         } catch (Exception e) {
             System.err.println("Error al crear la partida: " + e.getMessage());
             throw new RuntimeException("No se pudo crear la partida, intenta nuevamente.");
