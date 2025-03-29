@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import es.ucm.fdi.iw.dto.GameConfigDTO;
@@ -71,15 +72,22 @@ public class PartidaController {
         try {
             Game game = partidaService.getGameById(gameId);
 
-            if (game == null) {
-                throw new IllegalArgumentException("La partida no existe.");
+            if (game == null || !game.getActive()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
             }
 
+            if (game != null && !game.getGameState().equals("WAITING")) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha comenzado.");
+            }
             model.addAttribute("game", game);
-            return "sala-espera"; // El nombre de la vista que se renderiza
+            return "sala-espera";
+        } catch (ResponseStatusException e) {
+            model.addAttribute("msg", "Error al acceder a la sala de espera: " + e.getReason());
+            model.addAttribute("status",e.getStatusCode().value());
+            return "error";
         } catch (Exception e) {
-            model.addAttribute("error", "Error al acceder a la sala de espera: " + e.getMessage());
-            return "error"; // Si hay un error, redirige a una página de error
+            model.addAttribute("msg", "Error al acceder a la sala de espera: " + e.getMessage());
+            return "error";
         }
     }
 
