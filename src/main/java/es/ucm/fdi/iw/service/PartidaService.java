@@ -94,12 +94,13 @@ public class PartidaService {
         return playlists.getResultList();
     }
 
-    @Transactional 
+    @Transactional
     public String createPartida(GameConfigDTO gameConfig) {
         try {
             Playlist playlist = entityManager.find(Playlist.class, gameConfig.getPlaylistId());
             if (playlist == null || !playlist.isActive()) {
-                throw new IllegalArgumentException("La playlist seleccionada no existe o no se encuentra disponible.");
+                throw new IllegalArgumentException(
+                        "La playlist seleccionada no existe o no se encuentra disponible.");
             }
 
             Game game = new Game();
@@ -115,6 +116,14 @@ public class PartidaService {
             System.err.println("Error al crear la partida: " + e.getMessage());
             throw new RuntimeException("No se pudo crear la partida, intenta nuevamente.");
         }
+    }
+
+    public Game getGameById(UUID gameId) {
+        Game game = entityManager.find(Game.class, gameId);
+        if (game == null) {
+            throw new IllegalArgumentException("La partida no existe.");
+        }
+        return game;
     }
 
 }

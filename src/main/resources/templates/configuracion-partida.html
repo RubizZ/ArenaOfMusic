@@ -114,19 +114,13 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-CSRF-TOKEN': csrfToken // Usamos el token CSRF aquí
+                        'X-CSRF-TOKEN': csrfToken
                     },
                     body: formData
                 }).then(response => {
-                    if (!response.ok) {
-                        return response.json().then(error => { throw new Error(error.error || 'Error en la solicitud'); });
+                    if (response.redirected) {
+                        window.location.href = response.url;
                     }
-                    return response.json();
-                }).then(data => {
-                    console.log('Partida creada con éxito:', data);
-                    alert(`Partida creada con ID: ${data.gameId}`);
-                    // Redirigir a la sala de espera con el ID de la partida
-                    window.location.href = `/partida/sala-espera`;
                 }).catch(error => {
                     console.error('Error al crear la partida:', error);
                     alert('Hubo un error al crear la partida. Intenta nuevamente.');

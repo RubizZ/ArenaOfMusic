@@ -3,6 +3,7 @@ package es.ucm.fdi.iw.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,8 +12,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import es.ucm.fdi.iw.dto.GameConfigDTO;
 import es.ucm.fdi.iw.model.Game;
@@ -44,31 +47,40 @@ public class PartidaController {
     }
 
     @PostMapping("/partida/crear-partida")
-    public ResponseEntity<?> crearPartida(Model model,
+    public String crearPartida(Model model,
             @RequestParam Long playlistId,
             @RequestParam int rondas,
             @RequestParam int tiempo,
-            @RequestParam String modoJuego) {
+            @RequestParam String modoJuego,
+            RedirectAttributes redirectAttributes) {
         GameConfigDTO gameConfig = new GameConfigDTO(playlistId, modoJuego, rondas, tiempo);
         try {
             String gameId = partidaService.createPartida(gameConfig);
-            Map<String, String> response = new HashMap<>();
-            response.put("gameId", gameId);
-            return ResponseEntity.ok(response);
+            return "redirect:/partida/sala-espera/" + gameId;
         } catch (IllegalArgumentException e) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/error";
         } catch (Exception e) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Error al crear la partida: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            redirectAttributes.addFlashAttribute("error", "Error al crear la partida.");
+            return "redirect:/error";
         }
     }
 
-    @GetMapping("/partida/sala-espera")
-    public String salaespera(Model model) {
-        return "sala-espera";
+    @GetMapping("/partida/sala-espera/{gameId}")
+    public String salaEspera(@PathVariable UUID gameId, Model model) {
+        try {
+            Game game = partidaService.getGameById(gameId);
+
+            if (game == null) {
+                throw new IllegalArgumentException("La partida no existe.");
+            }
+
+            model.addAttribute("game", game);
+            return "sala-espera"; // El nombre de la vista que se renderiza
+        } catch (Exception e) {
+            model.addAttribute("error", "Error al acceder a la sala de espera: " + e.getMessage());
+            return "error"; // Si hay un error, redirige a una página de error
+        }
     }
 
     @GetMapping("/partida/resultados")
