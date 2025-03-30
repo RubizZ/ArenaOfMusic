@@ -9,15 +9,24 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import es.ucm.fdi.iw.dto.ModifiedPlaylistDTO;
 import es.ucm.fdi.iw.dto.NewPlaylistDTO;
+import es.ucm.fdi.iw.dto.PlaylistSearchFiltersDTO;
 import es.ucm.fdi.iw.model.Playlist;
 import es.ucm.fdi.iw.model.Song;
 import es.ucm.fdi.iw.util.ImageConverter.ImageConversionException;
@@ -26,6 +35,7 @@ import es.ucm.fdi.iw.util.ImageConverter;
 import es.ucm.fdi.iw.util.NoDataException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 
 @Service
 public class PlaylistService {
@@ -193,4 +203,128 @@ public class PlaylistService {
         return cover;
     }
 
+    public Page<Playlist.Transfer> searchPlaylists(PlaylistSearchFiltersDTO filters,
+            Pageable pageable) {
+
+        StringBuilder queryBuilder = new StringBuilder("SELECT p FROM Playlist p WHERE 1=1");
+        if (filters.getId() != null) {
+            queryBuilder.append(" AND p.id = :id");
+        }
+        if (filters.getName() != null) {
+            queryBuilder.append(" AND p.name LIKE :name");
+        }
+        if (pageable.isPaged() && pageable.getSort().isSorted()) {
+            queryBuilder.append(" ORDER BY ");
+            pageable.getSort().forEach(order -> {
+                queryBuilder.append("p.").append(order.getProperty()).append(" ").append(order.getDirection())
+                        .append(", ");
+            });
+            queryBuilder.setLength(queryBuilder.length() - 2);
+        }
+
+        TypedQuery<Playlist> query = entityManager.createQuery(queryBuilder.toString(), Playlist.class);
+        if (filters.getId() != null) {
+            query.setParameter("id", filters.getId());
+        }
+        if (filters.getName() != null) {
+            query.setParameter("name", "%" + filters.getName() + "%");
+        }
+        if (pageable.isPaged()) {
+            query.setFirstResult((int) pageable.getOffset());
+            query.setMaxResults(pageable.getPageSize());
+        }
+        List<Playlist> playlists = query.getResultList();
+        List<Playlist.Transfer> transfers = playlists.stream()
+                .map(playlist -> playlist.toTransfer())
+                .collect(Collectors.toList());
+        return new PageImpl<>(transfers, pageable, query.getResultList().size());
+    }
+
+    public void modifyPlaylist(ModifiedPlaylistDTO playlist)
+            throws UnsupportedImageException, ImageConversionException, IOException {
+        Playlist p = entityManager.find(Playlist.class, playlist.getId());
+        try {
+            if (p == null)
+                throw new IllegalArgumentException("La playlist no existe");
+
+            if (playlist.getName() != null) {
+                p.setName(playlist.getName());
+            }
+            if (playlist.getActive() != null) {
+                p.setActive(playlist.getActive());
+            }
+            if (playlist.getDesc() != null) {
+                p.setDescription(playlist.getDesc());
+            }
+
+            if (playlist.getAddedSongs() != null) {
+                for (Long songId : playlist.getAddedSongs()) {
+                    Song song = entityManager.find(Song.class, songId);
+                    if (song == null) {
+                        throw new IllegalArgumentException("La cancion no existe");
+                    }
+                    p.addSong(song);
+                }
+            }
+
+            if (playlist.getRemovedSongs() != null) {
+                for (Long songId : playlist.getRemovedSongs()) {
+                    Song song = entityManager.find(Song.class, songId);
+                    if (song == null) {
+                        throw new IllegalArgumentException("La cancion no existe");
+                    }
+                    p.removeSong(song);
+                }
+            }
+
+            if (playlist.getCover() != null) {
+                Path path = Paths.get(UPLOAD_DIR + playlist.getId());
+                Path oldPath = Paths.get(UPLOAD_DIR + playlist.getId() + "/old");
+                String timestamp = String.valueOf(System.currentTimeMillis());
+                try {
+                    if (!Files.exists(path)) {
+                        Files.createDirectories(path);
+                    } else {
+                        Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+                            @Override
+                            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                                Path destFile = oldPath.resolve(timestamp + "." + getFileExtension(file));
+                                Files.move(file, destFile, StandardCopyOption.REPLACE_EXISTING);
+                                return FileVisitResult.CONTINUE;
+                            }
+
+                            private String getFileExtension(Path file) {
+                                String fileName = file.getFileName().toString();
+                                int dotIndex = fileName.lastIndexOf('.');
+                                return (dotIndex == -1) ? "" : fileName.substring(dotIndex + 1);
+                            }
+                        });
+                    }
+
+                    File imgDest = new File(UPLOAD_DIR + playlist.getId() + "/cover.webp");
+                    ImageConverter.readAndConvertImage(playlist.getCover().getInputStream(), imgDest.toPath());
+
+                } catch (IOException e) {
+                    try {
+                        Files.move(oldPath.resolve(timestamp + ".webp"), path.resolve("cover.webp"),
+                                StandardCopyOption.REPLACE_EXISTING);
+                        if (oldPath.toFile().listFiles().length == 0) {
+                            Files.delete(oldPath);
+                        }
+                    } catch (IOException ex) {
+                        e.addSuppressed(ex);
+                    }
+
+                    throw e;
+                }
+            }
+        } catch (Exception e) {
+            entityManager.clear();
+            throw e;
+        }
+
+        entityManager.persist(p);
+        entityManager.flush();
+
+    }
 }

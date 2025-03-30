@@ -18,8 +18,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+import es.ucm.fdi.iw.model.Playlist;
 import es.ucm.fdi.iw.model.Song;
 import es.ucm.fdi.iw.service.PlaylistService;
 import es.ucm.fdi.iw.service.SongService;
@@ -28,9 +27,11 @@ import es.ucm.fdi.iw.util.NoDataException;
 import es.ucm.fdi.iw.util.AudioConverter.AudioConversionException;
 import es.ucm.fdi.iw.util.ImageConverter.ImageConversionException;
 import es.ucm.fdi.iw.util.ImageConverter.UnsupportedImageException;
+import es.ucm.fdi.iw.dto.ModifiedPlaylistDTO;
 import es.ucm.fdi.iw.dto.ModifiedSongDTO;
 import es.ucm.fdi.iw.dto.NewPlaylistDTO;
 import es.ucm.fdi.iw.dto.NewSongDTO;
+import es.ucm.fdi.iw.dto.PlaylistSearchFiltersDTO;
 import es.ucm.fdi.iw.dto.SongSearchFiltersDTO;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -88,8 +89,7 @@ public class PlaylistsController {
     }
 
     @PostMapping("/modifySong")
-    public ResponseEntity<?> modifySong(RedirectAttributes redirectAttributes,
-            @ModelAttribute ModifiedSongDTO song, Model model) {
+    public ResponseEntity<?> modifySong(@ModelAttribute ModifiedSongDTO song, Model model) {
         try {
             songService.modifyExistingSong(song);
             return ResponseEntity.ok().build();
@@ -163,6 +163,27 @@ public class PlaylistsController {
             return ResponseEntity.notFound().build();
         } catch (IOException e) {
             return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/searchPlaylists")
+    public ResponseEntity<Page<Playlist.Transfer>> searchPlaylists(
+            @ModelAttribute PlaylistSearchFiltersDTO filters,
+            @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
+        return ResponseEntity.ok(playlistService.searchPlaylists(filters, pageable));
+    }
+
+    @PostMapping("/modifyPlaylist")
+    public ResponseEntity<?> modifyPlaylist(@ModelAttribute ModifiedPlaylistDTO playlist) {
+        try {
+            playlistService.modifyPlaylist(playlist);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        } catch (UnsupportedImageException | ImageConversionException e) {
+            return ResponseEntity.status(415).body("Error en la conversion de la portada: " + e.getMessage());
         }
     }
 
