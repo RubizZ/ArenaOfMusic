@@ -302,9 +302,7 @@ public class SongService {
         }
         List<Song> resultList = query.getResultList();
 
-        long totalElements = countTotalElements(filters);
-
-        Page<Song> page = new PageImpl<>(resultList, pageable, totalElements);
+        Page<Song> page = new PageImpl<>(resultList, pageable, resultList.size());
 
         return page.map(Song::toTransfer);
     }
@@ -341,46 +339,6 @@ public class SongService {
         }
 
         return predicates;
-    }
-
-    private long countTotalElements(SongSearchFiltersDTO filters) {
-        StringBuilder jpql = new StringBuilder("SELECT COUNT(c) FROM Song c WHERE 1=1");
-
-        Map<String, Object> parameters = new HashMap<>();
-
-        if (filters.getId() != null) {
-            jpql.append(" AND c.id = :id");
-            parameters.put("id", filters.getId());
-        }
-
-        if (filters.getActive() != null) {
-            jpql.append(" AND c.active = :active");
-            parameters.put("active", filters.getActive());
-        }
-
-        if (filters.getName() != null) {
-            jpql.append(" AND LOWER(c.name) LIKE :name");
-            parameters.put("name", "%" + filters.getName().toLowerCase() + "%");
-        }
-
-        if (filters.getArtists() != null && !filters.getArtists().isEmpty()) {
-            String artistJson = filters.getArtists().stream()
-                    .map(artist -> artist.toLowerCase())
-                    .collect(Collectors.joining(".*"));
-
-            jpql.append(" AND LOWER(c.artists) LIKE :artists");
-            parameters.put("artists", "%" + artistJson + "%");
-        }
-
-        if (filters.getAlbum() != null) {
-            jpql.append(" AND LOWER(c.album) LIKE :album");
-            parameters.put("album", "%" + filters.getAlbum().toLowerCase() + "%");
-        }
-
-        Query countQuery = entityManager.createQuery(jpql.toString());
-        parameters.forEach((key, value) -> countQuery.setParameter(key, value));
-
-        return ((Number) countQuery.getSingleResult()).longValue();
     }
 
     public File getSongCover(long id) throws IllegalArgumentException, NoDataException {
