@@ -1,14 +1,10 @@
 package es.ucm.fdi.iw.controller;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +16,9 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import es.ucm.fdi.iw.dto.GameConfigDTO;
+import es.ucm.fdi.iw.dto.GamePlayerDTO;
 import es.ucm.fdi.iw.model.Game;
+import es.ucm.fdi.iw.model.Playlist;
 import es.ucm.fdi.iw.model.User;
 import es.ucm.fdi.iw.service.PartidaService;
 import jakarta.servlet.http.HttpSession;
@@ -81,15 +79,31 @@ public class PartidaController {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
             }
 
-            if (game != null && game.getGameState().equals("FINISHED")) {
+            if (game.getGameState().equals("FINISHED")) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
             }
 
-            if (game != null && !game.getGameState().equals("WAITING")) {
+            if (!game.getGameState().equals("WAITING")) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha comenzado.");
             }
 
+            
+            //Obtener Jugadores de la partida
+            Set<GamePlayerDTO> players = partidaService.getGamePlayers(gameId);
+
+            //Obtener Configuracion de la Partida
+            String gameConfigString = game.getConfigJson();
+            GameConfigDTO gameConfig = new GameConfigDTO();
+            gameConfig.parseGameConfigDTO(gameConfigString);
+
+            // Obtener información de la playlist
+            Playlist playlist = game.getPlaylist();
+
+            // Agregar datos al modelo
             model.addAttribute("game", game);
+            model.addAttribute("gameConfig", gameConfig);
+            model.addAttribute("players", players);
+            model.addAttribute("playlist", playlist);
             return "sala-espera";
         } catch (ResponseStatusException e) {
             model.addAttribute("msg", "Error al acceder a la sala de espera: " + e.getReason());

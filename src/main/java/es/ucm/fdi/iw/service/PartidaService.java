@@ -2,13 +2,17 @@ package es.ucm.fdi.iw.service;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 import es.ucm.fdi.iw.dto.GameConfigDTO;
+import es.ucm.fdi.iw.dto.GamePlayerDTO;
 import es.ucm.fdi.iw.model.Game;
 import es.ucm.fdi.iw.model.PlayerGame;
 import es.ucm.fdi.iw.model.PlayerGameId;
@@ -130,14 +134,9 @@ public class PartidaService {
     }
 
     @Transactional
-    public void addPlayerToGame(long id, UUID gameId) {
+    public PlayerGame addPlayerToGame(long id, UUID gameId) {
         try {
-            PlayerGame playerGame = new PlayerGame();
-            PlayerGameId playerGameId = new PlayerGameId();
-
-            playerGameId.setGameId(gameId);
-            playerGameId.setUserId(id); // Asegúrate de que creator.getId() sea correcto
-
+            // Obtener las entidades Game y User
             Game game = entityManager.find(Game.class, gameId);
             if (game == null) {
                 throw new IllegalArgumentException("La partida no existe.");
@@ -147,31 +146,77 @@ public class PartidaService {
             if (user == null) {
                 throw new IllegalArgumentException("El usuario no existe.");
             }
-            // Vincular player a game
+
+            // Crear una nueva instancia de PlayerGame
+            PlayerGame playerGame = new PlayerGame();
+            PlayerGameId playerGameId = new PlayerGameId();
+
+            playerGameId.setGameId(gameId);
+            playerGameId.setUserId(id);
+
             playerGame.setId(playerGameId);
             playerGame.setGame(game);
             playerGame.setUser(user);
-            playerGame.setScore(0);
-            playerGame.setPosition(0);
+            playerGame.setScore(0); // inicializar el puntaje
+            playerGame.setPosition(0); // inicializar la posición
 
+            // Persistir el PlayerGame
             entityManager.persist(playerGame);
+
+            return playerGame;
+
         } catch (Exception e) {
-            System.err.println("Error al Vincular host con partida: " + e.getMessage());
+            System.err.println("Error al vincular host con partida: " + e.getMessage());
             throw new RuntimeException("No se pudo vincular host a partida, intenta nuevamente.");
         }
+    }
+
+    @Transactional
+    private void vinculatePlayerWhitGame(User creator, UUID gameId, PlayerGame pg) {
+        try {
+            User aux = entityManager.find(User.class, creator.getId());
+            if (aux == null) {
+                throw new IllegalArgumentException("El usuario no existe.");
+            }
+            aux.addPlayerGame(pg);
+            System.out.println("patata");
+        } catch (Exception e) {
+            System.out.println("patata");
+        }
+
     }
 
     @Transactional
     public UUID crearPartidaYVincular(GameConfigDTO gameConfig, User creator) {
         try {
             UUID gameId = createPartida(gameConfig);
-            addPlayerToGame(creator.getId(), gameId);
+            PlayerGame pg = addPlayerToGame(creator.getId(), gameId);
+            vinculatePlayerWhitGame(creator, gameId, pg);
             return gameId;
         } catch (Exception e) {
             System.err.println("Error al crear partida o vincular host con partida: " + e.getMessage());
             throw new RuntimeException("No se pudo crear partida o vincular host a partida, intenta nuevamente.");
         }
 
+    }
+
+    public Set<GamePlayerDTO> getGamePlayers(UUID gameId) {
+        Game game = entityManager.find(Game.class, gameId);
+        if (game == null) {
+            throw new IllegalArgumentException("La partida no existe.");
+        }
+        Set<PlayerGame> gamePlayers = game.getParticipants();
+        Set<GamePlayerDTO> players = new HashSet<>();
+
+        for (PlayerGame playerGame : gamePlayers) {
+            User player = entityManager.find(User.class, playerGame.getUser().getId());
+            GamePlayerDTO playerDTO = new GamePlayerDTO();
+            playerDTO.setId(player.getId());
+            playerDTO.setUsername(player.getUsername());
+            players.add(playerDTO);
+        }
+
+        return players;
     }
 
 }
