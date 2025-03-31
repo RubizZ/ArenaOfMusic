@@ -38,11 +38,6 @@ public class PartidaController {
         }
     }
 
-    @GetMapping("/partida")
-    public String partida(Model model) {
-        return "partida";
-    }
-
     @GetMapping("/partida/configuracion-partida")
     public String configPartida(Model model) {
         model.addAttribute("playlists", partidaService.getActivePlaylists());
@@ -118,6 +113,44 @@ public class PartidaController {
             model.addAttribute("msg", "Error al acceder a la sala de espera: " + e.getMessage());
             return "error";
         }
+    }
+
+    @PostMapping("/partida/iniciar/{gameId}")
+    public String iniciarPartida(@PathVariable UUID gameId, RedirectAttributes redirectAttributes) {
+        try {
+            partidaService.startGame(gameId);
+            return "redirect:/partida/partida/" + gameId.toString();
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/error";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al iniciar la partida.");
+            return "redirect:/error";
+        }
+    }
+
+    
+    @GetMapping("/partida/partida/{gameId}")
+    public String partida(@PathVariable UUID gameId, Model model) {
+        try {
+            Game game = partidaService.getGameById(gameId);
+            if (game == null || !game.getActive()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
+            }
+            if (game.getGameState().equals("FINISHED")) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
+            }
+            if (game.getGameState().equals("WAITING")) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha comenzado.");
+            }
+            
+
+        } catch (ResponseStatusException e) {
+            model.addAttribute("msg", "Error al acceder a la sala de espera: " + e.getReason());
+            model.addAttribute("status", e.getStatusCode().value());
+            return "error";
+        }
+        return "partida";
     }
 
     @GetMapping("/partida/resultados")
