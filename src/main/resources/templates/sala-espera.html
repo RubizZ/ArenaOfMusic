@@ -3,7 +3,7 @@
 
 <head>
     <th:block th:replace="~{fragments/head :: header}" />
-    <title>Arena of Music</title>
+    <title>Arena of Music - Sala de Espera</title>
 </head>
 
 <body class="d-flex flex-column h-100">
@@ -15,30 +15,139 @@
                 <h1>Sala de Espera</h1>
                 <p>Esperando a otros jugadores para comenzar la partida...</p>
 
-
-                <!-- Lista de jugadores -->
-                <div>
+                <!-- Información del creador de la partida 
+                 ToDo: Cargar dinamicamente la imagen del Host-->
+                <!-- Lista de jugadores 
+                <div class="mb-4 text-center">
                     <h3>Jugadores esperando:</h3>
-                    <ul class="list-group">
-                        <li class="list-group-item">Jugador 1</li>
-                        <li class="list-group-item">Jugador 2</li>
-                        <li class="list-group-item">Jugador 3</li>
-                        <!-- Agregar más jugadores según sea necesario -->
-                    </ul>
+                    <div th:each="player : ${players}" class="d-inline-block mx-2">
+                        <img th:if="${player.imageUrl != null and !player.imageUrl.isEmpty()}"
+                            th:src="@{${player.imageUrl}}" alt="Imagen del jugador" class="rounded-circle" width="80"
+                            height="80">
+                        <img th:unless="${player.imageUrl != null and !player.imageUrl.isEmpty()}"
+                            th:src="@{/img/default-profile.png}" alt="Imagen por defecto" class="rounded-circle"
+                            width="80" height="80">
+                        <p class="mt-2" th:text="${player.username}"></p>
+                    </div>
+                </div>-->
+
+                <div class="mb-4 text-center">
+                    <h3>Jugadores esperando:</h3>
+                    <div th:each="player : ${players}" class="d-inline-block mx-2">
+                        <img th:src="@{/img/default-profile.png}" alt="Imagen por defecto" class="rounded-circle"
+                            width="80" height="80">
+                        <p class="mt-2" th:text="${player.username}"></p>
+                    </div>
                 </div>
 
+                <!-- Información de la partida -->
+                <div class="mb-4">
+                    <h3>Información de la partida</h3>
+                    <p><strong>Playlist:</strong> <span th:text="${playlist.name}"></span></p>
+                    <!-- ToDo: Cargar dinámicamente la imgen de la playlist -->
+                    <!-- <img th:src="@{${game.playlist.imageUrl}}" alt="Imagen de la playlist" class="rounded mb-2"
+                        width="150"> -->
+                    <img th:src="${/img/preview-song-img.jpeg}" alt="Imagen de la playlist" class="rounded mb-2"
+                        width="150">
+                    <p><strong>Número de rondas:</strong> <span th:text="${gameConfig.rounds}"></span></p>
+                    <p><strong>Tiempo por fragmento:</strong> <span th:text="${gameConfig.fragmentDuration}"></span>
+                        segundos</p>
+                    <p><strong>Modo de juego:</strong> <span th:text="${gameConfig.gameMode}"></span></p>
+
+                    <!-- Botón para abrir modal de edición -->
+                    <button class="btn btn-warning mt-2" data-bs-toggle="modal" data-bs-target="#editConfigModal">
+                        Editar Configuración
+                    </button>
+                </div>
+
+                <!-- Botón para comenzar la partida -->
                 <div class="container d-flex justify-content-center">
-                    <!-- Botón para empezar -->
-                    <a th:href="@{/partida}">
-                        <button class="btn btn-success btn-empezarEspera mt-4" id="startButton" type="button">
-                            Comenzar partida</button>
+                    <a th:href="@{/partida/iniciar/{id}(id=${game.id})}">
+                        <button class="btn btn-success mt-4" id="startButton">
+                            Comenzar partida
+                        </button>
                     </a>
                 </div>
             </div>
         </div>
     </main>
 
+    <!-- Modal para editar configuración -->
+    <div class="modal fade" id="editConfigModal" tabindex="-1" aria-labelledby="editConfigModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editConfigModalLabel">Editar Configuración</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editConfigForm">
+                        <div class="mb-3">
+                            <label class="form-label">Número de rondas</label>
+                            <input type="number" class="form-control" id="editRounds" th:value="${gameConfig.rounds}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tiempo por fragmento (segundos)</label>
+                            <input type="number" class="form-control" id="editTimePerRound"
+                                th:value="${gameConfig.fragmentDuration}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Modo de Juego</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="modoJuego" id="escribir"
+                                    value="escribir" checked>
+                                <label class="form-check-label" for="escribir">Escribir la Canción</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="modoJuego" id="opciones"
+                                    value="opciones" disabled>
+                                <label class="form-check-label" for="opciones">Opciones <small
+                                        class="text-muted">(Próximamente...)</small></label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" id="saveChanges">Guardar Cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <th:block th:replace="~{fragments/footer.html :: footer}" />
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("saveChanges").addEventListener("click", function () {
+                const rounds = document.getElementById("editRounds").value;
+                const timePerRound = document.getElementById("editTimePerRound").value;
+                const gameMode = document.getElementById("editGameMode").value;
+
+                fetch("/partida/editar-configuracion", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        gameId: "[[${game.id}]]",
+                        rounds: rounds,
+                        timePerRound: timePerRound,
+                        gameMode: gameMode
+                    })
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert("Error al actualizar la configuración.");
+                    }
+                }).catch(error => {
+                    console.error("Error:", error);
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>
