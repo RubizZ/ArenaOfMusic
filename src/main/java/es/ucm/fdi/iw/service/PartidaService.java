@@ -232,4 +232,23 @@ public class PartidaService {
         return players;
     }
 
+    @Transactional
+    public void startGame(UUID gameId) {
+        try {
+            Game game = entityManager.find(Game.class, gameId);
+            if (game == null) {
+                throw new IllegalArgumentException("La partida no existe.");
+            }
+            if (!game.getGameState().equals("WAITING")) {
+                throw new IllegalStateException("La partida ya ha comenzado o ha finalizado.");
+            }
+            game.setGameState("PREPARING");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Argumento invalido: " + e.getMessage());
+        }catch (IllegalStateException e) {
+            System.out.println("Invalid state: " + e.getMessage());
+        }
+
+    }
+
 }
