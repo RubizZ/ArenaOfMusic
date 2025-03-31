@@ -1,5 +1,6 @@
 package es.ucm.fdi.iw.model;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -44,8 +45,11 @@ public class Game implements Transferable<Game.Transfer> {
     private Playlist playlist;
 
     @OneToMany(mappedBy = "game")
-    private Set<PlayerGame> participants;
+    private Set<PlayerGame> participants = new HashSet<>();
 
+    public synchronized void addPlayerGame(PlayerGame playerGame) {
+        this.participants.add(playerGame);
+    }
 
     @Getter
     @AllArgsConstructor

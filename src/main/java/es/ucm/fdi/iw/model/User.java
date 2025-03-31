@@ -3,7 +3,9 @@ package es.ucm.fdi.iw.model;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -109,7 +111,11 @@ public class User implements Transferable<User.Transfer> {
     private List<Block> blocksReceived;
 
     @OneToMany(mappedBy = "user")
-    private List<PlayerGame> partidas;
+    private Set<PlayerGame> partidas = new HashSet<>();
+
+    public synchronized void addPlayerGame(PlayerGame playerGame) {
+        this.partidas.add(playerGame);
+    }
 
     /**
      * Checks whether this user has a given role.
