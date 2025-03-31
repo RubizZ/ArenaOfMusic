@@ -10,7 +10,10 @@ import org.springframework.stereotype.Service;
 
 import es.ucm.fdi.iw.dto.GameConfigDTO;
 import es.ucm.fdi.iw.model.Game;
+import es.ucm.fdi.iw.model.PlayerGame;
+import es.ucm.fdi.iw.model.PlayerGameId;
 import es.ucm.fdi.iw.model.Playlist;
+import es.ucm.fdi.iw.model.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
@@ -95,7 +98,7 @@ public class PartidaService {
     }
 
     @Transactional
-    public String createPartida(GameConfigDTO gameConfig) {
+    public UUID createPartida(GameConfigDTO gameConfig) {
         try {
             Playlist playlist = entityManager.find(Playlist.class, gameConfig.getPlaylistId());
             if (playlist == null || !playlist.isActive()) {
@@ -111,7 +114,7 @@ public class PartidaService {
 
             entityManager.persist(game);
 
-            return game.getId().toString();
+            return game.getId();
         } catch (Exception e) {
             System.err.println("Error al crear la partida: " + e.getMessage());
             throw new RuntimeException("No se pudo crear la partida, intenta nuevamente.");
@@ -124,6 +127,51 @@ public class PartidaService {
             throw new IllegalArgumentException("La partida no existe.");
         }
         return game;
+    }
+
+    @Transactional
+    public void addPlayerToGame(long id, UUID gameId) {
+        try {
+            PlayerGame playerGame = new PlayerGame();
+            PlayerGameId playerGameId = new PlayerGameId();
+
+            playerGameId.setGameId(gameId);
+            playerGameId.setUserId(id); // Asegúrate de que creator.getId() sea correcto
+
+            Game game = entityManager.find(Game.class, gameId);
+            if (game == null) {
+                throw new IllegalArgumentException("La partida no existe.");
+            }
+
+            User user = entityManager.find(User.class, id);
+            if (user == null) {
+                throw new IllegalArgumentException("El usuario no existe.");
+            }
+            // Vincular player a game
+            playerGame.setId(playerGameId);
+            playerGame.setGame(game);
+            playerGame.setUser(user);
+            playerGame.setScore(0);
+            playerGame.setPosition(0);
+
+            entityManager.persist(playerGame);
+        } catch (Exception e) {
+            System.err.println("Error al Vincular host con partida: " + e.getMessage());
+            throw new RuntimeException("No se pudo vincular host a partida, intenta nuevamente.");
+        }
+    }
+
+    @Transactional
+    public UUID crearPartidaYVincular(GameConfigDTO gameConfig, User creator) {
+        try {
+            UUID gameId = createPartida(gameConfig);
+            addPlayerToGame(creator.getId(), gameId);
+            return gameId;
+        } catch (Exception e) {
+            System.err.println("Error al crear partida o vincular host con partida: " + e.getMessage());
+            throw new RuntimeException("No se pudo crear partida o vincular host a partida, intenta nuevamente.");
+        }
+
     }
 
 }
