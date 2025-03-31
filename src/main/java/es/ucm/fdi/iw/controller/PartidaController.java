@@ -94,7 +94,7 @@ public class PartidaController {
 
             
             //Obtener Jugadores de la partida
-            Set<GamePlayerDTO> players = new HashSet<>(); //partidaService.getGamePlayers(gameId);
+            Set<GamePlayerDTO> players = partidaService.getGamePlayers(gameId);
 
             //Obtener Configuracion de la Partida
             String gameConfigString = game.getConfigJson();
