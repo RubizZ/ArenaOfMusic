@@ -20,7 +20,7 @@ public class GameConfigDTO {
         String[] parts = gameConfig.split(",");
         this.playlistId = Long.parseLong(parts[0].split("=")[1]);
         this.gameMode = parts[1].split("=")[1];
-        this.rounds = Integer.parseInt(parts[2].split(gameConfig)[1]);
+        this.rounds = Integer.parseInt(parts[2].split("=")[1]);
         this.fragmentDuration = Integer.parseInt(parts[3].split("=")[1]);
     }
 
