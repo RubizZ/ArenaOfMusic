@@ -1,7 +1,7 @@
 package es.ucm.fdi.iw.controller;
 
 import java.util.UUID;
-
+import java.util.HashSet;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,10 +18,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import es.ucm.fdi.iw.dto.GameConfigDTO;
 import es.ucm.fdi.iw.dto.GamePlayerDTO;
 import es.ucm.fdi.iw.model.Game;
+import es.ucm.fdi.iw.model.PlayerGame;
 import es.ucm.fdi.iw.model.Playlist;
 import es.ucm.fdi.iw.model.User;
 import es.ucm.fdi.iw.service.PartidaService;
 import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 
 @Controller
 public class PartidaController {
@@ -59,7 +61,10 @@ public class PartidaController {
 
         GameConfigDTO gameConfig = new GameConfigDTO(playlistId, modoJuego, rondas, tiempo);
         try {
-            UUID gameId = partidaService.crearPartidaYVincular(gameConfig, creator);
+            UUID gameId = partidaService.createPartida(gameConfig);
+            PlayerGame pg = partidaService.addPlayerToGame(creator.getId(), gameId);
+            partidaService.addPlayerGameToUser(creator.getId(), pg);
+            partidaService.addPlayerGameToGame(gameId, pg);
             return "redirect:/partida/sala-espera/" + gameId.toString();
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -89,7 +94,7 @@ public class PartidaController {
 
             
             //Obtener Jugadores de la partida
-            Set<GamePlayerDTO> players = partidaService.getGamePlayers(gameId);
+            Set<GamePlayerDTO> players = new HashSet<>(); //partidaService.getGamePlayers(gameId);
 
             //Obtener Configuracion de la Partida
             String gameConfigString = game.getConfigJson();

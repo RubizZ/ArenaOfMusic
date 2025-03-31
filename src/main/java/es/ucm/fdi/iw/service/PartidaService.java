@@ -19,9 +19,10 @@ import es.ucm.fdi.iw.model.PlayerGameId;
 import es.ucm.fdi.iw.model.Playlist;
 import es.ucm.fdi.iw.model.User;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PartidaService {
@@ -134,78 +135,90 @@ public class PartidaService {
     }
 
     @Transactional
-    public PlayerGame addPlayerToGame(long id, UUID gameId) {
+    public PlayerGame addPlayerToGame(long userId, UUID gameId) {
         try {
-            // Obtener las entidades Game y User
             Game game = entityManager.find(Game.class, gameId);
             if (game == null) {
-                throw new IllegalArgumentException("La partida no existe.");
+                throw new IllegalArgumentException("La partida con ID " + gameId + " no existe.");
             }
 
-            User user = entityManager.find(User.class, id);
+            User user = entityManager.find(User.class, userId);
             if (user == null) {
-                throw new IllegalArgumentException("El usuario no existe.");
+                throw new IllegalArgumentException("El usuario con ID " + userId + " no existe.");
             }
 
-            // Crear una nueva instancia de PlayerGame
+            PlayerGameId checkId = new PlayerGameId(gameId, userId);
+            if (entityManager.find(PlayerGame.class, checkId) != null) {
+                System.out.println("El usuario " + userId + " ya está en la partida " + gameId);
+                throw new IllegalStateException("El usuario ya está en esta partida.");
+            }
+
             PlayerGame playerGame = new PlayerGame();
-            PlayerGameId playerGameId = new PlayerGameId();
 
-            playerGameId.setGameId(gameId);
-            playerGameId.setUserId(id);
-
-            playerGame.setId(playerGameId);
             playerGame.setGame(game);
             playerGame.setUser(user);
-            playerGame.setScore(0); // inicializar el puntaje
-            playerGame.setPosition(0); // inicializar la posición
 
-            // Persistir el PlayerGame
+            PlayerGameId playerGameId = new PlayerGameId(game.getId(), user.getId());
+            playerGame.setId(playerGameId);
+
+            playerGame.setScore(0);
+            playerGame.setPosition(0);
+
             entityManager.persist(playerGame);
 
             return playerGame;
-
+        } catch (IllegalArgumentException e) {
+            System.out.println("Argumento invalido: " + e.getMessage());
+            throw e;
         } catch (Exception e) {
-            System.err.println("Error al vincular host con partida: " + e.getMessage());
-            throw new RuntimeException("No se pudo vincular host a partida, intenta nuevamente.");
-        }
-    }
-
-    @Transactional
-    private void vinculatePlayerWhitGame(User creator, UUID gameId, PlayerGame pg) {
-        try {
-            User aux = entityManager.find(User.class, creator.getId());
-            if (aux == null) {
-                throw new IllegalArgumentException("El usuario no existe.");
-            }
-            aux.addPlayerGame(pg);
-            System.out.println("patata");
-        } catch (Exception e) {
-            System.out.println("patata");
+            System.out.println(
+                    "Error inesperado al agregar jugador " + userId + " a partida " + gameId + "\n" + e.getMessage());
+            throw new RuntimeException("Error inesperado en el servidor al agregar el jugador al juego.", e);
         }
 
     }
 
     @Transactional
-    public UUID crearPartidaYVincular(GameConfigDTO gameConfig, User creator) {
-        try {
-            UUID gameId = createPartida(gameConfig);
-            PlayerGame pg = addPlayerToGame(creator.getId(), gameId);
-            vinculatePlayerWhitGame(creator, gameId, pg);
-            return gameId;
-        } catch (Exception e) {
-            System.err.println("Error al crear partida o vincular host con partida: " + e.getMessage());
-            throw new RuntimeException("No se pudo crear partida o vincular host a partida, intenta nuevamente.");
+    public void addPlayerGameToUser(long userId, PlayerGame pg) {
+        User user = entityManager.find(User.class, userId);
+        if (user == null) {
+            throw new IllegalArgumentException("El usuario con ID " + userId + " no existe.");
         }
-
+        user.addPlayerGame(pg);
     }
+
+    @Transactional
+    public void addPlayerGameToGame(UUID gameId, PlayerGame pg) {
+        Game game = entityManager.find(Game.class, gameId);
+        if (game == null) {
+            throw new IllegalArgumentException("La partida con ID " + gameId + " no existe.");
+        }
+        game.addPlayerGame(pg);
+    }
+
+    // @Transactional
+    // public UUID crearPartidaYVincular(GameConfigDTO gameConfig, User creator) {
+    // try {
+    // UUID gameId = createPartida(gameConfig);
+    // //addPlayerToGame(creator.getId(), gameId);
+    // // addPlayerGameToUser(creator.getId(), pg);
+    // // addPlayerGameToGame(gameId, pg);
+    // return gameId;
+    // } catch (Exception e) {
+    // System.err.println("Error al crear partida o vincular host con partida: " +
+    // e.getMessage());
+    // throw new RuntimeException("No se pudo crear partida o vincular host a
+    // partida, intenta nuevamente.");
+    // }
+
+    // }
 
     public Set<GamePlayerDTO> getGamePlayers(UUID gameId) {
         Game game = entityManager.find(Game.class, gameId);
         if (game == null) {
             throw new IllegalArgumentException("La partida no existe.");
         }
-        Set<PlayerGame> gamePlayers = game.getParticipants();
+        List<PlayerGame> gamePlayers = game.getParticipants();
         Set<GamePlayerDTO> players = new HashSet<>();
 
         for (PlayerGame playerGame : gamePlayers) {

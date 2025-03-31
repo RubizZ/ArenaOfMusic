@@ -6,7 +6,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,6 +22,7 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -53,6 +56,7 @@ public class User implements Transferable<User.Transfer> {
 
     @Column(nullable = false, unique = true)
     private String username;
+
     @Column(nullable = false)
     private String password;
 
@@ -110,11 +114,11 @@ public class User implements Transferable<User.Transfer> {
     @OneToMany(mappedBy = "blocked")
     private List<Block> blocksReceived;
 
-    @OneToMany(mappedBy = "user")
-    private Set<PlayerGame> partidas = new HashSet<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PlayerGame> partidas = new CopyOnWriteArrayList<>();
 
-    public synchronized void addPlayerGame(PlayerGame playerGame) {
-        this.partidas.add(playerGame);
+    public void addPlayerGame(PlayerGame playerGame) {
+        partidas.add(playerGame);
     }
 
     /**

@@ -8,10 +8,15 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Embeddable
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 public class PlayerGameId implements Serializable {
@@ -22,19 +27,4 @@ public class PlayerGameId implements Serializable {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-
-    // Sobrescribir equals para comparar correctamente las claves compuestas
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        PlayerGameId that = (PlayerGameId) obj;
-        return gameId.equals(that.gameId) && userId.equals(that.userId);
-    }
-
-    // Sobrescribir hashCode para generar un valor consistente
-    @Override
-    public int hashCode() {
-        return Objects.hash(gameId, userId);
-    }
 }
