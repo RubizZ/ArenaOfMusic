@@ -33,10 +33,10 @@ public class PlayerGame implements Transferable<PlayerGame.Transfer> {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "score", nullable = false)
+    @Column(name = "score", nullable = true)
     private int score;
 
-    @Column(name = "position", nullable = false)
+    @Column(name = "position", nullable = true)
     private int position;
 
     @Getter
