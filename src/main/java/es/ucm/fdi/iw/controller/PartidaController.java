@@ -8,6 +8,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import es.ucm.fdi.iw.dto.GameConfigDTO;
 import es.ucm.fdi.iw.model.Game;
+import es.ucm.fdi.iw.model.User;
 import es.ucm.fdi.iw.service.PartidaService;
 import jakarta.servlet.http.HttpSession;
 
@@ -53,11 +55,14 @@ public class PartidaController {
             @RequestParam int rondas,
             @RequestParam int tiempo,
             @RequestParam String modoJuego,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            HttpSession session) {
+        User creator = (User) session.getAttribute("u");
+
         GameConfigDTO gameConfig = new GameConfigDTO(playlistId, modoJuego, rondas, tiempo);
         try {
-            String gameId = partidaService.createPartida(gameConfig);
-            return "redirect:/partida/sala-espera/" + gameId;
+            UUID gameId = partidaService.crearPartidaYVincular(gameConfig, creator);
+            return "redirect:/partida/sala-espera/" + gameId.toString();
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/error";
@@ -76,18 +81,19 @@ public class PartidaController {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
             }
 
-            if (game != null && game.getGameState().equals("FINISHED")){
+            if (game != null && game.getGameState().equals("FINISHED")) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
             }
 
             if (game != null && !game.getGameState().equals("WAITING")) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha comenzado.");
             }
+
             model.addAttribute("game", game);
             return "sala-espera";
         } catch (ResponseStatusException e) {
             model.addAttribute("msg", "Error al acceder a la sala de espera: " + e.getReason());
-            model.addAttribute("status",e.getStatusCode().value());
+            model.addAttribute("status", e.getStatusCode().value());
             return "error";
         } catch (Exception e) {
             model.addAttribute("msg", "Error al acceder a la sala de espera: " + e.getMessage());
