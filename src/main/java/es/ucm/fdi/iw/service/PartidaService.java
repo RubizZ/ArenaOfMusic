@@ -120,7 +120,7 @@ public class PartidaService {
 
     public Game getGameById(UUID gameId) {
         Game game = entityManager.find(Game.class, gameId);
-        if (game == null) {
+        if (game == null || !game.getActive()) {
             throw new IllegalArgumentException("La partida no existe.");
         }
         return game;
