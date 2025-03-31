@@ -66,12 +66,33 @@
 
                     <!-- Botón para comenzar la partida -->
                     <div class="container d-flex justify-content-center">
-                        <a th:href="@{/partida/iniciar/{id}(id=${game.id})}">
-                            <button class="btn btn-success mt-4" id="startButton">
-                                Comenzar partida
-                            </button>
-                        </a>
+                        <button class="btn btn-success mt-4" id="startButton" th:data-game-id="${game.id}">
+                            Comenzar partida
+                        </button>
                     </div>
+
+                    <script>
+                        document.getElementById("startButton").addEventListener("click", function () {
+                            let gameId = this.getAttribute("data-game-id");
+
+                            fetch(`/partida/iniciar/${gameId}`, {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                }
+                            }).then(response => {
+                                if (!response.ok) {
+                                    throw new Error("Error al iniciar la partida");
+                                }
+                                return response.json();
+                            }).then(data => {
+                                console.log("Partida iniciada:", data);
+                                // Aquí podrías redirigir a la vista del juego o cambiar la interfaz
+                            }).catch(error => {
+                                console.error("Error:", error);
+                            });
+                        });
+                    </script>
                 </div>
             </div>
         </div>
