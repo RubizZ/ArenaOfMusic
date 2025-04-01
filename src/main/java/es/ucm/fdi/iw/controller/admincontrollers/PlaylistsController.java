@@ -57,11 +57,12 @@ public class PlaylistsController {
 
     @GetMapping({ "", "/" })
     public String index(Model model, @RequestParam(name = "view", required = false) String viewType,
-            @RequestParam(required = false) String list, @RequestParam(required = false) String songUpload,
+            @RequestParam(required = false) String search, @RequestParam(required = false) String songUpload,
             @RequestParam(required = false) String playlistUpload,
-            @RequestParam(required = false) String id) {
+            @RequestParam(required = false) String id) {// TODO Hacer que el GET acepte todo tipo de filtros
         model.addAttribute("viewType", viewType == null || viewType.isBlank() ? "list" : viewType);
-        model.addAttribute("list", list == null || list.isBlank() ? "playlists" : list);
+        model.addAttribute("search", search == null || search.isBlank() ? "playlists" : search);
+
         if (songUpload != null) {
             model.addAttribute("songUpload", songUpload);
         }

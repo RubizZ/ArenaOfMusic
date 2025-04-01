@@ -19,8 +19,8 @@
                     <div class="d-flex justify-content-center align-items-center mb-3">
                         <h2 class="mb-0 me-2">Lista de</h2>
                         <select class="form-control" style="width: auto;" id="listSelector">
-                            <option value="playlists" th:selected="${list} == 'playlists'">playlists</option>
-                            <option value="songs" th:selected="${list} == 'songs'">canciones</option>
+                            <option value="playlists" th:selected="${search} == 'playlists'">playlists</option>
+                            <option value="songs" th:selected="${search} == 'songs'">canciones</option>
                         </select>
                     </div>
                 </div>
@@ -84,6 +84,7 @@
     <th:block th:replace="~{fragments/footer.html :: footer}" />
 
     <script th:if="${viewType} == 'list'">
+
         /* List view changer */
         document.addEventListener("DOMContentLoaded", function () {
             const selector = document.getElementById("listSelector");
@@ -110,7 +111,19 @@
             // Esperar un pequeño tiempo para que el navegador restaure el estado del select
             setTimeout(updateView, 50);
 
-            selector.addEventListener("change", updateView);
+            selector.addEventListener("change", () => {
+                const url = new URL(window.location);
+                url.searchParams.set("search", selector.value);
+                url.searchParams.delete("id");
+                window.history.replaceState({}, '', url.toString());
+
+                updateView();
+            });
+
+            setTimeout(() => {
+                document.dispatchEvent(new CustomEvent('playlistFilter'));
+                document.dispatchEvent(new CustomEvent('songFilter'));
+            });
 
         });
 
@@ -207,7 +220,7 @@
             })
                 .then(async response => {
                     if (response.ok) {
-                        window.location.href = '/admin/playlists?view=list&list=songs&songUpload=success&id=' + await response.json();
+                        window.location.href = '/admin/playlists?search=songs&songUpload=success&id=' + await response.json();
                     } else {
                         showErrorNotification("Ha ocurrido un error al subir la cancion. ERROR: " + response.status, "error");
                     }
@@ -227,6 +240,19 @@
                 playlistName.classList.add('is-invalid');
                 playlistName.addEventListener('input', function () {
                     playlistName.classList.remove('is-invalid');
+                });
+
+                return false;
+            }
+
+            const playlistDesc = playlistWindow.querySelector('#playlist-desc');
+
+            if (playlistDesc.value.length > 255) {
+                showErrorNotification('La descripción de la playlist no puede superar los 255 caracteres, actualmente tiene ' + playlistDesc.value.length + ' caracteres');
+
+                playlistDesc.classList.add('is-invalid');
+                playlistDesc.addEventListener('input', function () {
+                    playlistDesc.classList.remove('is-invalid');
                 });
 
                 return false;
@@ -421,7 +447,6 @@
         // Manejador principal de envío de formulario
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('submitPlaylist');
-            if (!form) return;
 
             form.addEventListener('submit', async function (e) {
                 e.preventDefault();
@@ -510,7 +535,7 @@
 
                     // Éxito
                     await new Promise(resolve => setTimeout(resolve, 2000));
-                    window.location.href = '/admin/playlists/?view=list&list=playlists&playlistUpload=success&id=' + playlistId;
+                    window.location.href = '/admin/playlists/?search=playlists&playlistUpload=success&id=' + playlistId;
 
                 } catch (error) {
                     showErrorNotification(error.message, 'error');
@@ -524,6 +549,11 @@
                 };
             });
         });
+
+        // Busqueda inicial de canciones
+        document.addEventListener('DOMContentLoaded', () => {
+            document.dispatchEvent(new CustomEvent('songFilter'));
+        })
     </script>
     <script th:inline="javascript">
         //Script para manejo de parametros de URL
@@ -532,7 +562,7 @@
             var songUpload = /*[[${songUpload}]]*/ null;
             var playlistUpload = /*[[${playlistUpload}]]*/ null;
             var id = /*[[${id}]]*/ null;
-            var list = /*[[${list}]]*/ null;
+            var search = /*[[${search}]]*/ null;
 
             if (songUpload === 'success' && id !== null) {
                 showErrorNotification('Canción subida correctamente con ID: ' + id, 'success');
@@ -543,21 +573,26 @@
             }
 
             /* Si la lista es "songs" y hay un ID, actualizar el filtro */
-            if (list === 'songs' && id !== null) {
+            if (search === 'songs' && id !== null) { //TODO hacer que recoga parametros para todos los filtros
                 var songFilter = document.getElementById('song-filter-id');
                 if (songFilter) {
                     songFilter.value = id;
-                    songFilter.dispatchEvent(new Event('input'));
                 }
             }
 
             /* Si la lista es "playlists" y hay un ID, actualizar el filtro */
-            if (list === 'playlists' && id !== null) {
+            if (search === 'playlists' && id !== null) { //TODO hacer que recoga parametros para todos los filtros
                 var playlistFilter = document.getElementById('playlist-filter-id');
                 if (playlistFilter) {
                     playlistFilter.value = id;
-                    playlistFilter.dispatchEvent(new Event('input'));
                 }
+            }
+
+            if (songUpload === 'success' || playlistUpload === 'success') {
+                const url = new URL(window.location);
+                url.searchParams.delete("songUpload");
+                url.searchParams.delete("playlistUpload");
+                window.history.replaceState({}, document.title, url.toString());
             }
         });
     </script>
