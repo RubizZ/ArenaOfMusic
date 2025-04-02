@@ -11,7 +11,7 @@
 
     <main class="flex-shrink-0 d-flex justify-content-center container">
 
-        <div class="sala-espera bg-light p-6 m-5 d-flex justify-content-center rounded">
+        <div class="sala-espera p-6 m-5 d-flex justify-content-center rounded">
             <div class="espera-card p-3">
 
                 <h1 class="text-center">Sala de Espera</h1>
@@ -72,26 +72,8 @@
                     </div>
 
                     <script>
-                        document.getElementById("startButton").addEventListener("click", function () {
-                            let gameId = this.getAttribute("data-game-id");
 
-                            fetch(`/partida/iniciar/${gameId}`, {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json"
-                                }
-                            }).then(response => {
-                                if (!response.ok) {
-                                    throw new Error("Error al iniciar la partida");
-                                }
-                                return response.json();
-                            }).then(data => {
-                                console.log("Partida iniciada:", data);
-                                // Aquí podrías redirigir a la vista del juego o cambiar la interfaz
-                            }).catch(error => {
-                                console.error("Error:", error);
-                            });
-                        });
+
                     </script>
                 </div>
             </div>
@@ -168,6 +150,26 @@
                     } else {
                         alert("Error al actualizar la configuración.");
                     }
+                }).catch(error => {
+                    console.error("Error:", error);
+                });
+            });
+            document.getElementById("startButton").addEventListener("click", function () {
+                let gameId = this.getAttribute("data-game-id");
+
+                fetch(`/partida/iniciar/${gameId}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                }).then(response => {
+                    if (!response.ok) {
+                        throw new Error("Error al iniciar la partida");
+                    }
+                    return response.json();
+                }).then(data => {
+                    console.log("Partida iniciada:", data);
+                    // Aquí podrías redirigir a la vista del juego o cambiar la interfaz
                 }).catch(error => {
                     console.error("Error:", error);
                 });
