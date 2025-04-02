@@ -56,10 +56,7 @@ public class PartidaController {
 
         GameConfigDTO gameConfig = new GameConfigDTO(playlistId, modoJuego, rondas, tiempo);
         try {
-            UUID gameId = partidaService.createPartida(gameConfig);
-            PlayerGame pg = partidaService.addPlayerToGame(creator.getId(), gameId);
-            partidaService.addPlayerGameToUser(creator.getId(), pg);
-            partidaService.addPlayerGameToGame(gameId, pg);
+            UUID gameId = partidaService.crearPartidaYVincular(gameConfig, creator);
             return "redirect:/partida/sala-espera/" + gameId.toString();
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -87,11 +84,10 @@ public class PartidaController {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha comenzado.");
             }
 
-            
-            //Obtener Jugadores de la partida
+            // Obtener Jugadores de la partida
             Set<GamePlayerDTO> players = partidaService.getGamePlayers(gameId);
 
-            //Obtener Configuracion de la Partida
+            // Obtener Configuracion de la Partida
             String gameConfigString = game.getConfigJson();
             GameConfigDTO gameConfig = new GameConfigDTO();
             gameConfig.parseGameConfigDTO(gameConfigString);
@@ -116,7 +112,7 @@ public class PartidaController {
     }
 
     @PostMapping("/partida/iniciar/{gameId}")
-    public String iniciarPartida(@PathVariable UUID gameId, RedirectAttributes redirectAttributes) {
+    public String iniciarPartida(@PathVariable UUID gameId, RedirectAttributes redirectAttributes, Model model) {
         try {
             partidaService.startGame(gameId);
             return "redirect:/partida/partida/" + gameId.toString();
@@ -129,7 +125,6 @@ public class PartidaController {
         }
     }
 
-    
     @GetMapping("/partida/partida/{gameId}")
     public String partida(@PathVariable UUID gameId, Model model) {
         try {
@@ -140,17 +135,16 @@ public class PartidaController {
             if (game.getGameState().equals("FINISHED")) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
             }
-            if (game.getGameState().equals("WAITING")) {
+            if (!game.getGameState().equals("WAITING")) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha comenzado.");
             }
-            
+            return "partida";
 
         } catch (ResponseStatusException e) {
             model.addAttribute("msg", "Error al acceder a la sala de espera: " + e.getReason());
             model.addAttribute("status", e.getStatusCode().value());
             return "error";
         }
-        return "partida";
     }
 
     @GetMapping("/partida/resultados")
