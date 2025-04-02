@@ -196,22 +196,19 @@ public class PartidaService {
         game.addPlayerGame(pg);
     }
 
-    // @Transactional
-    // public UUID crearPartidaYVincular(GameConfigDTO gameConfig, User creator) {
-    // try {
-    // UUID gameId = createPartida(gameConfig);
-    // //addPlayerToGame(creator.getId(), gameId);
-    // // addPlayerGameToUser(creator.getId(), pg);
-    // // addPlayerGameToGame(gameId, pg);
-    // return gameId;
-    // } catch (Exception e) {
-    // System.err.println("Error al crear partida o vincular host con partida: " +
-    // e.getMessage());
-    // throw new RuntimeException("No se pudo crear partida o vincular host a
-    // partida, intenta nuevamente.");
-    // }
-
-    // }
+    @Transactional
+    public UUID crearPartidaYVincular(GameConfigDTO gameConfig, User creator) {
+        try {
+            UUID gameId = createPartida(gameConfig);
+            PlayerGame pg = addPlayerToGame(creator.getId(), gameId);
+            addPlayerGameToUser(creator.getId(), pg);
+            addPlayerGameToGame(gameId, pg);
+            return gameId;
+        } catch (Exception e) {
+            System.err.println("Error al crear partida o vincular host con partida: " + e.getMessage());
+            throw new RuntimeException("No se pudo crear partida o vincular host a partida, intenta nuevamente.");
+        }
+    }
 
     public Set<GamePlayerDTO> getGamePlayers(UUID gameId) {
         Game game = entityManager.find(Game.class, gameId);
@@ -245,7 +242,7 @@ public class PartidaService {
             game.setGameState("PREPARING");
         } catch (IllegalArgumentException e) {
             System.out.println("Argumento invalido: " + e.getMessage());
-        }catch (IllegalStateException e) {
+        } catch (IllegalStateException e) {
             System.out.println("Invalid state: " + e.getMessage());
         }
 
