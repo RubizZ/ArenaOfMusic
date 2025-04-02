@@ -1,5 +1,6 @@
 package es.ucm.fdi.iw.model;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -49,9 +50,9 @@ public class Game implements Transferable<Game.Transfer> {
     private Playlist playlist;
 
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PlayerGame> participants = new CopyOnWriteArrayList<>();
+    private List<PlayerGame> participants = new ArrayList<>(); //new CopyOnWriteArrayList<>();
 
-    public void addPlayerGame(PlayerGame playerGame) {
+    public synchronized void addPlayerGame(PlayerGame playerGame) {
         participants.add(playerGame);
     }
 

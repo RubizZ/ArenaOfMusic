@@ -115,9 +115,9 @@ public class User implements Transferable<User.Transfer> {
     private List<Block> blocksReceived;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PlayerGame> partidas = new CopyOnWriteArrayList<>();
+    private List<PlayerGame> partidas = new ArrayList<>();//new CopyOnWriteArrayList<>();
 
-    public void addPlayerGame(PlayerGame playerGame) {
+    public synchronized void addPlayerGame(PlayerGame playerGame) {
         partidas.add(playerGame);
     }
 
