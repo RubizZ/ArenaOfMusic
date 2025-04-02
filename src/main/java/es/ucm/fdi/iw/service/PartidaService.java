@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class PartidaService {
-    
+
     public Map<String, Object> getPlaylist() {
         Map<String, Object> playlist = new HashMap<>();
         playlist.put("image", "img/logo.jpeg");
@@ -60,8 +60,7 @@ public class PartidaService {
                         "winnerName", "Eric",
                         "time", 3.9),
                 Map.of(
-                        "song",
-                        Map.of("name", "Memories", "artist", "David Guetta ft. Kid Cudi"),
+                        "song", Map.of("name", "Memories", "artist", "David Guetta ft. Kid Cudi"),
                         "winnerName", "Eric",
                         "time", 3.5),
                 Map.of(
@@ -69,12 +68,39 @@ public class PartidaService {
                         "winnerName", "Sam",
                         "time", 4.8),
                 Map.of(
-                        "song",
-                        Map.of("name", "Can't Hold Us", "artist", "Macklemore ft. Ryan Lewis"),
+                        "song", Map.of("name", "Can't Hold Us", "artist", "Macklemore ft. Ryan Lewis"),
                         "winnerName", "Ava",
                         "time", 2.7));
         return songResults;
 
     }
 
+    public Map<String, Object> getPlaylistInfo() {
+        return Map.of(
+            "title", "Top Hits 2010's",
+            "image", "img/logo.jpeg"
+        );
+    }
+
+    public List<Map<String, Object>> getPlayers() {
+        return List.of(
+            Map.of("username", "Ava", "photoUrl", "img/default-profile.png", "level", 4, "winRate", 85),
+            Map.of("username", "Sam", "photoUrl", "img/default-profile.png", "level", 3, "winRate", 75),
+            Map.of("username", "Taylor", "photoUrl", "img/default-profile.png", "level", 8, "winRate", 71)
+        );
+    }
+
+    public Map<String, Object> getHost() {
+        return Map.of("username", "Eric", "photoUrl", "img/default-profile.png", "level", 4, "winRate", 38);
+    }
+
+    public Map<String, Object> getGameInfo() {
+        return Map.of(
+            "code", "XT8V5L",
+            "status", "waiting",
+            "mode", "options",
+            "rounds", 20,
+            "songTime", 10
+        );
+    }
 }
