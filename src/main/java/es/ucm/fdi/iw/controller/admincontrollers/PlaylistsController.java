@@ -140,12 +140,12 @@ public class PlaylistsController {
     }
 
     @PostMapping("/addSongToPlaylist")
-    public ResponseEntity<Void> addSongToPlaylist(@RequestParam Long playlistId, @RequestParam Long songId) {
+    public ResponseEntity<?> addSongToPlaylist(@RequestParam Long playlistId, @RequestParam Long songId) {
         try {
             playlistService.addSongToPlaylist(playlistId, songId);
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
