@@ -402,6 +402,14 @@
             clearTimeout(filterTimeoutPlaylistSearch);
             setTimeout(async function () {
                 playlistsContainer.innerHTML = '';
+                let modalContainer = document.getElementById('modalContainer');
+                if (!modalContainer) {
+                    modalContainer = document.createElement('div');
+                    modalContainer.id = 'modalContainer';
+                    document.body.appendChild(modalContainer);
+                } else {
+                    //modalContainer.innerHTML = '';
+                }
 
                 playlistSearchLoader.style.display = 'flex';
 
@@ -436,41 +444,37 @@
                     if (playlistsData.content.length == 0) {
                         const noPlaylists = document.createElement('div');
                         noPlaylists.className = 'alert alert-info text-center my-3';
-                        noPlaylists.innerHTML = 'No se han encontrado resultados';
+                        noPlaylists.textContent = 'No se han encontrado resultados';
                         playlistsContainer.appendChild(noPlaylists);
                         return;
                     }
 
-                    for (let playlist of playlistsData.content) { //TODO Hacer con Promise.all para hacer fetch asincronos
+                    for (let playlist of playlistsData.content) {
                         const playlistCard = document.createElement('div');
                         playlistCard.style.display = 'none';
-                        playlistCard.className = 'card p-3 my-2 ';
+                        playlistCard.className = 'card hoverable p-3 my-2';
                         playlistCard.id = playlist.id;
                         playlistCard.style.backgroundColor = `var(--bs-${playlist.active ? 'success' : 'danger'}-bg-subtle)`;
                         playlistCard.innerHTML = `
-                            <div class="row align-items-center">
-                                <div class="col-2 d-flex flex-column align-items-center justify-content-center text-center">
-                                    <input id="cover-image" type="image" class="form-control img-fluid" src="/img/preview-song-img.jpeg"
-                                        alt="Imagen de la canción" style="height: 128px; width: 128px; object-fit: contain;" disabled>
-                                    <input name="cover" id="cover-input" type="file" style="display:none" accept="image/*" disabled>
+                            <div class="row align-items-center g-3">
+                                <div class="col-12 col-sm-4 col-md-3 col-lg-2 d-flex flex-column align-items-center justify-content-center text-center">
+                                    <img id="cover-image" type="image" class="img-fluid" src="/img/preview-song-img.jpeg"
+                                        alt="Imagen de la canción" style="height: 128px; width: 128px; min-height: 128px; min-width: 128px; object-fit: contain; border: 1px solid var(--bs-tertiary-bg); border-radius: 12px;" disabled>
                                 </div>
-                                <div class="col-6">
+                                <div class="col-12 col-sm-8 col-md-9 col-lg-10 text-center text-sm-start">
                                     <h4>${quoteattr(playlist.name)}</h4>
                                     <h5>ID: ${playlist.id}</h5>
                                     <p>${playlist.description != null ? quoteattr(playlist.description.toString()) : 'Sin descripcion'}</p>
                                 </div>
-                                <div class="col-4 text-end">
-                                    <button class="btn btn-primary">Ver canciones</button>
-                                </div>
                             </div>
-                        `; //TODO botones modificar/eliminar playlist
+                        `;
 
                         playlistsContainer.appendChild(playlistCard);
 
-                        const img = playlistCard.querySelector('input[type="image"]');
-                        const input = playlistCard.querySelector('#cover-input');
+                        // Imagen de la playlist
 
-                        imagePreview(img, input);
+                        const img = playlistCard.querySelector('#cover-image');
+
 
                         const cover = await fetch(`/admin/playlists/playlist/${playlist.id}/cover`, {
                             method: 'GET',
@@ -490,13 +494,253 @@
                             img.src = url;
                         }
 
-                        playlistCard.style.display = 'block';
+                        // Modal playlist
 
-                        //TODO modal canciones de playlist y listeners de botones
+                        //TODO Añadir switch para activar/desactivar playlist y añadir tooltips a botones con imagenes
+
+                        const modalElement = document.createElement('div');
+                        modalElement.innerHTML = `
+                        <!-- Modal playlist ${playlist.id} -->
+                        <div class="modal fade" id="modal${playlist.id}" tabindex="-1" aria-labelledby="modal${playlist.id}Label" aria-hidden="true">
+                            <div class="modal-dialog modal-xl">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="modal${playlist.id}Label">Playlist ${playlist.id}</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="container d-flex flex-column mb-3">
+                                            <div class="row align-items-center justify-content-center text-center g-3 mb-3">
+                                                <div class="col-12 col-lg-3 col-xl-2 d-flex align-items-center justify-content-center text-center">
+                                                    <input id="cover-image" type="image" class="form-control img-fluid" src="/img/preview-song-img.jpeg"
+                                                        alt="Imagen de la canción" style="height: 128px; width: 128px; min-height: 128px; min-width: 128px; object-fit: contain;">
+                                                    <input name="cover" id="cover-input" type="file" style="display:none" accept="image/*">
+                                                </div>
+                                                <div class="col-12 col-lg-9 col-xl-10">
+                                                    <div class="form-floating mb-3">
+                                                        <input type="text" class="form-control" id="playlist-name" value="${quoteattr(playlist.name)}">
+                                                        <label for="playlist-name">Nombre</label>
+                                                    </div>
+                                                    <div class="form-floating">
+                                                        <textarea class="form-control" id="playlist-description">${playlist.description != null ? quoteattr(playlist.description.toString()) : ''}</textarea>
+                                                        <label for="playlist-description">Descripción</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <button type="button" id="save" class="btn btn-success align-self-end">
+                                                <img src="/img/admin/check-lg.svg" alt="Aceptar cambios">
+                                            </button>
+                                        </div>
+                                        <hr class="my-4">
+                                        <div class="container d-flex justify-content-between align-items-center mb-2">
+                                            <h4>Canciones</h4>
+                                            <button id="add" class="btn btn-primary align-self-end" type="button">
+                                                <img src="/img/admin/plus.svg" alt="Añadir canción"></img>
+                                            </button>
+                                        </div>
+
+                                        <div class="container" id="songs-container">
+                                            
+                                        </div>
+
+                                        <div class="audio-loader-container" id="playlistSongsLoader">
+                                            <div class="audio-loader">
+                                                <div class="audio-bar"></div>
+                                                <div class="audio-bar"></div>
+                                                <div class="audio-bar"></div>
+                                                <div class="audio-bar"></div>
+                                                <div class="audio-bar"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" id="delete" class="btn btn-danger" data-bs-dismiss="modal">
+                                            <img src="/img/admin/trash3-fill.svg" alt="Eliminar playlist">    
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        `;
+                        modalContainer.appendChild(modalElement);
+
+                        const songsContainer = modalElement.querySelector('#songs-container');
+
+                        const coverImage = modalElement.querySelector(`#cover-image`);
+                        const coverInput = modalElement.querySelector(`#cover-input`);
+
+                        imagePreview(coverImage, coverInput);
+
+                        coverImage.src = img.src;
+
+                        const saveButton = modalElement.querySelector('#save');
+                        const deleteButton = modalElement.querySelector('#delete');
+
+                        const addButton = modalElement.querySelector('#add');
+
+                        deleteButton.addEventListener('click', async function (event) {
+                            event.preventDefault();
+
+                            const response = await fetch(`/admin/playlists/deletePlaylist?id=${playlist.id}`, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': config.csrf.value
+                                },
+                                credentials: 'same-origin'
+                            });
+
+                            if (response.ok) {
+                                modal.hide();
+                                handlePlaylistFilterInput();
+                                showErrorNotification("Playlist eliminada correctamente", "success");
+                            } else {
+                                showErrorNotification("Error al eliminar la playlist: " + response.statusText, "error");
+                            }
+                        });
+
+                        saveButton.addEventListener('click', async function (event) {
+                            event.preventDefault();
+
+                            //TODO Mejorar experiencia de usuario
+
+                            const name = modalElement.querySelector('#playlist-name').value;
+                            const description = modalElement.querySelector('#playlist-description').value;
+
+                            const cover = modalElement.querySelector('#cover-input').files[0];
+
+                            const formData = new FormData();
+                            if (name !== playlist.name) {
+                                formData.append('name', name);
+                            }
+                            if (description !== playlist.description) {
+                                formData.append('desc', description);
+                            }
+                            if (cover) {
+                                formData.append('cover', cover);
+                            }
+
+                            fetch(`/admin/playlists/modifyPlaylist?id=${playlist.id}`, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': config.csrf.value
+                                },
+                                credentials: 'same-origin',
+                                body: formData
+                            }).then(response => {
+                                if (response.ok) {
+                                    handlePlaylistFilterInput();
+                                    showErrorNotification("Playlist modificada correctamente", "success");
+                                } else {
+                                    showErrorNotification("Error " + response.status + " al modificar la playlist", "error");
+                                }
+                            });
+
+                        });
+
+                        addButton.addEventListener('click', async function (event) {
+                            event.preventDefault();
+                            const songId = prompt("Introduce el ID de la canción que quieres añadir a la playlist:");
+                            if (songId) {
+                                const response = await fetch(`/admin/playlists/addSongToPlaylist?playlistId=${playlist.id}&songId=${songId}`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'X-CSRF-TOKEN': config.csrf.value
+                                    },
+                                    credentials: 'same-origin'
+                                });
+
+                                if (response.ok) {
+                                    const song = await fetch(`/admin/playlists/searchSongs?id=${songId}`, {
+                                        method: 'GET',
+                                        headers: {
+                                            'X-CSRF-TOKEN': config.csrf.value
+                                        },
+                                        credentials: 'same-origin'
+                                    });
+                                    const songData = await song.json();
+                                    const songCard = await inPlaylistSongCard(songData.content[0], playlist.id, songsContainer);
+                                    showErrorNotification("Canción añadida correctamente", "success");
+                                } else {
+                                    const errorText = await response.text();
+                                    showErrorNotification("Error " + await response.status + " al añadir la canción: " + errorText, "error");
+                                }
+                            }
+                        });
+
+                        const modal = new bootstrap.Modal(modalElement.querySelector(`#modal${playlist.id}`), {
+                            backdrop: true,
+                            keyboard: true
+                        });
+
+                        playlistCard.addEventListener('click', async function (event) {
+
+                            songsContainer.innerHTML = '';
+
+                            const generalLoader = document.getElementsByClassName('loader')[0];
+                            generalLoader.style.display = 'flex';
+                            const songsLoader = modalElement.querySelector('#playlistSongsLoader');
+                            songsLoader.style.display = 'flex';
+
+                            try {
+
+                                const songs = await fetch(`/admin/playlists/searchSongs?playlists=${playlist.id}&all=true`, {
+                                    method: 'GET',
+                                    headers: {
+                                        'X-CSRF-TOKEN': config.csrf.value
+                                    },
+                                    credentials: 'same-origin'
+                                });
+
+                                if (!songs.ok) {
+                                    throw new Error("Error al obtener las canciones de la playlist: " + songs.statusText);
+                                }
+
+                                const songsData = await songs.json();
+                                if (songsData.content.length == 0) {
+                                    const noSongs = document.createElement('div');
+                                    noSongs.className = 'alert alert-info text-center my-3';
+                                    noSongs.textContent = 'La playlist no tiene canciones';
+                                    songsContainer.appendChild(noSongs);
+                                    return;
+                                }
+
+                                let songPromises = [];
+
+                                for (let song of songsData.content) {
+                                    songPromises.push(inPlaylistSongCard(song, playlist.id, songsContainer));
+                                }
+
+                                if (songPromises.length > 0) {
+                                    const results = await Promise.all(songPromises);
+                                    if (results.status === 'rejected') {
+                                        throw new Error("Error al cargar las canciones de la playlist");
+                                    }
+                                }
+
+
+                            } catch (error) {
+                                songsContainer.innerHTML = '';
+                                const errorMessage = document.createElement('div');
+                                errorMessage.className = 'alert alert-danger text-center my-3';
+                                errorMessage.innerHTML = 'Error al obtener las canciones de la playlist. Por favor, inténtalo de nuevo más tarde o comunicalo a un administrador.';
+                                songsContainer.appendChild(errorMessage);
+                                showErrorNotification(error.toString(), "error");
+                                console.error(error);
+                            } finally {
+                                songsLoader.style.display = 'none';
+                                generalLoader.style.display = 'none';
+                                modal.show();
+                            }
+
+                        });
+
+                        playlistCard.style.display = 'block';
                     }
 
                 } catch (error) {
                     playlistsContainer.innerHTML = '';
+                    modalContainer.innerHTML = '';
+
                     const errorMessage = document.createElement('div');
                     errorMessage.className = 'alert alert-danger text-center my-3';
                     errorMessage.innerHTML = 'Error al obtener las playlists. Por favor, inténtalo de nuevo más tarde o comunicalo a un administrador.';
@@ -518,6 +762,83 @@
         playlistOrderSelect.addEventListener('change', handlePlaylistFilterInput);
         playlistOrderButton.addEventListener('click', handlePlaylistFilterInput);
 
+        async function inPlaylistSongCard(song, playlistId, songsContainer) {
+            const songId = song.id;
+            const songName = song.name;
+            const songArtists = song.artists;
+            const songAlbum = song.album;
+            const songActive = song.active;
+
+            // Crea la card pero no se inserta todavía hasta que se cargue la imagen y el audio
+            const songCard = document.createElement('div');
+            songCard.className = 'card p-3 my-2 existing-song-card';
+            songCard.id = song.id;
+            songCard.style.backgroundColor = `var(--bs-${songActive ? 'success' : 'danger'}-bg-subtle)`;
+            songCard.innerHTML = `
+                                        <div class="row align-items-center g-3">
+                                            <div class="col-12 col-xl-2 d-flex flex-column align-items-center justify-content-center text-center">
+                                                <input id="cover-image" type="image" class="form-control img-fluid"
+                                                    alt="Imagen de la canción" style="height: 128px; width: 128px; object-fit: contain;" disabled>
+                                                <input name="cover" id="cover-input" type="file" style="display:none" accept="image/*" disabled>
+                                            </div>
+                                            <div class="col-12 col-xl-6">
+                                                <h5>${quoteattr(songName)}</h5>
+                                                <p>Artistas: ${quoteattr(songArtists.join(', '))}
+                                                <br>Álbum: ${quoteattr(songAlbum)}
+                                                <br>ID: ${songId}</p>
+                                            </div>
+                                            <div class="col-12 col-xl-3 d-flex flex-column text-center">
+                                                <audio id="player" class="flex-grow-1 w-100" controls></audio>
+                                            </div>
+                                            <div class="col-12 col-xl-1 text-center">
+                                                <div id="buttons-container" class="d-flex justify-content-center">
+                                                    <button id="remove" type="button" class="btn btn-danger mx-2 mx-xl-1">
+                                                        <img src="/img/admin/dash.svg">
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        `;
+
+            const coverImage = songCard.querySelector(`#cover-image`);
+            const coverInput = songCard.querySelector(`#cover-input`);
+            const player = songCard.querySelector('#player');
+
+            try {
+
+                coverImage.src = await getSongCover(songId);
+                player.src = await getSongAudio(songId);
+                player.volume = 0.25;
+
+                imagePreview(coverImage, coverInput);
+
+                songsContainer.appendChild(songCard);
+
+                const removeButton = songCard.querySelector('#remove');
+                removeButton.addEventListener('click', () => {
+                    fetch(`/admin/playlists/removeSongFromPlaylist?playlistId=${playlistId}&songId=${songId}`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': config.csrf.value
+                        },
+                        credentials: 'same-origin'
+                    }).then(response => {
+                        if (response.ok) {
+                            songsContainer.removeChild(songCard);
+                            showErrorNotification("Canción eliminada correctamente", "success");
+                        } else {
+                            showErrorNotification("Error al eliminar la canción: " + response.statusText, "error");
+                        }
+                    });
+                });
+
+            } catch (error) {
+                showErrorNotification("Error al cargar la canción: " + error, "error");
+                console.error(`Error cargando datos de la canción ${songName}:`, error);
+            }
+
+            return songCard;
+        }
     </script>
 </div>
 
