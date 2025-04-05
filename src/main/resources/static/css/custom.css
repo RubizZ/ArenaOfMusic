@@ -67,7 +67,8 @@ footer {
     display: flex;
     flex-direction: column;
     align-items: center;
-    z-index: 1050;
+    z-index: 1060;
+    /* Mayor que 1050 que es el z-index de los modales de bootstrap */
     pointer-events: none;
 }
 

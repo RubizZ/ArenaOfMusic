@@ -1,4 +1,6 @@
 // Función para obtener la portada de una canción
+// Si se llama con await, devuelve la URL de la portada
+// Si se llama sin await, devuelve una promesa
 async function getSongCover(songId) {
     try {
         const response = await fetch(`/admin/playlists/song/${songId}/cover`);
@@ -27,6 +29,8 @@ async function getSongCover(songId) {
 }
 
 // Función para obtener el archivo de audio de una canción
+// Si se llama con await, devuelve la URL del audio
+// Si se llama sin await, devuelve una promesa
 async function getSongAudio(songId) {
     try {
         const response = await fetch(`/admin/playlists/song/${songId}/audio`);

@@ -909,7 +909,7 @@
                     if (data.content.length == 0) {
                         const noSongs = document.createElement('div');
                         noSongs.className = 'alert alert-info text-center my-3';
-                        noSongs.innerHTML = 'No se han encontrado resultados';
+                        noSongs.textContent = 'No se han encontrado resultados';
                         songsContainer.appendChild(noSongs);
                         return;
                     }

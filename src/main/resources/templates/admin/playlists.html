@@ -482,7 +482,9 @@
 
                     // Añadir nuevas canciones
                     const newSongIds = [];
-                    showErrorNotification('Subiendo canciones nuevas...', 'info');
+                    if (newSongs.length > 0) {
+                        showErrorNotification('Subiendo canciones nuevas...', 'info');
+                    }
 
                     for (const song of newSongs) {
                         const songData = new FormData();
@@ -509,7 +511,11 @@
                     }
 
                     const addedSongs = [];
-                    showErrorNotification('Añadiendo canciones a la playlist...', 'info');
+
+                    if (results.filter(r => r.status === 'fulfilled').length > 0 || existingAddedSongs.length > 0) {
+                        showErrorNotification('Añadiendo canciones a la playlist...', 'info');
+                    }
+
                     for (const songId of results.map(r => r.value)) {
                         addedSongs.push(addSongToPlaylist(songId, playlistId));
                     }
