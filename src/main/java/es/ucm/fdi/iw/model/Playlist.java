@@ -41,14 +41,6 @@ public class Playlist implements Transferable<Playlist.Transfer> {
     @JoinTable(name = "playlist_song", joinColumns = @JoinColumn(name = "playlist_id"), inverseJoinColumns = @JoinColumn(name = "song_id"))
     private Set<Song> songs;
 
-    public synchronized void addSong(Song song) {
-        songs.add(song);
-    }
-
-    public synchronized void removeSong(Song song) {
-        songs.remove(song);
-    }
-
     @Getter
     @AllArgsConstructor
     public class Transfer {

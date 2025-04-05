@@ -152,21 +152,23 @@ public class PlaylistService {
         if (song == null)
             throw new IllegalArgumentException("La cancion no existe");
 
-        Query query = entityManager.createNativeQuery(
-                "INSERT INTO playlist_song (playlist_id, song_id) " +
-                        "SELECT :playlistId, :songId " +
-                        "WHERE NOT EXISTS (" +
-                        "  SELECT 1 FROM playlist_song " +
-                        "  WHERE playlist_id = :playlistId AND song_id = :songId" +
-                        ")");
-        query.setParameter("playlistId", playlistId);
-        query.setParameter("songId", songId);
+        String checkSql = "SELECT COUNT(*) FROM playlist_song WHERE playlist_id = ?1 AND song_id = ?2";
+        Long count = ((Number) entityManager.createNativeQuery(checkSql)
+                .setParameter(1, playlistId)
+                .setParameter(2, songId)
+                .getSingleResult()).longValue();
 
-        int rowsAffected = query.executeUpdate();
-
-        if (rowsAffected == 0) {
+        if (count > 0) {
             throw new IllegalArgumentException("La cancion ya esta en la playlist");
         }
+
+        String insertSql = "INSERT INTO playlist_song (playlist_id, song_id) VALUES (?1, ?2)";
+        entityManager.createNativeQuery(insertSql)
+                .setParameter(1, playlistId)
+                .setParameter(2, songId)
+                .executeUpdate();
+
+        entityManager.clear();
     }
 
     @Transactional
@@ -240,6 +242,7 @@ public class PlaylistService {
         return new PageImpl<>(transfers, pageable, query.getResultList().size());
     }
 
+    @Transactional(rollbackFor = { Exception.class })
     public void modifyPlaylist(ModifiedPlaylistDTO playlist)
             throws UnsupportedImageException, ImageConversionException, IOException {
         Playlist p = entityManager.find(Playlist.class, playlist.getId());
@@ -263,7 +266,22 @@ public class PlaylistService {
                     if (song == null) {
                         throw new IllegalArgumentException("La cancion no existe");
                     }
-                    p.addSong(song);
+                    String checkSql = "SELECT COUNT(*) FROM playlist_song WHERE playlist_id = ?1 AND song_id = ?2";
+                    Long count = ((Number) entityManager.createNativeQuery(checkSql)
+                            .setParameter(1, playlist.getId())
+                            .setParameter(2, songId)
+                            .getSingleResult()).longValue();
+                    if (count > 0) {
+                        throw new IllegalArgumentException("La cancion ya esta en la playlist");
+                    }
+
+                    String insertSql = "INSERT INTO playlist_song (playlist_id, song_id) VALUES (?1, ?2)";
+                    entityManager.createNativeQuery(insertSql)
+                            .setParameter(1, playlist.getId())
+                            .setParameter(2, songId)
+                            .executeUpdate();
+
+                    entityManager.clear();
                 }
             }
 
@@ -273,7 +291,17 @@ public class PlaylistService {
                     if (song == null) {
                         throw new IllegalArgumentException("La cancion no existe");
                     }
-                    p.removeSong(song);
+                    Query query = entityManager.createNativeQuery(
+                            "DELETE FROM playlist_song " +
+                                    "WHERE playlist_id = :playlistId AND song_id = :songId");
+                    query.setParameter("playlistId", playlist.getId());
+                    query.setParameter("songId", songId);
+                    int rowsAffected = query.executeUpdate();
+                    if (rowsAffected == 0) {
+                        throw new IllegalArgumentException("La cancion no esta en la playlist");
+                    }
+                    entityManager.clear();
+
                 }
             }
 
