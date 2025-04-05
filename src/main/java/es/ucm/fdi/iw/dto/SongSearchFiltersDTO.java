@@ -23,4 +23,6 @@ public class SongSearchFiltersDTO {
     private List<String> artists;
     @Nullable
     private String album;
+    @Nullable
+    private List<Long> playlists;
 }

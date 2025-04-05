@@ -32,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 import es.ucm.fdi.iw.dto.ModifiedSongDTO;
 import es.ucm.fdi.iw.dto.NewSongDTO;
 import es.ucm.fdi.iw.dto.SongSearchFiltersDTO;
+import es.ucm.fdi.iw.model.Playlist;
 import es.ucm.fdi.iw.model.Song;
 import es.ucm.fdi.iw.util.AudioConverter;
 import es.ucm.fdi.iw.util.NoDataException;
@@ -46,6 +47,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaDelete;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.CriteriaUpdate;
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
@@ -307,6 +309,23 @@ public class SongService {
         return page.map(Song::toTransfer);
     }
 
+    public Page<Song.Transfer> searchSongs(SongSearchFiltersDTO filters) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
+        CriteriaQuery<Song> select = cb.createQuery(Song.class);
+        Root<Song> selectRoot = select.from(Song.class);
+
+        List<Predicate> predicates = buildPredicates(cb, selectRoot, filters);
+
+        select.where(predicates.toArray(new Predicate[0]));
+
+        TypedQuery<Song> query = entityManager.createQuery(select);
+        List<Song> resultList = query.getResultList();
+
+        List<Song.Transfer> result = resultList.stream().map(Song::toTransfer).collect(Collectors.toList());
+        return new PageImpl<>(result, Pageable.unpaged(), result.size());
+    }
+
     private List<Predicate> buildPredicates(CriteriaBuilder cb, Root<Song> root, SongSearchFiltersDTO filters) {
         List<Predicate> predicates = new ArrayList<>();
 
@@ -336,6 +355,11 @@ public class SongService {
         if (filters.getAlbum() != null) {
             predicates.add(cb.like(cb.lower(root.get("album")),
                     "%" + filters.getAlbum().toLowerCase() + "%"));
+        }
+
+        if (filters.getPlaylists() != null && !filters.getPlaylists().isEmpty()) {
+            Join<Song, Playlist> playlistJoin = root.join("playlists");
+            predicates.add(playlistJoin.get("id").in(filters.getPlaylists()));
         }
 
         return predicates;

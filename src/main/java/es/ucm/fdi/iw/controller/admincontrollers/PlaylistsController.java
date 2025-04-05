@@ -118,8 +118,12 @@ public class PlaylistsController {
 
     @GetMapping("/searchSongs")
     public ResponseEntity<Page<Song.Transfer>> searchSongs(@ModelAttribute SongSearchFiltersDTO filters,
-            @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
-        return ResponseEntity.ok(songService.searchSongs(filters, pageable));
+            @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable,
+            @RequestParam(required = false) Boolean all) {
+        if (all != null && all)
+            return ResponseEntity.ok(songService.searchSongs(filters));
+        else
+            return ResponseEntity.ok(songService.searchSongs(filters, pageable));
     }
 
     @PostMapping("/submitPlaylist")
