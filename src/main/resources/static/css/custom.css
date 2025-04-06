@@ -597,6 +597,87 @@ a[disabled] {
     overflow-wrap: normal;
 }
 
+/* Botones de playlists */
+.playlist-radio + label,
+.playlist-radio + label:active,
+.playlist-radio + label:focus,
+.playlist-radio:focus + label {
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    transition: none !important;
+}
+
+.playlist-radio:checked + label img {
+    border: 2px solid black;
+}
+
+/* Botones de modo de juego */
+label.btn-outline-dark {
+    background-color: #ECECEC;
+    border: none;
+}
+
+label.btn-outline-dark:hover {
+    background-color: #C9C9C9 !important;
+}
+
+input.btn-check:checked + label.btn-outline-dark {
+    border: 2px solid black !important;
+    background-color: #ECECEC !important;
+    color: black !important;
+}
+
+input.btn-check:checked + label.btn-outline-dark:hover {
+    background-color: #C9C9C9 !important;
+}
+
+/* Thumb del control deslizante */
+input[type=range].form-range::-webkit-slider-thumb {
+    background: black;
+}
+
+input[type=range].form-range::-moz-range-thumb {
+    background: black;
+}
+
+input[type=range].form-range::-ms-thumb {
+    background: black;
+}
+
+input[type=range].form-range:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+input[type=range].form-range:focus::-webkit-slider-thumb {
+    outline: none;
+    box-shadow: none !important;
+}
+
+input[type=range].form-range:focus::-moz-focus-inner {
+    border: 0;
+}
+
+/* Botones de cambio de vista */
+.btn-back {
+    background-color: #F5F5F5;
+    border: none;
+}
+
+.btn-back:hover {
+    background-color: #ECECEC;
+}
+
+.btn-accept {
+    background-color: #94D977;
+    border: none;
+}
+
+.btn-accept:hover {
+    background-color: #7BCF6C;
+}
+
 /* ---PARTIDA--- */
 
 
