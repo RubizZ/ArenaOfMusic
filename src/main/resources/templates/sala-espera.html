@@ -11,7 +11,7 @@
 
     <main class="flex-shrink-0 d-flex justify-content-center container">
 
-        <div class="sala-espera p-6 m-5 d-flex justify-content-center rounded">
+        <div class="sala-espera p-6 m-5 d-flex bg-dark-subtle justify-content-center rounded">
             <div class="espera-card p-3">
 
                 <h1 class="text-center">Sala de Espera</h1>
@@ -35,7 +35,7 @@
                     </div>
                 </div>-->
 
-                    <div class="col col-md-10 col-lg-6 justify-content-center mb-4 text-center">
+                    <div class="col-md-12 col-lg-6 mb-4 text-center">
                         <h3>Jugadores esperando:</h3>
                         <div th:each="player : ${players}" class="d-inline-block mx-2">
                             <img th:src="@{/img/default-profile.png}" alt="Imagen por defecto" class="rounded-circle"
@@ -45,7 +45,7 @@
                     </div>
 
                     <!-- Información de la partida -->
-                    <div class="col col-md-10 col-lg-6 text-center mb-4">
+                    <div class="col-md-12 col-lg-6 text-center mb-4">
                         <h3>Información de la partida</h3>
                         <p><strong>Playlist:</strong> <span th:text="${playlist.name}"></span></p>
                         <!-- ToDo: Cargar dinámicamente la imgen de la playlist -->
@@ -59,13 +59,13 @@
                         <p><strong>Modo de juego:</strong> <span th:text="${gameConfig.gameMode}"></span></p>
 
                         <!-- Botón para abrir modal de edición -->
-                        <button class="btn btn-warning mt-2" data-bs-toggle="modal" data-bs-target="#editConfigModal">
+                        <button class="btn btn-danger mt-2" data-bs-toggle="modal" data-bs-target="#editConfigModal">
                             Editar Configuración
                         </button>
                     </div>
 
                     <!-- Botón para comenzar la partida -->
-                    <div class="container d-flex justify-content-center">
+                    <div class="container text-center">
                         <button class="btn btn-success mt-4" id="startButton" th:data-game-id="${game.id}">
                             Comenzar partida
                         </button>
