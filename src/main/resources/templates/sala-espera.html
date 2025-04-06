@@ -127,55 +127,31 @@
     <th:block th:replace="~{fragments/footer.html :: footer}" />
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            document.getElementById("saveChanges").addEventListener("click", function () {
-                const rounds = document.getElementById("editRounds").value;
-                const timePerRound = document.getElementById("editTimePerRound").value;
-                const gameMode = document.getElementById("editGameMode").value;
-
-                fetch("/partida/editar-configuracion", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        gameId: "[[${game.id}]]",
-                        rounds: rounds,
-                        timePerRound: timePerRound,
-                        gameMode: gameMode
-                    })
-                }).then(response => {
-                    if (response.ok) {
-                        window.location.reload();
-                    } else {
-                        alert("Error al actualizar la configuración.");
-                    }
-                }).catch(error => {
-                    console.error("Error:", error);
-                });
-            });
-            document.getElementById("startButton").addEventListener("click", function () {
-                let gameId = this.getAttribute("data-game-id");
-
-                fetch(`/partida/iniciar/${gameId}`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    }
-                }).then(response => {
-                    if (!response.ok) {
-                        throw new Error("Error al iniciar la partida");
-                    }
-                    return response.json();
-                }).then(data => {
-                    console.log("Partida iniciada:", data);
-                    // Aquí podrías redirigir a la vista del juego o cambiar la interfaz
-                }).catch(error => {
-                    console.error("Error:", error);
-                });
+        document.getElementById("startButton").addEventListener("click", function() {
+            let gameId = this.getAttribute("data-game-id");
+            const csrfToken = document.querySelector('input[name="_csrf"]').value;
+            console.log("Iniciando partida con ID:", gameId);
+            fetch(`/partida/iniciar/${gameId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.redirectUrl) {
+                    window.location.href = data.redirectUrl;
+                } else if (data.error) {
+                    alert("Error: " + data.error);
+                }
+            })
+            .catch(err => {
+                console.error("Error al iniciar partida", err);
+                alert("Error inesperado");
             });
         });
-    </script>
+        </script>
 </body>
 
 </html>
