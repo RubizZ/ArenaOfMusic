@@ -2,9 +2,11 @@ package es.ucm.fdi.iw.controller;
 
 import java.util.UUID;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -76,11 +79,11 @@ public class PartidaController {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
             }
 
-            if (game.getGameState().equals("FINISHED")) {
+            if (game.getGameState().equals(Game.GameState.FINISHED)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
             }
 
-            if (!game.getGameState().equals("WAITING")) {
+            if (!game.getGameState().equals(Game.GameState.WAITING)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha comenzado.");
             }
 
@@ -112,16 +115,17 @@ public class PartidaController {
     }
 
     @PostMapping("/partida/iniciar/{gameId}")
-    public String iniciarPartida(@PathVariable UUID gameId, RedirectAttributes redirectAttributes, Model model) {
+    @ResponseBody
+    public ResponseEntity<?> iniciarPartida(@PathVariable UUID gameId) {
         try {
             partidaService.startGame(gameId);
-            return "redirect:/partida/partida/" + gameId.toString();
+            return ResponseEntity.ok(Map.of(
+                    "message", "Partida iniciada correctamente",
+                    "redirectUrl", "/partida/partida/" + gameId.toString()));
         } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/error";
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Error al iniciar la partida.");
-            return "redirect:/error";
+            return ResponseEntity.status(500).body(Map.of("error", "Error al iniciar la partida"));
         }
     }
 
@@ -132,10 +136,10 @@ public class PartidaController {
             if (game == null || !game.getActive()) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
             }
-            if (game.getGameState().equals("FINISHED")) {
+            if (game.getGameState().equals(Game.GameState.FINISHED)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
             }
-            if (!game.getGameState().equals("WAITING")) {
+            if (game.getGameState().equals(Game.GameState.WAITING)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha comenzado.");
             }
             return "partida";
