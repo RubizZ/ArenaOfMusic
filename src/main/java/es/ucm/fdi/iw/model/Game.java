@@ -10,6 +10,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -29,6 +31,12 @@ import lombok.NoArgsConstructor;
 @Table(name = "Game")
 public class Game implements Transferable<Game.Transfer> {
 
+    public enum GameState {
+        WAITING, // Estado cuando la partida está esperando a comenzar
+        PLAYING, // Estado cuando la partida está en curso
+        FINISHED // Estado cuando la partida ha terminado
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
@@ -40,7 +48,8 @@ public class Game implements Transferable<Game.Transfer> {
     private String roundJson;
 
     @Column(name = "state", nullable = false)
-    private String gameState;
+    @Enumerated(EnumType.STRING)
+    private GameState gameState;
 
     @Column(name = "active", nullable = false)
     private Boolean active = true;
@@ -50,9 +59,9 @@ public class Game implements Transferable<Game.Transfer> {
     private Playlist playlist;
 
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PlayerGame> participants = new ArrayList<>(); //new CopyOnWriteArrayList<>();
+    private List<PlayerGame> participants = new ArrayList<>();
 
-    public synchronized void addPlayerGame(PlayerGame playerGame) {
+    public void addPlayerGame(PlayerGame playerGame) {
         participants.add(playerGame);
     }
 
@@ -63,7 +72,7 @@ public class Game implements Transferable<Game.Transfer> {
         private String configJson;
         private String roundJson;
         private long playlistId;
-        private String gameState;
+        private GameState gameState;
     }
 
     @Override
