@@ -33,6 +33,9 @@ public class PartidaController {
 
     @GetMapping("/configuracion-partida")
     public String configPartida(Model model) {
+        // Playlists disponibles
+        model.addAttribute("playlists", partidaService.getPlaylists());
+
         return "configuracion-partida";
     }
 
@@ -97,6 +100,4 @@ public class PartidaController {
 
         return "redirect:/sala-espera";
     }
-
-
 }

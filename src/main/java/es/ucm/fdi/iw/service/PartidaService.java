@@ -10,6 +10,17 @@ import org.springframework.stereotype.Service;
 @Service
 public class PartidaService {
 
+    public List<Map<String, Object>> getPlaylists() {
+        return Arrays.asList(
+                Map.of("id", 1, "image", "img/default-profile.png", "title", "The Weeknd", "author", "ArenaOfMusic"),
+                Map.of("id", 2, "image", "img/default-profile.png", "title", "ColdPlay", "author", "ArenaOfMusic"),
+                Map.of("id", 3, "image", "img/default-profile.png", "title", "Clásicos 80's", "author", "ArenaOfMusic"),
+                Map.of("id", 4, "image", "img/default-profile.png", "title", "Post Malone", "author", "ArenaOfMusic"),
+                Map.of("id", 5, "image", "img/default-profile.png", "title", "Country", "author", "ArenaOfMusic"),
+                Map.of("id", 6, "image", "img/default-profile.png", "title", "Ed Sheeran", "author", "ArenaOfMusic")
+        );
+    }
+
     public Map<String, Object> getPlaylist() {
         Map<String, Object> playlist = new HashMap<>();
         playlist.put("image", "img/logo.jpeg");
