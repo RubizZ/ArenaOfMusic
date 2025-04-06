@@ -669,6 +669,12 @@ input[type=range].form-range:focus::-moz-focus-inner {
     background-color: #ECECEC;
 }
 
+.btn-back:active,
+.btn-back:focus {
+    background-color: #F5F5F5 !important;
+}
+
+.bg-accept,
 .btn-accept {
     background-color: #94D977;
     border: none;
@@ -676,6 +682,11 @@ input[type=range].form-range:focus::-moz-focus-inner {
 
 .btn-accept:hover {
     background-color: #7BCF6C;
+}
+
+.btn-accept:active,
+.btn-accept:focus {
+    background-color: #94D977 !important;
 }
 
 /* ---PARTIDA--- */
