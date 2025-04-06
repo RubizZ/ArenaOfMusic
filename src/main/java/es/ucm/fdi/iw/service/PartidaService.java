@@ -114,7 +114,7 @@ public class PartidaService {
             Game game = new Game();
             game.setConfigJson(gameConfig.toString());
             game.setRoundJson("[]");
-            game.setGameState("WAITING");
+            game.setGameState(Game.GameState.WAITING);
             game.setPlaylist(playlist);
 
             entityManager.persist(game);
@@ -236,10 +236,10 @@ public class PartidaService {
             if (game == null) {
                 throw new IllegalArgumentException("La partida no existe.");
             }
-            if (!game.getGameState().equals("WAITING")) {
+            if (!game.getGameState().equals(Game.GameState.WAITING)) {
                 throw new IllegalStateException("La partida ya ha comenzado o ha finalizado.");
             }
-            game.setGameState("PREPARING");
+            game.setGameState(Game.GameState.PLAYING);
         } catch (IllegalArgumentException e) {
             System.out.println("Argumento invalido: " + e.getMessage());
         } catch (IllegalStateException e) {
