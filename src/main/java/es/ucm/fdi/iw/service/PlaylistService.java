@@ -313,6 +313,9 @@ public class PlaylistService {
                     if (!Files.exists(path)) {
                         Files.createDirectories(path);
                     } else {
+                        if (!Files.exists(oldPath)) {
+                            Files.createDirectories(oldPath);
+                        }
                         Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
                             @Override
                             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
