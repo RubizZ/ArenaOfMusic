@@ -102,42 +102,37 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form>
-                            <!-- Username -->
+                        <form id="edit-profile-form">
+                            <div id="edit-profile-alert" class="alert d-none" role="alert"></div>
+
                             <div class="mb-3">
                                 <label for="username" class="form-label text-success">Nombre de Usuario</label>
-                                <input type="text" class="form-control" id="username" placeholder="Nombre Usuario"
-                                    th:value="${u.username}">
+                                <input type="text" class="form-control" id="username" name="username"
+                                    placeholder="Nombre Usuario" th:value="${u.username}">
                             </div>
-
-                            <!-- Description -->
                             <div class="mb-3">
                                 <label for="description" class="form-label text-success">Descripción</label>
-                                <textarea class="form-control" id="description" rows="3" placeholder="Descripción..."
-                                    th:value="${u.description}"></textarea>
+                                <textarea class="form-control" id="description" name="description" rows="3"
+                                    placeholder="Descripción..." th:text="${u.description}"></textarea>
                             </div>
-
                             <hr class="text-muted">
-
-                            <!-- Email -->
                             <div class="mb-3">
                                 <label for="email" class="form-label text-success">Correo Electrónico</label>
-                                <input type="email" class="form-control" id="email" placeholder="ejemplo@correo.com"
-                                    th:value="${u.email}">
+                                <input type="email" class="form-control" id="email" name="email"
+                                    placeholder="ejemplo@correo.com" th:value="${u.email}">
                             </div>
-                            <!-- Old Password -->
                             <div class="mb-3">
-                                <label for="password" class="form-label text-success">Vieja Contraseña</label>
-                                <input type="password" class="form-control" id="old-password" placeholder="********">
+                                <label for="old-password" class="form-label text-success">Vieja Contraseña</label>
+                                <input type="password" class="form-control" id="old-password" name="oldPassword"
+                                    placeholder="********">
                             </div>
-                            <!-- Password -->
                             <div class="mb-3">
                                 <label for="password" class="form-label text-success">Nueva Contraseña</label>
-                                <input type="password" class="form-control" id="password" placeholder="********">
+                                <input type="password" class="form-control" id="password" name="password"
+                                    placeholder="********">
                             </div>
-
-
                         </form>
+
                     </div>
                     <div class="modal-footer border-0">
                         <button type="button" class="btn btn-outline-secondary"
@@ -152,5 +147,38 @@
 
     <th:block th:replace="~{fragments/footer.html :: footer}" />
 </body>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const form = document.getElementById("edit-profile-form");
+        const saveBtn = document.querySelector("#editProfileModal .btn-success");
+        const alertBox = document.getElementById("edit-profile-alert");
+
+        saveBtn.addEventListener("click", async () => {
+            const data = {
+                username: form.username.value,
+                email: form.email.value,
+                description: form.description.value,
+                oldPassword: form.oldPassword.value,
+                password: form.password.value
+            };
+
+            try {
+                const response = await go("/perfil/editar", "POST", data);
+                alertBox.className = "alert alert-success";
+                alertBox.textContent = response.message;
+                alertBox.classList.remove("d-none");
+
+                // setTimeout(() => {
+                //     location.reload();
+                // }, 1000);
+            } catch (err) {
+                alertBox.className = "alert alert-danger";
+                alertBox.textContent = err.text || "Error inesperado.";
+                alertBox.classList.remove("d-none");
+            }
+        });
+    });
+</script>
 
 </html>
