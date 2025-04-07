@@ -7,6 +7,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -18,7 +20,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @NoArgsConstructor
-@Table(name = "playlists")
+@Table(name = "playlist")
 public class Playlist implements Transferable<Playlist.Transfer> {
 
     @Id
@@ -35,8 +37,9 @@ public class Playlist implements Transferable<Playlist.Transfer> {
     @Column
     private String description;
 
-    @ManyToMany(mappedBy = "playlists")
-    private Set<Cancion> canciones;
+    @ManyToMany
+    @JoinTable(name = "playlist_song", joinColumns = @JoinColumn(name = "playlist_id"), inverseJoinColumns = @JoinColumn(name = "song_id"))
+    private Set<Song> songs;
 
     @Getter
     @AllArgsConstructor
