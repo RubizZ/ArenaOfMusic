@@ -50,7 +50,7 @@ public class PerfilController {
                     data.get("description"),
                     data.get("oldPassword"),
                     data.get("password"));
-            session.setAttribute("u", perfilService.findById(user.getId())); // aggiorna sessione
+            session.setAttribute("u", perfilService.findById(user.getId())); // actualiza sesión
             return ResponseEntity.ok(Map.of("message", "Perfil actualizado correctamente"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
