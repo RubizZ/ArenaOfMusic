@@ -343,13 +343,11 @@ public class SongService {
         }
 
         if (filters.getArtists() != null && !filters.getArtists().isEmpty()) {
-            String artistJson = filters.getArtists().stream()
-                    .map(artist -> artist.toLowerCase())
-                    .collect(Collectors.joining(".*"));
-
-            predicates.add(cb.like(cb.lower(root.get("artists").as(String.class)),
-                    "%" + artistJson + "%")); // TODO Cambiar filtros para que sean restrictivos y pensar en
-                                              // lower/uppercase
+            List<Predicate> artistPredicates = new ArrayList<>();
+            for (String artist : filters.getArtists()) {
+                artistPredicates.add(cb.like(cb.lower(root.get("artists")), "%" + artist.toLowerCase() + "%"));
+            }
+            predicates.add(cb.and(artistPredicates.toArray(new Predicate[0])));
         }
 
         if (filters.getAlbum() != null) {

@@ -1198,10 +1198,10 @@
                 document.getElementById('songSearchLoader').style.display = 'flex';
 
                 let filters = {
-                    id: encodeURIComponent(songIdFilter.value.trim()),
-                    name: encodeURIComponent(songNameFilter.value.trim()),
-                    artists: encodeURIComponent(Array.from(songArtistsFilter.children).map(tag => tag.textContent.trim()).join('/')),
-                    album: encodeURIComponent(songAlbumFilter.value.trim()),
+                    id: songIdFilter.value.trim(),
+                    name: songNameFilter.value.trim(),
+                    artists: Array.from(songArtistsFilter.children).map(tag => tag.textContent.trim()),
+                    album: songAlbumFilter.value.trim(),
                     sort: songSortSelect.value + (songOrderState == 0 ? ",DESC" : ",ASC")
                 };
 
@@ -1369,23 +1369,23 @@
                             })
                                 .then(response => {
                                     if (response.status === 404) {
-                                        alert(`No existe ninguna cancion con id ${id}`);
+                                        showErrorNotification(`No existe ninguna canción con id ${id}`, "error");
                                         return;
                                     }
 
                                     if (response.status === 500) {
-                                        alert(`El servidor ha tenido un error interno al eliminar la cancion ${id}, por favor, avisa a los programadores`);
+                                        showErrorNotification(`El servidor ha tenido un error interno al eliminar la canción ${id}, por favor, avisa a los programadores`, "error");
                                         handleSongFilterInput();
                                         return;
                                     }
 
                                     if (!response.ok) {
-                                        alert('Ha sucedido un error inesperado al eliminar la cancion');
+                                        showErrorNotification('Ha sucedido un error inesperado al eliminar la canción', "error");
                                         handleSongFilterInput();
                                         return;
                                     }
 
-                                    alert(`Se ha eliminado la cancion ${id}`);
+                                    showErrorNotification(`Se ha eliminado la canción ${id}`, "success");
                                     handleSongFilterInput();
                                 });
                         });
@@ -1424,25 +1424,25 @@
                                 .then(async response => {
                                     if (response.status === 404) {
                                         songFileContainer.classList.add('d-none');
-                                        alert(`No existe ninguna cancion con id ${id} para modificar`);
+                                        showErrorNotification(`No existe ninguna canción con id ${id} para modificar`, "error");
                                         return;
                                     }
 
                                     if (response.status === 500) {
                                         songFileContainer.classList.add('d-none');
-                                        alert(`El servidor ha tenido un error interno al modificar la cancion ${id}, por favor, avisa a los programadores`);
+                                        showErrorNotification(`El servidor ha tenido un error interno al modificar la canción ${id}, por favor, avisa a los programadores`, "error");
                                         handleSongFilterInput();
                                         return;
                                     }
 
                                     if (!response.ok) {
                                         songFileContainer.classList.add('d-none');
-                                        alert('Ha sucedido un error inesperado al modificar la cancion');
+                                        showErrorNotification('Ha sucedido un error inesperado al modificar la canción', "error");
                                         handleSongFilterInput();
                                         return;
                                     }
 
-                                    alert(`Se ha modificado la cancion ${id}`);
+                                    showErrorNotification(`Se ha modificado la canción ${id}`, "success");
                                     audioUrl = await getSongAudio(id);
                                     coverUrl = await getSongCover(id);
 
