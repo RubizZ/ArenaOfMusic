@@ -17,71 +17,69 @@
     <main>
         <h1 class="mt-5 mb-5 text-center">Administrar usuarios</h1>
         <!-- Contenedor fijo para filtros y ordenar por -->
-        <div class="sticky-filters">
-            <div class="container">
-                <div class="row d-flex mb-3">
-                    <!--Filtros-->
-                    <div class="col-8 d-flex flex-column">
-                        <div class="card text-center flex-grow-1">
-                            <div class="row align-items-center justify-content-center ">
-                                <div class="col ps-4">
-                                    <h4>Filtros</h4>
+
+        <div class="container sticky-filters">
+            <div class="row d-flex mb-3">
+                <!--Filtros-->
+                <div class="col-8 d-flex flex-column">
+                    <div class="card text-center flex-grow-1">
+                        <div class="row align-items-center justify-content-center ">
+                            <div class="col ps-4">
+                                <h4>Filtros</h4>
+                            </div>
+                            <div class="col">
+                                <div class="form-floating mb-3 mt-3">
+                                    <input type="number" class="form-control" id="floatingAdminUserID">
+                                    <label for="floatingAdminUserID">ID</label>
                                 </div>
-                                <div class="col">
-                                    <div class="form-floating mb-3 mt-3">
-                                        <input type="number" class="form-control" id="floatingAdminUserID">
-                                        <label for="floatingAdminUserID">ID</label>
-                                    </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-floating mb-3 mt-3">
+                                    <input type="text" class="form-control" id="floatingAdminUserUsername">
+                                    <label for="floatingAdminUserUsername">Username</label>
                                 </div>
-                                <div class="col">
-                                    <div class="form-floating mb-3 mt-3">
-                                        <input type="text" class="form-control" id="floatingAdminUserUsername">
-                                        <label for="floatingAdminUserUsername">Username</label>
-                                    </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-floating mb-3 mt-3">
+                                    <input type="email" class="form-control" id="floatingAdminUserEmail">
+                                    <label for="floatingAdminUserEmail">Email</label>
                                 </div>
-                                <div class="col">
-                                    <div class="form-floating mb-3 mt-3">
-                                        <input type="email" class="form-control" id="floatingAdminUserEmail">
-                                        <label for="floatingAdminUserEmail">Email</label>
-                                    </div>
-                                </div>
-                                <div class="col align-items-center pe-4">
-                                    <div class="form-floating mb-1 mt-1">
-                                        <select class="form-select multi-select" id="floatingAdminUserRoles" multiple>
-                                            <option value="USER">USER</option>
-                                            <option value="ADMIN">ADMIN</option>
-                                        </select>
-                                        <script>
-                                            $('.multi-select').select2();
-                                        </script>
-                                        <label for="floatingAdminUserRoles">Roles</label>
-                                    </div>
+                            </div>
+                            <div class="col align-items-center pe-4">
+                                <div class="form-floating mb-1 mt-1">
+                                    <select class="form-select multi-select" id="floatingAdminUserRoles" multiple>
+                                        <option value="USER">USER</option>
+                                        <option value="ADMIN">ADMIN</option>
+                                    </select>
+                                    <script>
+                                        $('.multi-select').select2();
+                                    </script>
+                                    <label for="floatingAdminUserRoles">Roles</label>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!--Ordenar por-->
-                    <div class="col-4 d-flex">
-                        <div class="card flex-grow-1 align-items-center justify-content-center">
-                            <div class="row justify-content-center align-items-center text-center">
-                                <h5 class="col-auto">Ordenar por</h5>
-                                <div class="col-auto">
-                                    <div class="input-group">
-                                        <select class="form-select" id="adminUserOrder">
-                                            <option value="1">ID</option>
-                                            <option value="2">Fecha de registro</option>
-                                            <option value="3">Ultima vez visto</option>
-                                        </select>
-                                        <button id="adminUserOrderChange" class="btn btn-light" type="button">
-                                            <img id="adminUserOrderType" th:src="@{/img/admin/users/sort-down.svg}">
-                                        </button>
-                                    </div>
+                <!--Ordenar por-->
+                <div class="col-4 d-flex">
+                    <div class="card flex-grow-1 align-items-center justify-content-center">
+                        <div class="row justify-content-center align-items-center text-center">
+                            <h5 class="col-auto">Ordenar por</h5>
+                            <div class="col-auto">
+                                <div class="input-group">
+                                    <select class="form-select" id="adminUserOrder">
+                                        <option value="1">ID</option>
+                                        <option value="2">Fecha de registro</option>
+                                        <option value="3">Ultima vez visto</option>
+                                    </select>
+                                    <button id="adminUserOrderChange" class="btn" type="button">
+                                        <img id="adminUserOrderType" th:src="@{/img/admin/sort-down.svg}">
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -102,7 +100,7 @@
         const imagen = document.getElementById('adminUserOrderType');
         const boton = document.getElementById('adminUserOrderChange');
 
-        const imagenes = ['/img/admin/users/sort-down.svg', '/img/admin/users/sort-up.svg']
+        const imagenes = ['/img/admin/sort-down.svg', '/img/admin/sort-up.svg']
 
         let actual = 0;
 

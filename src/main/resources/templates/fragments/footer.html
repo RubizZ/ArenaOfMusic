@@ -7,14 +7,41 @@
 
 <body>
     <!-- ver https://getbootstrap.com/docs/5.0/examples/sticky-footer-navbar/ -->
-    <footer th:fragment="footer" class="footer mt-auto py-3 bg-dark text-white">
-        <div class="container text-center">
+    <footer th:fragment="footer" class="footer mt-auto py-3">
+
+        <div class="container text-center align-content-center">
             <p class="mb-1">
                 🎵 <strong>Arena of Music</strong> – Adivina canciones y desafía a tus amigos en duelos musicales.
             </p>
             <br>
             <p class="small">© 2025 Arena of Music. Todos los derechos reservados.</p>
+
         </div>
+        <div class="container d-flex justify-content-center">
+            <button id="theme-toggle" class="btn btn-secondary d-flex mx-3">
+                <img id="theme-toggle-img" class="img-fluid" style="object-fit: contain;"
+                    th:src="@{/img/brightness-high-fill.svg}">
+            </button>
+        </div>
+
+        <th:block th:include="~{fragments/error-message :: error-message}"></th:block>
+        <th:block th:include="~{fragments/loader :: loader}"></th:block>
+
+        <script>
+            const toggleButton = document.getElementById("theme-toggle");
+            const img = document.getElementById("theme-toggle-img");
+
+            // Al hacer clic, cambiar el tema
+            toggleButton.addEventListener("click", () => {
+                const currentTheme = htmlElement.getAttribute("data-bs-theme");
+                const newTheme = currentTheme === "light" ? "dark" : "light";
+                const newImg = currentTheme === "light" ? '/img/brightness-high-fill.svg' : '/img/moon-fill.svg';
+
+                htmlElement.setAttribute("data-bs-theme", newTheme);
+                img.src = newImg;
+                localStorage.setItem("theme", newTheme);
+            });
+        </script>
 
         <!-- Bootstrap -->
         <script th:src="@{/js/bootstrap.bundle-5.3.3.js}" src="js/bootstrap.bundle-5.3.3.js"></script>
