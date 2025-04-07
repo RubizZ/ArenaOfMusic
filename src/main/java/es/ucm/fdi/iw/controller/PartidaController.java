@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import es.ucm.fdi.iw.dto.GameConfigDTO;
-import es.ucm.fdi.iw.dto.GamePlayerDTO;
+import es.ucm.fdi.iw.dto.game.GameConfigDTO;
+import es.ucm.fdi.iw.dto.game.GamePlayerDTO;
 import es.ucm.fdi.iw.model.Game;
 import es.ucm.fdi.iw.model.PlayerGame;
 import es.ucm.fdi.iw.model.Playlist;
@@ -53,13 +53,11 @@ public class PartidaController {
             @RequestParam int rondas,
             @RequestParam int tiempo,
             @RequestParam String modoJuego,
-            RedirectAttributes redirectAttributes,
-            HttpSession session) {
-        User creator = (User) session.getAttribute("u");
+            RedirectAttributes redirectAttributes) {
 
         GameConfigDTO gameConfig = new GameConfigDTO(playlistId, modoJuego, rondas, tiempo);
         try {
-            UUID gameId = partidaService.crearPartidaYVincular(gameConfig, creator);
+            UUID gameId = partidaService.crearPartida(gameConfig);
             return "redirect:/partida/sala-espera/" + gameId.toString();
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -71,7 +69,8 @@ public class PartidaController {
     }
 
     @GetMapping("/partida/sala-espera/{gameId}")
-    public String salaEspera(@PathVariable UUID gameId, Model model) {
+    public String salaEspera(@PathVariable UUID gameId, Model model, HttpSession session) {
+        User creator = (User) session.getAttribute("u");
         try {
             Game game = partidaService.getGameById(gameId);
 
@@ -87,9 +86,6 @@ public class PartidaController {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha comenzado.");
             }
 
-            // Obtener Jugadores de la partida
-            Set<GamePlayerDTO> players = partidaService.getGamePlayers(gameId);
-
             // Obtener Configuracion de la Partida
             String gameConfigString = game.getConfigJson();
             GameConfigDTO gameConfig = new GameConfigDTO();
@@ -99,9 +95,9 @@ public class PartidaController {
             Playlist playlist = game.getPlaylist();
 
             // Agregar datos al modelo
-            model.addAttribute("game", game);
+            model.addAttribute("gameId", game.getId().toString());
+            model.addAttribute("userId", creator.getId());
             model.addAttribute("gameConfig", gameConfig);
-            model.addAttribute("players", players);
             model.addAttribute("playlist", playlist);
             return "sala-espera";
         } catch (ResponseStatusException e) {

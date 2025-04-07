@@ -1,4 +1,4 @@
-package es.ucm.fdi.iw.dto;
+package es.ucm.fdi.iw.dto.game;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

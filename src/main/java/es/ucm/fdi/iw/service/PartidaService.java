@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import es.ucm.fdi.iw.dto.GameConfigDTO;
-import es.ucm.fdi.iw.dto.GamePlayerDTO;
+import es.ucm.fdi.iw.dto.game.GameConfigDTO;
+import es.ucm.fdi.iw.dto.game.GamePlayerDTO;
 import es.ucm.fdi.iw.model.Game;
 import es.ucm.fdi.iw.model.PlayerGame;
 import es.ucm.fdi.iw.model.PlayerGameId;
@@ -135,7 +135,7 @@ public class PartidaService {
     }
 
     @Transactional
-    public PlayerGame addPlayerToGame(long userId, UUID gameId) {
+    public PlayerGame addPlayerIntoGame(long userId, UUID gameId) {
         try {
             Game game = entityManager.find(Game.class, gameId);
             if (game == null) {
@@ -197,16 +197,36 @@ public class PartidaService {
     }
 
     @Transactional
-    public UUID crearPartidaYVincular(GameConfigDTO gameConfig, User creator) {
+    public UUID crearPartida(GameConfigDTO gameConfig) {
         try {
             UUID gameId = createPartida(gameConfig);
-            PlayerGame pg = addPlayerToGame(creator.getId(), gameId);
-            addPlayerGameToUser(creator.getId(), pg);
-            addPlayerGameToGame(gameId, pg);
             return gameId;
         } catch (Exception e) {
             System.err.println("Error al crear partida o vincular host con partida: " + e.getMessage());
             throw new RuntimeException("No se pudo crear partida o vincular host a partida, intenta nuevamente.");
+        }
+    }
+
+    @Transactional
+    public void addPlayerToGame(UUID gameId, long userId) {
+        try {
+            Game game = entityManager.find(Game.class, gameId);
+            if (game == null) {
+                throw new IllegalArgumentException("La partida con ID " + gameId + " no existe.");
+            }
+
+            User user = entityManager.find(User.class, userId);
+            if (user == null) {
+                throw new IllegalArgumentException("El usuario con ID " + userId + " no existe.");
+            }
+
+            PlayerGame pg = addPlayerIntoGame(userId, gameId);
+            addPlayerGameToUser(userId, pg);
+            addPlayerGameToGame(gameId, pg);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Argumento invalido: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Error inesperado al agregar jugador a la partida: " + e.getMessage());
         }
     }
 

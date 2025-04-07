@@ -15,18 +15,27 @@ import es.ucm.fdi.iw.model.User;
  * @see https://docs.spring.io/spring-security/reference/servlet/integrations/websocket.html
  */
 @Configuration
-@EnableWebSocketSecurity  
+@EnableWebSocketSecurity
 public class WebSocketSecurityConfig {
 
     @Bean
-    AuthorizationManager<Message<?>> messageAuthorizationManager(MessageMatcherDelegatingAuthorizationManager.Builder messages) {
-        
+    AuthorizationManager<Message<?>> messageAuthorizationManager(
+            MessageMatcherDelegatingAuthorizationManager.Builder messages) {
+
         // necesario estar logeado para poder enviar
-        // necesario ser admin para poder enviar a /admin/**, y para poder recibir de /admin/**
+        // necesario ser admin para poder enviar a /admin/**, y para poder recibir de
+        // /admin/**
         messages
                 .simpDestMatchers("/admin/**").hasRole(User.Role.ADMIN.toString())
                 .simpSubscribeDestMatchers("/admin/**").hasRole(User.Role.ADMIN.toString())
                 .anyMessage().authenticated();
+
+        // Nueva seguridad para las rutas del juego (necesidad de estar logeado)
+        messages
+                .simpDestMatchers("/game/**").authenticated()
+                .simpSubscribeDestMatchers("/topic/game/**", "/queue/game/**").authenticated()
+                .anyMessage().authenticated();
+
         return messages.build();
     }
 }

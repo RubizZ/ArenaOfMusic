@@ -16,31 +16,12 @@
 
                 <h1 class="text-center">Sala de Espera</h1>
                 <p class="text-center">Esperando a otros jugadores para comenzar la partida...</p>
-
                 <div class="row">
-
-                    <!-- Información del creador de la partida 
-                 ToDo: Cargar dinamicamente la imagen del Host-->
-                    <!-- Lista de jugadores 
-                <div class="mb-4 text-center">
-                    <h3>Jugadores esperando:</h3>
-                    <div th:each="player : ${players}" class="d-inline-block mx-2">
-                        <img th:if="${player.imageUrl != null and !player.imageUrl.isEmpty()}"
-                            th:src="@{${player.imageUrl}}" alt="Imagen del jugador" class="rounded-circle" width="80"
-                            height="80">
-                        <img th:unless="${player.imageUrl != null and !player.imageUrl.isEmpty()}"
-                            th:src="@{/img/default-profile.png}" alt="Imagen por defecto" class="rounded-circle"
-                            width="80" height="80">
-                        <p class="mt-2" th:text="${player.username}"></p>
-                    </div>
-                </div>-->
-
+                    <!-- Lista de jugadores -->
                     <div class="col-md-12 col-lg-6 mb-4 text-center">
                         <h3>Jugadores esperando:</h3>
-                        <div th:each="player : ${players}" class="d-inline-block mx-2">
-                            <img th:src="@{/img/default-profile.png}" alt="Imagen por defecto" class="rounded-circle"
-                                width="80" height="80">
-                            <p class="mt-2" th:text="${player.username}"></p>
+                        <div id="playersList" class="d-flex justify-content-center">
+                            <!-- Los jugadores se añadirán aquí dinámicamente -->
                         </div>
                     </div>
 
@@ -48,9 +29,6 @@
                     <div class="col-md-12 col-lg-6 text-center mb-4">
                         <h3>Información de la partida</h3>
                         <p><strong>Playlist:</strong> <span th:text="${playlist.name}"></span></p>
-                        <!-- ToDo: Cargar dinámicamente la imgen de la playlist -->
-                        <!-- <img th:src="@{${game.playlist.imageUrl}}" alt="Imagen de la playlist" class="rounded mb-2"
-                        width="150"> -->
                         <img th:src="@{/img/preview-song-img.jpeg}" alt="Imagen de la playlist" class="rounded mb-2"
                             width="150">
                         <p><strong>Número de rondas:</strong> <span th:text="${gameConfig.rounds}"></span></p>
@@ -66,15 +44,11 @@
 
                     <!-- Botón para comenzar la partida -->
                     <div class="container text-center">
-                        <button class="btn btn-success mt-4" id="startButton" th:data-game-id="${game.id}">
+                        <button class="btn btn-success mt-4" id="startButton" th:data-game-id="${gameId}">
                             Comenzar partida
                         </button>
                     </div>
 
-                    <script>
-
-
-                    </script>
                 </div>
             </div>
         </div>
@@ -93,12 +67,12 @@
                     <form id="editConfigForm">
                         <div class="mb-3">
                             <label class="form-label">Número de rondas</label>
-                            <input type="number" class="form-control" id="editRounds" th:value="${gameConfig.rounds}">
+                            <input type="number" class="form-control" id="editRounds" th:value="${gameConfig.rounds}" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Tiempo por fragmento (segundos)</label>
                             <input type="number" class="form-control" id="editTimePerRound"
-                                th:value="${gameConfig.fragmentDuration}">
+                                th:value="${gameConfig.fragmentDuration}" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Modo de Juego</label>
@@ -125,33 +99,63 @@
     </div>
 
     <th:block th:replace="~{fragments/footer.html :: footer}" />
+    <script src="/js/gamesw.js"></script>
 
     <script>
-        document.getElementById("startButton").addEventListener("click", function() {
-            let gameId = this.getAttribute("data-game-id");
-            const csrfToken = document.querySelector('input[name="_csrf"]').value;
-            console.log("Iniciando partida con ID:", gameId);
-            fetch(`/partida/iniciar/${gameId}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    'X-CSRF-TOKEN': csrfToken
-                }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.redirectUrl) {
-                    window.location.href = data.redirectUrl;
-                } else if (data.error) {
-                    alert("Error: " + data.error);
-                }
-            })
-            .catch(err => {
-                console.error("Error al iniciar partida", err);
-                alert("Error inesperado");
+        // Thymeleaf inyecta correctamente el userId y gameId en las variables de JavaScript
+        const userId = Number(`[[${userId}]]`);  // Thymeleaf inyecta el userId aquí
+        const gameId = `[[${gameId}]]`;  // También el gameId que se pasa desde el backend
+
+        const playerListDiv = document.getElementById("playersList");
+
+        // // Conectar al WebSocket de la sala de espera
+        gameWs.initialize("/ws", gameId, userId,[
+            `/topic/game/${gameId}/waiting`,
+            `/topic/game/${gameId}/start`
+        ]);
+
+        // Función para actualizar la lista de jugadores
+        function updatePlayerList(players) {
+            playerListDiv.innerHTML = "";
+            players.forEach(player => {
+                const playerElement = document.createElement("div");
+                playerElement.classList.add("d-inline-block", "mx-2");
+
+                const img = document.createElement("img");
+                img.src = /*player.imageUrl ||*/ "/img/default-profile.png";
+                img.alt = "Imagen del jugador";
+                img.classList.add("rounded-circle");
+                img.width = 80;
+                img.height = 80;
+
+                const playerName = document.createElement("p");
+                playerName.classList.add("mt-2");
+                playerName.textContent = player.username;
+
+                playerElement.appendChild(img);
+                playerElement.appendChild(playerName);
+
+                playerListDiv.appendChild(playerElement);
             });
+        }
+
+        // Recibir mensajes WebSocket
+        gameWs.receive = (text) => {
+            let message = JSON.parse(text);
+
+            if (message.type === "player_joined") {
+                updatePlayerList(message.players);
+            } else if (message.type === "game_start") {
+                window.location.href = message.redirectUrl;  // Redirigir al juego
+            }
+        };
+
+        // Acción al hacer clic en el botón de inicio
+        document.getElementById("startButton").addEventListener("click", function () {
+            gameWs.send(`/game/start/${gameId}`, { action: "start" });
         });
-        </script>
+    </script>
+
 </body>
 
 </html>
