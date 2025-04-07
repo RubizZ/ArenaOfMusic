@@ -99,7 +99,7 @@
     </div>
 
     <th:block th:replace="~{fragments/footer.html :: footer}" />
-    <script src="/js/gamesw.js"></script>
+    <script th:src="@{/js/gamews.js}"></script>
 
     <script>
         // Thymeleaf inyecta correctamente el userId y gameId en las variables de JavaScript
