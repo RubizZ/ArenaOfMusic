@@ -113,7 +113,11 @@ public class User implements Transferable<User.Transfer> {
     private List<Block> blocksReceived;
 
     @OneToMany(mappedBy = "user")
-    private List<PlayerGame> partidas;
+    private List<PlayerGame> partidas = new ArrayList<>();//new CopyOnWriteArrayList<>();
+
+    public synchronized void addPlayerGame(PlayerGame playerGame) {
+        partidas.add(playerGame);
+    }
 
     /**
      * Checks whether this user has a given role.
