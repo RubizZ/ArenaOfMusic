@@ -169,9 +169,9 @@
                 alertBox.textContent = response.message;
                 alertBox.classList.remove("d-none");
 
-                // setTimeout(() => {
-                //     location.reload();
-                // }, 1000);
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
             } catch (err) {
                 alertBox.className = "alert alert-danger";
                 alertBox.textContent = err.text || "Error inesperado.";
