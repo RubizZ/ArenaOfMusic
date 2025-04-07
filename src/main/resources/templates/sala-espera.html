@@ -4,36 +4,137 @@
 <head>
     <th:block th:replace="~{fragments/head :: header}" />
     <title>Arena of Music</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
 </head>
 
 <body class="d-flex flex-column h-100">
     <header th:replace="~{fragments/nav.html :: nav}"></header>
 
-    <main class="flex-shrink-0 d-flex justify-content-center">
-        <div class="sala-espera bg-light p-6 m-5 d-flex justify-content-center rounded">
-            <div class="espera-card p-3">
-                <h1>Sala de Espera</h1>
-                <p>Esperando a otros jugadores para comenzar la partida...</p>
+    <main class="flex-shrink-0 mt-5">
+        <div class="container my-5" style="margin-right: 50px;">
+            <div class="row align-items-start p-2 rounded">
+                <div class="col-md-5 offset-md-1">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h2 class="fw-bold mb-0">Sala de Espera</h2>
+                    </div>
+                    <p class="text-muted mb-3 fs-5">Esperando a otros jugadores...</p>
 
+                    <!-- Información de la partida -->
+                    <div class="d-flex align-items-center mb-4">
+                        <img
+                            th:src="${playlist.image}"
+                            class="rounded me-3"
+                            style="width: 100px; height: 100px; object-fit: cover;"
+                        />
+                        <div>
+                            <h5 class="fw-bold mb-1 fs-4" th:text="${playlist.title}">Título</h5>
+                            <p
+                                class="text-muted mb-0 small"
+                                th:text="|${game.rounds} rondas • Fragmentos de canción de ${game.songTime} segundos|">
+                                Rondas
+                            </p>
+                        </div>
+                    </div>
 
-                <!-- Lista de jugadores -->
-                <div>
-                    <h3>Jugadores esperando:</h3>
-                    <ul class="list-group">
-                        <li class="list-group-item">Jugador 1</li>
-                        <li class="list-group-item">Jugador 2</li>
-                        <li class="list-group-item">Jugador 3</li>
-                        <!-- Agregar más jugadores según sea necesario -->
-                    </ul>
+                    <!-- Lista de jugadores -->
+                     <ul class="list-group mb-3">
+                        <!-- Anfritrión -->
+                        <li class="list-group-item d-flex align-items-center border-0">
+                            <div class="d-flex align-items-center flex-grow-1">
+                                <img
+                                    th:src="${host.photoUrl}"
+                                    class="rounded-circle me-3"
+                                    style="width: 55px; height: 55px; object-fit: cover;"
+                                />
+                                <div>
+                                    <div class="fw-semibold" th:text="${host.username}">Nombre</div>
+                                    <div class="text-muted small">
+                                        <span th:text="${'Nivel ' + host.level}">Nivel</span>
+                                        <span> • </span>
+                                        <span th:text="${host.winRate + '% victorias'}">Victorias</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ms-auto">
+                                <span class="badge bg-accept fw-bold rounded-4 text-dark">ANFITRIÓN</span>
+                            </div>
+                        </li>
+
+                        <!-- Resto de jugadores -->
+                        <li class="list-group-item d-flex align-items-center border-0" th:each="player : ${players}">
+                            <div class="d-flex align-items-center">
+                                <img
+                                    th:src="${player.photoUrl}"
+                                    class="rounded-circle me-3"
+                                    style="width: 55px; height: 55px; object-fit: cover;"
+                                />
+                                <div>
+                                    <div class="fw-semibold fs-6" th:text="${player.username}">Nombre</div>
+                                    <div class="text-muted small">
+                                        <span th:text="${'Nivel ' + player.level}">Nivel</span>
+                                        <span> • </span>
+                                        <span th:text="${player.winRate + '% victorias'}">Victorias</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ms-auto">
+                                <button
+                                    th:if="${isHost}"
+                                    class="btn text-dark border-0"
+                                    title="Expulsar">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                            </div>
+                        </li>
+                     </ul>
                 </div>
 
-                <div class="container d-flex justify-content-center">
-                    <!-- Botón para empezar -->
-                    <a th:href="@{/partida}">
-                        <button class="btn btn-success btn-empezarEspera mt-4" id="startButton" type="button">
-                            Comenzar partida</button>
-                    </a>
-                </div>
+                <!-- Modo de juego -->
+                 <div class="col-md-3 mt-5 offset-md-1">
+                    <!-- Código -->
+                    <div class="text-start ms-3">
+                        <span class="badge bg-dark px-4 py-3 rounded-pill" style="font-size: 1.0rem;" th:text="|CÓDIGO: ${game.code}|"></span>
+                    </div>
+
+                    <div class="bg-light p-4 rounded mt-5 text-center" style="max-width: 200px; max-height: 250px;">
+                        <!-- Opciones múltiples -->
+                        <div th:if="${game.mode == 'options'}">
+                            <div class="d-flex justify-content-center mb-4 mt-3">
+                                <i class="bi bi-list-ul" style="font-size: 50px;"></i>
+                            </div>
+                            <h5 class="fw-bold mb-3 fs-6">Opciones múltiples</h5>
+                            <p class="text-muted mb-4 small">Elige entre 4 opciones posibles</p>
+                        </div>
+
+                        <!-- Adivina la canción -->
+                        <div th:if="${game.mode == 'song'}">
+                            <div class="d-flex justify-content-center mb-4 mt-3">
+                                <i class="bi bi-music-note-beamed" style="font-size: 50px;"></i>
+                            </div>
+                            <h5 class="fw-bold mb-3 fs-6">Adivina la canción</h5>
+                            <p class="text-muted mb-4 small">Escribe el nombre de la canción</p>
+                        </div>
+
+                        <!-- Adivina el artista -->
+                        <div th:if="${game.mode == 'artist'}">
+                            <div class="d-flex justify-content-center mb-4 mt-3">
+                                <i class="bi bi-person-fill" style="font-size: 50px;"></i>
+                            </div>
+                            <h5 class="fw-bold mb-3 fs-6">Adivina el artista</h5>
+                            <p class="text-muted mb-4 small">Escribe el nombre del artista de la canción</p>
+                        </div>
+                    </div>
+
+                    <!-- Comenzar partida -->
+                    <div class="text-start" style="margin-top: 80px; margin-left: 40px;">
+                        <a th:href="@{/partida}">
+                            <button class="btn btn-accept fw-bold rounded-4 text-dark" id="startButton" type="button">
+                                Comenzar partida
+                            </button>
+                        </a>
+                    </div>
+
+                 </div>
             </div>
         </div>
     </main>
