@@ -3,141 +3,101 @@
 
 <head>
     <th:block th:replace="~{fragments/head :: header}" />
-    <title>Arena of Music</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+    <title>Arena of Music - Sala de Espera</title>
 </head>
 
 <body class="d-flex flex-column h-100">
     <header th:replace="~{fragments/nav.html :: nav}"></header>
 
-    <main class="flex-shrink-0 mt-5">
-        <div class="container my-5" style="margin-right: 50px;">
-            <div class="row align-items-start p-2 rounded">
-                <div class="col-md-5 offset-md-1">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h2 class="fw-bold mb-0">Sala de Espera</h2>
+    <main class="flex-shrink-0 d-flex justify-content-center container">
+        <div class="sala-espera p-6 m-5 d-flex bg-dark-subtle justify-content-center rounded">
+            <div class="espera-card p-3">
+
+                <h1 class="text-center">Sala de Espera</h1>
+                <p class="text-center">Esperando a otros jugadores para comenzar la partida...</p>
+                <div class="row">
+                    <!-- Lista de jugadores -->
+                    <div class="col-md-12 col-lg-6 mb-4 text-center">
+                        <h3>Jugadores esperando:</h3>
+                        <div id="playersList" class="d-flex flex-wrap justify-content-center gap-3">
+                            <div th:each="player : ${players}"
+                                class="player-card d-flex flex-column align-items-center bg-light rounded p-2">
+                                <img th:src="@{/img/default-profile.png}" alt="Foto de perfil"
+                                    class="rounded-circle mb-2" width="80" height="80">
+                                <span th:text="${player.username}" class="fw-semibold"></span>
+                            </div>
+                        </div>
                     </div>
-                    <p class="text-muted mb-3 fs-5">Esperando a otros jugadores...</p>
 
                     <!-- Información de la partida -->
-                    <div class="d-flex align-items-center mb-4">
-                        <img
-                            th:src="${playlist.image}"
-                            class="rounded me-3"
-                            style="width: 100px; height: 100px; object-fit: cover;"
-                        />
-                        <div>
-                            <h5 class="fw-bold mb-1 fs-4" th:text="${playlist.title}">Título</h5>
-                            <p
-                                class="text-muted mb-0 small"
-                                th:text="|${game.rounds} rondas • Fragmentos de canción de ${game.songTime} segundos|">
-                                Rondas
-                            </p>
-                        </div>
+                    <div class="col-md-12 col-lg-6 text-center mb-4">
+                        <h3>Información de la partida</h3>
+                        <p><strong>Playlist:</strong> <span th:text="${playlist.name}"></span></p>
+                        <img th:src="@{/img/preview-song-img.jpeg}" alt="Imagen de la playlist" class="rounded mb-2"
+                            width="150">
+                        <p><strong>Número de rondas:</strong> <span th:text="${gameConfig.rounds}"></span></p>
+                        <p><strong>Tiempo por fragmento:</strong> <span th:text="${gameConfig.fragmentDuration}"></span>
+                            segundos</p>
+                        <p><strong>Modo de juego:</strong> <span th:text="${gameConfig.gameMode}"></span></p>
                     </div>
 
-                    <!-- Lista de jugadores -->
-                     <ul class="list-group mb-3">
-                        <!-- Anfritrión -->
-                        <li class="list-group-item d-flex align-items-center border-0">
-                            <div class="d-flex align-items-center flex-grow-1">
-                                <img
-                                    th:src="${host.photoUrl}"
-                                    class="rounded-circle me-3"
-                                    style="width: 55px; height: 55px; object-fit: cover;"
-                                />
-                                <div>
-                                    <div class="fw-semibold" th:text="${host.username}">Nombre</div>
-                                    <div class="text-muted small">
-                                        <span th:text="${'Nivel ' + host.level}">Nivel</span>
-                                        <span> • </span>
-                                        <span th:text="${host.winRate + '% victorias'}">Victorias</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="ms-auto">
-                                <span class="badge bg-accept fw-bold rounded-4 text-dark">ANFITRIÓN</span>
-                            </div>
-                        </li>
-
-                        <!-- Resto de jugadores -->
-                        <li class="list-group-item d-flex align-items-center border-0" th:each="player : ${players}">
-                            <div class="d-flex align-items-center">
-                                <img
-                                    th:src="${player.photoUrl}"
-                                    class="rounded-circle me-3"
-                                    style="width: 55px; height: 55px; object-fit: cover;"
-                                />
-                                <div>
-                                    <div class="fw-semibold fs-6" th:text="${player.username}">Nombre</div>
-                                    <div class="text-muted small">
-                                        <span th:text="${'Nivel ' + player.level}">Nivel</span>
-                                        <span> • </span>
-                                        <span th:text="${player.winRate + '% victorias'}">Victorias</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="ms-auto">
-                                <button
-                                    th:if="${isHost}"
-                                    class="btn text-dark border-0"
-                                    title="Expulsar">
-                                    <i class="bi bi-three-dots-vertical"></i>
-                                </button>
-                            </div>
-                        </li>
-                     </ul>
-                </div>
-
-                <!-- Modo de juego -->
-                 <div class="col-md-3 mt-5 offset-md-1">
-                    <!-- Código -->
-                    <div class="text-start ms-3">
-                        <span class="badge bg-dark px-4 py-3 rounded-pill" style="font-size: 1.0rem;" th:text="|CÓDIGO: ${game.code}|"></span>
-                    </div>
-
-                    <div class="bg-light p-4 rounded mt-5 text-center" style="max-width: 200px; max-height: 250px;">
-                        <!-- Opciones múltiples -->
-                        <div th:if="${game.mode == 'options'}">
-                            <div class="d-flex justify-content-center mb-4 mt-3">
-                                <i class="bi bi-list-ul" style="font-size: 50px;"></i>
-                            </div>
-                            <h5 class="fw-bold mb-3 fs-6">Opciones múltiples</h5>
-                            <p class="text-muted mb-4 small">Elige entre 4 opciones posibles</p>
-                        </div>
-
-                        <!-- Adivina la canción -->
-                        <div th:if="${game.mode == 'song'}">
-                            <div class="d-flex justify-content-center mb-4 mt-3">
-                                <i class="bi bi-music-note-beamed" style="font-size: 50px;"></i>
-                            </div>
-                            <h5 class="fw-bold mb-3 fs-6">Adivina la canción</h5>
-                            <p class="text-muted mb-4 small">Escribe el nombre de la canción</p>
-                        </div>
-
-                        <!-- Adivina el artista -->
-                        <div th:if="${game.mode == 'artist'}">
-                            <div class="d-flex justify-content-center mb-4 mt-3">
-                                <i class="bi bi-person-fill" style="font-size: 50px;"></i>
-                            </div>
-                            <h5 class="fw-bold mb-3 fs-6">Adivina el artista</h5>
-                            <p class="text-muted mb-4 small">Escribe el nombre del artista de la canción</p>
-                        </div>
-                    </div>
-
-                    <!-- Comenzar partida -->
-                    <div class="text-start" style="margin-top: 80px; margin-left: 40px;">
-                        <a th:href="@{/partida}">
-                            <button class="btn btn-accept fw-bold rounded-4 text-dark" id="startButton" type="button">
+                    <!-- Botón para comenzar la partida -->
+                    <form th:action="@{/partida/iniciar/{gameId}(gameId=${gameId})}" method="post">
+                        <div class="container text-center">
+                            <button class="btn btn-success mt-4" id="startButton" type="submit">
                                 Comenzar partida
                             </button>
-                        </a>
-                    </div>
-
-                 </div>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </main>
+
+
+    <!-- Modal para editar configuración -->
+    <!-- <div class="modal fade" id="editConfigModal" tabindex="-1" aria-labelledby="editConfigModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editConfigModalLabel">Editar Configuración</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editConfigForm">
+                        <div class="mb-3">
+                            <label class="form-label">Número de rondas</label>
+                            <input type="number" class="form-control" id="editRounds" th:value="${gameConfig.rounds}" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tiempo por fragmento (segundos)</label>
+                            <input type="number" class="form-control" id="editTimePerRound"
+                                th:value="${gameConfig.fragmentDuration}" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Modo de Juego</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="modoJuego" id="escribir"
+                                    value="escribir" checked>
+                                <label class="form-check-label" for="escribir">Escribir la Canción</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="modoJuego" id="opciones"
+                                    value="opciones" disabled>
+                                <label class="form-check-label" for="opciones">Opciones <small
+                                        class="text-muted">(Próximamente...)</small></label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" id="saveChanges">Guardar Cambios</button>
+                </div>
+            </div>
+        </div>
+    </div> -->
 
     <th:block th:replace="~{fragments/footer.html :: footer}" />
 </body>
