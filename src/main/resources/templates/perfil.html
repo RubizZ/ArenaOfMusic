@@ -15,7 +15,8 @@
         <div class="container mt-5">
             <div class="card profile-card mx-auto shadow-lg">
                 <div class="card-header text-center bg-success text-white position-relative">
-                    <img th:src="@{/img/default-profile.png}"
+
+                    <img th:src="${u.profileImage != null ?  u.profileImage : '/img/default-profile.png'}"
                         class="rounded-circle border border-3 border-white mt-3 profile-image" alt="Foto de Perfil">
                     <h3 class="mt-3" th:text="${u.username}">Nombre Usuario</h3>
                     <!-- <span class="badge bg-light text-success position-absolute top-0 end-0 m-3 shadow-sm">Online</span> -->
@@ -30,7 +31,8 @@
             </div>
         </div>
 
-        <!-- Mis Objetos -->
+        <!-- 
+         Mis Objetos  
         <div class="container mt-5">
             <h2 class="text-center mb-4 text-success bg-light p-2 rounded">Mis Objetos</h2>
 
@@ -44,7 +46,7 @@
         </div>
 
 
-        <!-- Estadísticas -->
+        Estadísticas  
         <div class="container mt-5">
             <h2 class="text-center mb-4 text-success  bg-light p-2 rounded">Estadísticas</h2>
             <div class="row justify-content-center">
@@ -75,7 +77,7 @@
             </div>
         </div>
 
-        <!-- Historial de Partidas -->
+      Historial de Partidas  
         <div class="container mt-5">
             <h2 class="text-center mb-4 text-success bg-light p-2 rounded">Historial de Partidas</h2>
             <ul class="list-group">
@@ -90,6 +92,7 @@
                 </li>
             </ul>
         </div>
+    -->
 
 
         <!-- Edit Profile Modal -->
@@ -104,6 +107,19 @@
                     <div class="modal-body">
                         <form id="edit-profile-form">
                             <div id="edit-profile-alert" class="alert d-none" role="alert"></div>
+
+                            <div class="mb-3 text-center">
+                                <label for="profileImage" class="form-label text-success">Foto de Perfil</label>
+                                <div>
+                                    <img id="previewImage"
+                                        th:src="${u.profileImage != null ?  u.profileImage : '/img/default-profile.png'}"
+                                        class="rounded-circle border border-3 border-success mb-3" alt="Foto de Perfil"
+                                        style="width: 150px; height: 150px; object-fit: cover;">
+                                </div>
+                                <input type="file" class="form-control" id="profileImage" name="profileImage"
+                                    accept="image/*">
+                            </div>
+
 
                             <div class="mb-3">
                                 <label for="username" class="form-label text-success">Nombre de Usuario</label>
@@ -155,12 +171,14 @@
         const alertBox = document.getElementById("edit-profile-alert");
 
         saveBtn.addEventListener("click", async () => {
+            const img = document.getElementById("previewImage").src
             const data = {
                 username: form.username.value,
                 email: form.email.value,
                 description: form.description.value,
                 oldPassword: form.oldPassword.value,
-                password: form.password.value
+                password: form.password.value,
+                img: img ? img : null
             };
 
             try {
@@ -178,7 +196,20 @@
                 alertBox.classList.remove("d-none");
             }
         });
+
+        document.getElementById("profileImage").addEventListener("change", (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById("previewImage").src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
     });
+
+
 </script>
 
 </html>
