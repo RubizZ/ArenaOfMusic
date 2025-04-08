@@ -1,6 +1,7 @@
 package es.ucm.fdi.iw.controller;
 
 import java.util.UUID;
+import java.util.Map;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
@@ -126,7 +128,7 @@ public class PartidaController {
             }
 
             partidaService.startGame(game);
-            return "redirect:/partida/partida/" + gameId.toString();
+            return "redirect:/partida/" + gameId.toString();
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/error";
@@ -136,7 +138,7 @@ public class PartidaController {
         }
     }
 
-    @GetMapping("/partida/partida/{gameId}")
+    @GetMapping("/partida/{gameId}")
     public String partida(@PathVariable UUID gameId, Model model) {
         try {
             Game game = partidaService.getGameById(gameId);
@@ -180,8 +182,7 @@ public class PartidaController {
     }
 
     @PostMapping("/partida/finRonda/{gameId}")
-    @ResponseBody
-    public ResponseEntity<Void> finRonda(@PathVariable UUID gameId) {
+    public ResponseEntity<Void> finRonda(@PathVariable UUID gameId, @RequestBody Map<Long, String> body) {
         try {
             Game game = partidaService.getGameById(gameId);
             if (game == null || !game.getActive()) {
@@ -193,7 +194,7 @@ public class PartidaController {
             if (game.getGameState().equals(Game.GameState.WAITING)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha comenzado.");
             }
-           // partidaService.finalizarRonda(game);
+            partidaService.finalizarRonda(game, body);
             return ResponseEntity.ok().build();
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
