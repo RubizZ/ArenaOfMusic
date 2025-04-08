@@ -1,6 +1,8 @@
 package es.ucm.fdi.iw.service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -13,10 +15,14 @@ import org.springframework.stereotype.Service;
 
 import es.ucm.fdi.iw.dto.game.GameConfigDTO;
 import es.ucm.fdi.iw.dto.game.GamePlayerDTO;
+import es.ucm.fdi.iw.dto.game.GameRoundsDTO;
+import es.ucm.fdi.iw.dto.game.RoundInfoDTO;
+import es.ucm.fdi.iw.dto.game.RoundResponseDTO;
 import es.ucm.fdi.iw.model.Game;
 import es.ucm.fdi.iw.model.PlayerGame;
 import es.ucm.fdi.iw.model.PlayerGameId;
 import es.ucm.fdi.iw.model.Playlist;
+import es.ucm.fdi.iw.model.Song;
 import es.ucm.fdi.iw.model.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
@@ -195,6 +201,7 @@ public class PartidaService {
         }
         game.addPlayerGame(pg);
     }
+
     @Transactional
     public UUID crearPartida(GameConfigDTO gameConfig, long playerId) {
         try {
@@ -251,16 +258,57 @@ public class PartidaService {
         return players;
     }
 
+    public List<Song> getSongsByPlaylistId(long playlistId) {
+        return entityManager.createNamedQuery("Song.findByPlaylistId", Song.class)
+                .setParameter("playlistId", playlistId)
+                .getResultList();
+    }
+
     @Transactional
-    public void startGame(UUID gameId) {
+    public void cargarCanciones(Game game) {
+        GameConfigDTO gameConfigDTO = new GameConfigDTO();
+        gameConfigDTO.parseGameConfigDTO(game.getConfigJson());
+
+        Playlist playlist = game.getPlaylist();
+        if (playlist == null || !playlist.isActive()) {
+            throw new IllegalArgumentException("La playlist no existe o no está activa.");
+        }
+
+        List<Song> cancionesAleatorias = getSongsByPlaylistId(playlist.getId());
+
+        // Verificar si hay suficientes canciones para el número de rondas
+        if (cancionesAleatorias.size() < gameConfigDTO.getRounds()) {
+            throw new IllegalArgumentException(
+                    "No hay suficientes canciones en la playlist para el número de rondas configurado.");
+        }
+
+        // Mezclar las canciones aleatoriamente
+        Collections.shuffle(cancionesAleatorias);
+
+        // Seleccionar las primeras `gameConfigDTO.getRounds()` canciones
+        cancionesAleatorias = cancionesAleatorias.subList(0, gameConfigDTO.getRounds());
+
+        GameRoundsDTO gameRoundsDTO = new GameRoundsDTO();
+        gameRoundsDTO.setSongsIds(cancionesAleatorias.stream()
+                .map(Song::getId)
+                .collect(Collectors.toList()));
+
+        gameRoundsDTO.setRoundNumber(0);
+
+        game.setRoundJson(gameRoundsDTO.toString());
+
+    }
+
+    @Transactional
+    public void startGame(Game game) {
         try {
-            Game game = entityManager.find(Game.class, gameId);
             if (game == null) {
                 throw new IllegalArgumentException("La partida no existe.");
             }
             if (!game.getGameState().equals(Game.GameState.WAITING)) {
                 throw new IllegalStateException("La partida ya ha comenzado o ha finalizado.");
             }
+            cargarCanciones(game);
             game.setGameState(Game.GameState.PLAYING);
         } catch (IllegalArgumentException e) {
             System.out.println("Argumento invalido: " + e.getMessage());
@@ -269,5 +317,88 @@ public class PartidaService {
         }
 
     }
+
+    @Transactional
+    public RoundInfoDTO iniciarRonda(Game game) {
+        GameRoundsDTO gameRoundsDTO = new GameRoundsDTO();
+        RoundInfoDTO roundInfo = new RoundInfoDTO();
+
+        try {
+            if (game == null) {
+                throw new IllegalArgumentException("La partida no existe.");
+            }
+            if (!game.getGameState().equals(Game.GameState.PLAYING)) {
+                throw new IllegalStateException("La partida no se está jugando.");
+            }
+
+            gameRoundsDTO.parseGameRoundsDTO(game.getRoundJson());
+            Long songId = gameRoundsDTO.getSong(gameRoundsDTO.getRoundNumber());
+            Song song = entityManager.find(Song.class, songId);
+
+            roundInfo.setRoundNumber(gameRoundsDTO.getRoundNumber());
+            roundInfo.setSong(song.getId());
+            gameRoundsDTO.addRound(roundInfo);
+            game.setRoundJson(gameRoundsDTO.toString());
+
+        } catch (IllegalArgumentException e) {
+            System.out.println("Argumento invalido: " + e.getMessage());
+        } catch (IllegalStateException e) {
+            System.out.println("Invalid state: " + e.getMessage());
+        }
+
+        return roundInfo;
+
+    }
+
+    @Transactional
+    public RoundResponseDTO finalizarRonda(Game game, Map<Long, String> userAnswers) {
+        GameRoundsDTO gameRoundsDTO = new GameRoundsDTO();
+        RoundInfoDTO roundInfo = new RoundInfoDTO();
+        RoundResponseDTO roundResponse = new RoundResponseDTO();
+        try {
+            if (game == null) {
+                throw new IllegalArgumentException("La partida no existe.");
+            }
+            if (!game.getGameState().equals(Game.GameState.PLAYING)) {
+                throw new IllegalStateException("La partida no se está jugando.");
+            }
+            gameRoundsDTO.parseGameRoundsDTO(game.getRoundJson());
+            roundInfo = gameRoundsDTO.getRound(gameRoundsDTO.getRoundNumber() - 1);
+            roundInfo.setUserAnswers(userAnswers);
+            gameRoundsDTO.setRound(gameRoundsDTO.getRoundNumber() - 1, roundInfo);
+            game.setRoundJson(roundInfo.toString());
+            Song song = entityManager.find(Song.class, gameRoundsDTO.getSong(gameRoundsDTO.getRoundNumber() - 1));
+            roundResponse.setSong(song);
+
+            userAnswers.forEach((userId, answer) -> {
+                PlayerGame playerGame = entityManager.find(PlayerGame.class,
+                        new PlayerGameId(game.getId(), userId));
+                int score = 0;
+                if (answer.equalsIgnoreCase(song.getName())) {
+                    score += 10; 
+                } 
+                if (playerGame != null) {
+                    playerGame.setScore(playerGame.getScore() + score); // Incrementar el puntaje del jugador
+                }
+                roundResponse.getResult().put(userId, score); // Guardar el puntaje del jugador en el resultado
+            });
+
+            if(gameRoundsDTO.getRoundNumber() >= gameRoundsDTO.getRounds().size()) {
+                game.setGameState(Game.GameState.FINISHED);
+            } 
+
+            game.setRoundJson(gameRoundsDTO.toString());
+            
+
+        } catch (IllegalArgumentException e) {
+            System.out.println("Argumento invalido: " + e.getMessage());
+        } catch (IllegalStateException e) {
+            System.out.println("Invalid state: " + e.getMessage());
+        }
+
+        return roundResponse;
+
+    }
+    
 
 }
