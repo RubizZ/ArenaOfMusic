@@ -107,21 +107,23 @@ public class PartidaController {
 
     @PostMapping("/partida/iniciar/{gameId}")
     public String iniciarPartida(@PathVariable UUID gameId, RedirectAttributes redirectAttributes) {
-        Game game = partidaService.getGameById(gameId);
-        if (game == null || !game.getActive()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
-        }
-
-        if (game.getGameState().equals(Game.GameState.FINISHED)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
-        }
-
-        if (!game.getGameState().equals(Game.GameState.WAITING)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha comenzado.");
-        }
-
         try {
-            partidaService.startGame(gameId);
+
+            Game game = partidaService.getGameById(gameId);
+
+            if (game == null || !game.getActive()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
+            }
+
+            if (game.getGameState().equals(Game.GameState.FINISHED)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
+            }
+
+            if (!game.getGameState().equals(Game.GameState.WAITING)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha comenzado.");
+            }
+
+            partidaService.startGame(game);
             return "redirect:/partida/partida/" + gameId.toString();
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
