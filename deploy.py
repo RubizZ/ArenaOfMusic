@@ -66,7 +66,9 @@ def main(credentials_file, db_file_root, data_file_root):
       # shell=True works in windows/fails in Linux; and vice-versa
       is_win = sys.platform.startswith("win")
       subprocess.run(["mvn",
-                      "package", 
+                      "package",
+                      "-P",
+                      "linux",
                       "-DskipTests=true"], shell=is_win, check=True)
       jar_path = glob.glob("target/*.jar")[0]
       jar_name = Path(jar_path).name
@@ -88,9 +90,7 @@ def main(credentials_file, db_file_root, data_file_root):
       ssh_username=credentials['jumphost_user'],
       ssh_password=credentials['jumphost_pass'],
       remote_bind_address=(credentials['target'], 22),
-      local_bind_address=('0.0.0.0', 2222),
-      allow_agent=False,
-      look_for_keys=False 
+      local_bind_address=('0.0.0.0', 2222)
   ) as tunnel:
       print(f"Tunnel to {credentials['jumphost']} over port 22 established, bind via localhost 2222 ...")
       with fabric.connection.Connection(
