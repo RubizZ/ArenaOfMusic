@@ -40,7 +40,12 @@ public class PerfilService {
         }
         // Update image if provided
         if (img != null && !img.isBlank()) {
+            if (img.length() > 1000000) {
+                throw new IllegalArgumentException("Image is too large.");
+            }
             user.setProfileImage(img);
+        } else {
+            user.setProfileImage(null);
         }
 
         user.setUsername(username);
