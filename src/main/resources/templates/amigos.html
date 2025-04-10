@@ -12,10 +12,10 @@
 
     <main class="flex-shrink-0 mt-5">
         <div class="container my-5">
-            <div class="row align-items-start bg-light p-2 rounded ">
+            <div class="row align-items-start p-2 rounded ">
 
                 <!-- Lista de amigos -->
-                <div class="col-md-5 left-panel me-md-4">
+                <div class="col-md-5 left-panel me-md-4 offset-md-3" id="leftPanel">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h2 class="fw-bold"
                             th:text="${viewType == 'solicitudes' ? 'Solicitudes' : 'Amigos'}">
@@ -23,9 +23,8 @@
                         </h2>
                     </div>
 
-                    <!-- Barra de búsqueda con botones de navegación -->
+                    <!-- Barra de búsqueda -->
                     <div class="d-flex mb-3">
-                        <!-- Barra de búsqueda -->
                         <div class="input-group">
                             <span class="input-group-text bg-light border-end-0">
                                 <i class="bi bi-search"></i>
@@ -34,59 +33,41 @@
                                 type="text"
                                 class="form-control bg-light border-start-0"
                                 placeholder="Buscar amigos"
-                                name="search"
+                                id="friendSearch"
                             />
                         </div>
 
                         <!-- Vista de amigos -->
                         <div class="ms-2" th:if="${viewType} == 'solicitudes'">
                             <a
-                                class="btn btn-outline-success d-flex align-items-center justify-content-center"
+                                class="btn btn-back d-flex align-items-center justify-content-center"
                                 th:href="@{/amigos(view='amigos')}"
-                                style="width: 38px; height: 38px;"
-                            >
-                                <i class="bi bi-people"></i>
+                                style="width: 40px; height: 40px;">
+                                <i class="bi bi-people-fill"></i>
                             </a>
                         </div>
 
                         <!-- Vista de solicitudes -->
                         <div class="ms-2" th:if="${viewType} == 'amigos'">
                             <a
-                                class="btn btn-outline-success d-flex align-items-center justify-content-center position-relative"
+                                class="btn btn-back d-flex align-items-center justify-content-center position-relative"
                                 th:href="@{/amigos(view='solicitudes')}"
-                                style="width: 38px; height: 38px;"
-                            >
-                                <i class="bi bi-person"></i>
+                                style="width: 40px; height: 40px;">
+                                <i class="bi bi-person-fill"></i>
 
                                 <!-- Indicador de notificación -->
                                 <span
                                     class="position-absolute bg-danger border border-light rounded-circle d-block"
                                     style="width: 8px; height: 8px; top: 5px; left: 25px;"
-                                    th:if="${requests != null && !requests.isEmpty()}"
-                                ></span>
+                                    th:if="${requests != null && !requests.isEmpty()}">
+                                </span>
                             </a>
                         </div>
                     </div>
 
                     <!-- Lista de amigos -->
                     <div th:if="${viewType} == 'amigos'">
-                        <ul class="list-group mb-3">
-                            <li
-                                class="list-group-item d-flex align-items-center border-0 bg-transparent"
-                                th:each="friend : ${friends}"
-                            >
-                                <!-- Foto de perfil -->
-                                <img
-                                    th:src="${friend.photoUrl}"
-                                    class="rounded-circle me-3"
-                                    style="width: 40px; height: 40px; object-fit: cover;"
-                                />
-                                <div>
-                                    <div class="fw-semibold" th:text="${friend.username}">Nombre</div>
-                                    <div class="text-muted" th:text="${friend.status}">Conectado</div>
-                                </div>
-                            </li>
-                        </ul>
+                        <ul class="list-group mb-3" id="friendList"></ul>
 
                         <!-- Añadir amigos -->
                         <div class="d-grid">
@@ -98,114 +79,220 @@
 
                     <!-- Lista de solicitudes -->
                     <div th:if="${viewType} == 'solicitudes'">
-                        <ul class="list-group mb-3">
-                            <li
-                                class="list-group-item d-flex align-items-center border-0 bg-transparent"
-                                th:each="request : ${requests}"
-                            >
-                                <!-- Foto de perfil -->
-                                <img
-                                    th:src="${request.photoUrl}"
-                                    class="rounded-circle me-3"
-                                    style="width: 40px; height: 40px; object-fit: cover;"
-                                />
-
-                                <div>
-                                    <div class="fw-semibold" th:text="${request.username}">Nombre</div>
-                                    <div class="text-muted">
-                                        <span th:text="${'Nivel ' + request.level}">Nivel 0</span>
-                                        <span> • </span>
-                                        <span th:text="${request.winRate + '% victorias'}"></span>
-                                    </div>
-                                </div>
-
-                                <div class="ms-auto">
-                                    <button class="btn btn-success rounded-pill px-2 py-0 me-1">
-                                        <small>Aceptar</small>
-                                    </button>
-                                    <button class="btn btn-outline-secondary rounded-pill px-2 py-0">
-                                        <small>Rechazar</small>
-                                    </button>
-                                </div>
-                            </li>
-                        </ul>
+                        <ul class="list-group mb-3" id="requestList"></ul>
                     </div>
                 </div>
 
                 <!-- Perfil del usuario seleccionado -->
-                <div class="col-md-6 right-panel ms-md-4">
-                    <div th:if="${selectedUser != null}">
-
-                        <!-- Perfil de usuario -->
-                        <div class="d-flex align-items-center mb-5">
-                            <img
-                                th:src="${selectedUser.photoUrl}"
-                                class="rounded me-3"
-                                style="width: 80px; height: 80px; object-fit: cover;"
-                            />
-                            <div>
-                                <h3 class="mb-0" th:text="${selectedUser.username}">Nombre</h3>
-                                <small class="fs-6 text-muted" th:text="${selectedUser.status}">Conectado</small>
-                            </div>
-                        </div>
-
-                        <!-- Estadísticas del usuario -->
-                        <div class="mb-5">
-                            <div class="row text-center">
-                                <div class="col">
-                                    <h5 class="mb-0 fw-bold" th:text="${selectedUser.victories}">7</h5>
-                                    <small class="text-muted">Victorias</small>
-                                </div>
-
-                                <div class="col">
-                                    <h5 class="mb-0 fw-bold" th:text="${selectedUser.losses}">3</h5>
-                                    <small class="text-muted">Derrotas</small>
-                                </div>
-
-                                <div class="col">
-                                    <h5 class="mb-0 fw-bold" th:text="${selectedUser.draws}">12</h5>
-                                    <small class="text-muted">Empates</small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Playlists favoritas -->
-                        <h5 class="fw-bold mb-3">Playlists favoritas</h5>
-                        <ul class="list-group bg-transparent">
-                            <li
-                                class="list-group-item d-flex align-items-center border-0 bg-transparent mb-2"
-                                th:each="playlist : ${selectedUser.favoritePlaylists}"
-                            >
-
-                                <!-- Playlist -->
-                                <div class="me-3">
-                                    <div class="rounded" style="width: 50px; height: 50px; overflow: hidden;">
-                                        <img th:src="${playlist.image}" class="img-fluid"/>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div class="fw-semibold" th:text="${playlist.title}">Título</div>
-                                    <small class="text-muted" th:text="${'by ' + playlist.author}">by ArenaOfMusic</small>
-                                </div>
-
-                            </li>
-                        </ul>
-
-                    </div>
-
-                    <!-- Ningún usuario seleccionado -->
-                    <div th:if="${selectedUser == null}"
-                         class="d-flex justify-content-center align-items-center text-center"
-                         style="min-height: 300px;">
-                        <p class="text-muted fs-5">Selecciona un usuario para consultar su perfil.</p>
-                    </div>
-
+                <div class="col-md-6 right-panel ms-md-4" id="rightPanel" style="display: none;">
+                    <div id="friendProfile"></div>
                 </div>
             </div>
         </div>
     </main>
 
     <th:block th:replace="~{fragments/footer.html :: footer}" />
+
+    <script th:inline="javascript">
+        // Acceder a perfil de un usuario
+        function handleUser(event) {
+            const li = event.target.closest("li");
+            if(li) {
+                const friendData = {
+                    username: li.getAttribute("data-username"),
+                    photoUrl: li.getAttribute("data-photourl") || "",
+                    status: li.getAttribute("data-status") || ""
+                };
+                loadFriendProfile(friendData);
+            }
+        }
+
+        // Cargar lista de amigos o solicitudes
+        function loadList(viewType) {
+            const filters = { view: viewType, search: document.getElementById("friendSearch").value };
+            go(config.rootUrl + "/amigos/list", "POST", filters)
+            .then(data => {
+                let html = "";
+                data.forEach(item => {
+                    if(viewType === 'amigos') {
+                        html += `
+                            <li class="list-group-item d-flex align-items-center border-0"
+                                data-username="${item.username}"
+                                data-photourl="${item.photoUrl}"
+                                data-status="${item.status}">
+
+                                <!-- Foto de perfil -->
+                                <img src="${item.photoUrl}" class="rounded-circle me-3" style="width: 55px; height: 55px; object-fit: cover;"/>
+                                <div>
+                                    <div class="fw-semibold">${item.username}</div>
+                                    <small class="text-muted">Nivel ${item.level} • ${item.winRate}% victorias</small>
+                                </div>
+                            </li>
+                        `;
+                    }
+                    else if (viewType === 'solicitudes') {
+                        html += `
+                            <li class="list-group-item d-flex align-items-center border-0"
+                                data-username="${item.username}"
+                                data-photourl="${item.photoUrl}"
+                                data-status="${item.status}"
+                            >
+                                <img src="${item.photoUrl}" class="rounded-circle me-3" style="width: 55px; height: 55px; object-fit: cover;"/>
+
+                                <div>
+                                    <div class="fw-semibold">${item.username}</div>
+                                    <small class="text-muted">Nivel ${item.level} • ${item.winRate}% victorias</small>
+                                </div>
+
+                                <div class="ms-auto">
+                                    <button
+                                        class="btn btn-accept fw-bold rounded-4 px-2 py-0 me-1 text-dark"
+                                        onclick="event.stopPropagation(); acceptRequest('${item.username}')">
+                                        <small>Aceptar</small>
+                                    </button>
+                                    <button
+                                        class="btn btn-back fw-bold rounded-4 px-2 py-0 text-dark"
+                                        onclick="event.stopPropagation(); rejectRequest('${item.username}')">
+                                        <small>Rechazar</small>
+                                    </button>
+                                </div>
+                            </li>
+                        `;
+                    }
+                });
+                if(viewType === 'amigos') {
+                    document.getElementById("friendList").innerHTML = html;
+                }
+                else if(viewType === 'solicitudes') {
+                    document.getElementById("requestList").innerHTML = html;
+                }
+            })
+            .catch(error => console.error(error));
+        }
+
+        // Cargar el perfil de un amigo
+        function loadFriendProfile(friendData) {
+            // Desplazar el panel de amigos o solicitudes a la izquierda
+            document.getElementById("leftPanel").classList.remove("offset-md-3");
+
+            // Mostrar el panel de perfil del usuario seleccionado
+            document.getElementById("rightPanel").style.display = 'block';
+
+            go(config.rootUrl + "/amigos/profile", "POST", friendData)
+            .then(data => {
+                let profileHtml = `
+                    <!-- Perfil de usuario -->
+                    <div class="d-flex align-items-center mb-5">
+                        <img src="${data.photoUrl}" class="rounded me-3" style="width: 80px; height: 80px; object-fit: cover;"/>
+                        <div>
+                            <h3 class="fw-semibold mb-0">${data.username}</h3>
+                            <h5 class="fs-5 text-muted mt-1">${data.status}</h5>
+                        </div>
+                        <!-- Cerrar perfil -->
+                        <button
+                            type="button"
+                            class="btn btn-sm ms-auto me-3 d-flex align-items-center"
+                            onclick="hideFriendProfile()">
+                            <span class="btn-close" aria-hidden="true"></span>
+                            <span class="ms-2" style="font-size: 1.1rem; color: #6C757D">Cerrar</span>
+                        </button>
+                    </div>
+
+                    <!-- Estadísticas del usuario -->
+                    <div class="mb-5">
+                        <div class="row text-center">
+                            <div class="col">
+                                <h5 class="mb-0 fw-bold">${data.victories}</h5>
+                                <div class="text-muted mt-2">Victorias</div>
+                            </div>
+
+                            <div class="col">
+                                <h5 class="mb-0 fw-bold">${data.defeats}</h5>
+                                <div class="text-muted mt-2">Derrotas</div>
+                            </div>
+
+                            <div class="col">
+                                <h5 class="mb-0 fw-bold">${data.draws}</h5>
+                                <div class="text-muted mt-2">Empates</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Playlists favoritas -->
+                    <h5 class="fw-bold mb-3">Playlists favoritas</h5>
+                    <ul class="list-group bg-transparent">
+                `;
+                data.favoritePlaylists.forEach(playlist => {
+                    profileHtml += `
+                        <li class="list-group-item d-flex align-items-center border-0 bg-transparent mb-2">
+                            <div class="me-3">
+                                <div class="rounded" style="width: 50px; height: 50px; overflow: hidden;">
+                                    <img src="${playlist.image}" class="img-fluid"/>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="fw-semibold">${playlist.title}</div>
+                                <small class="text-muted">by ${playlist.author}</small>
+                            </div>
+                        </li>
+                    `
+                });
+                profileHtml += '</ul>';
+                document.getElementById("friendProfile").innerHTML = profileHtml;
+            })
+            .catch(error => console.error(error));
+        }
+
+        // Ocultar el perfil de un amigo
+        function hideFriendProfile() {
+            // Desplazar el panel de amigos o solicitudes al centro
+            document.getElementById("leftPanel").classList.add("offset-md-3");
+
+            // Ocultar el panel de perfil del usuario seleccionado
+            document.getElementById("rightPanel").style.display = "none";
+        }
+
+        // Aceptar solicitud de amistad
+        function acceptRequest(username) {
+            go(config.rootUrl + "/amigos/request/accept", "POST", { username: username })
+            .then(data => {
+                if(data.success) {
+                    loadList('solicitudes');
+                    loadList('amigos');
+                }
+            })
+            .catch(error => console.error(error));
+        }
+
+        // Rechazar solicitud de amistad
+        function rejectRequest(username) {
+            go(config.rootUrl + "/amigos/request/reject", "POST", { username: username})
+            .then(data => {
+                if(data.success) {
+                    loadList('solicitudes');
+                }
+            })
+            .catch(error => console.error(error));
+        }
+
+        // Cargar la lista al cargar la página y filtrar búsqueda
+        document.addEventListener("DOMContentLoaded", function() {
+            const friendList = document.getElementById("friendList");
+            if(friendList) {
+                friendList.addEventListener("click", handleUser);
+            }
+            const requestList = document.getElementById("requestList");
+            if(requestList) {
+                requestList.addEventListener("click", handleUser);
+            }
+
+            var viewType = /*[[${viewType}]]*/ "amigos";
+            loadList(viewType);
+            document.getElementById("friendSearch").addEventListener("input", function() {
+                loadList(viewType);
+            });
+        });
+    </script>
 </body>
 
 </html>
