@@ -3,6 +3,8 @@ import java.util.UUID;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -60,8 +62,10 @@ public class Report implements Transferable<Report.Transfer> {
 
     @Column(nullable = false)
     private LocalDateTime creationDate = LocalDateTime.now();
+    private LocalDateTime creationDate = LocalDateTime.now();
 
     @Column
+    private LocalDateTime resolutionDate;
     private LocalDateTime resolutionDate;
 
     @Getter
@@ -75,6 +79,8 @@ public class Report implements Transferable<Report.Transfer> {
         private boolean solved;
         private boolean banned;
         private long admin;
+        private String creationDate;
+        private String resolutionDate;
         private String creationDate;
         private String resolutionDate;
     }
