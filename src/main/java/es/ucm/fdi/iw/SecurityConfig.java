@@ -62,7 +62,6 @@ public class SecurityConfig {
 						.ignoringRequestMatchers("/api/**"))
 				.authorizeHttpRequests(authorize -> authorize
 						.requestMatchers("/css/**", "/js/**", "/img/**")
-						.requestMatchers("/css/**", "/js/**", "/img/**")
 						.permitAll()
 						.requestMatchers("/api/**", "/", "/error", "/tienda", "/register", "/user_available",
 								"/register", "/login", "/logout")
