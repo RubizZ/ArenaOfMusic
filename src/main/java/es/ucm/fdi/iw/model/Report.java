@@ -62,10 +62,8 @@ public class Report implements Transferable<Report.Transfer> {
 
     @Column(nullable = false)
     private LocalDateTime creationDate = LocalDateTime.now();
-    private LocalDateTime creationDate = LocalDateTime.now();
 
     @Column
-    private LocalDateTime resolutionDate;
     private LocalDateTime resolutionDate;
 
     @Getter
@@ -79,8 +77,6 @@ public class Report implements Transferable<Report.Transfer> {
         private boolean solved;
         private boolean banned;
         private long admin;
-        private String creationDate;
-        private String resolutionDate;
         private String creationDate;
         private String resolutionDate;
     }

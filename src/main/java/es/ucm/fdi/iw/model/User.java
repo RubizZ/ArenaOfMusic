@@ -38,19 +38,11 @@ import lombok.NoArgsConstructor;
         @NamedQuery(name = "User.hasUsername", query = "SELECT COUNT(u) "
                 + "FROM User u "
                 + "WHERE u.username = :username")
-        @NamedQuery(name = "User.byUsername", query = "SELECT u FROM User u "
-                + "WHERE u.username = :username AND u.enabled = TRUE"),
-        @NamedQuery(name = "User.hasUsername", query = "SELECT COUNT(u) "
-                + "FROM User u "
-                + "WHERE u.username = :username")
 })
-@Table(name = "IWUser")
 @Table(name = "IWUser")
 public class User implements Transferable<User.Transfer> {
 
     public enum Role {
-        USER, // normal users
-        ADMIN, // admin users
         USER, // normal users
         ADMIN, // admin users
     }
@@ -58,7 +50,6 @@ public class User implements Transferable<User.Transfer> {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen")
     @SequenceGenerator(name = "gen", sequenceName = "gen")
-    private long id;
     private long id;
 
     @Column(nullable = false, unique = true)
@@ -145,7 +136,6 @@ public class User implements Transferable<User.Transfer> {
     @AllArgsConstructor
     public static class Transfer {
         private long id;
-        private long id;
         private String username;
         private String email;
         private boolean enabled;
@@ -158,7 +148,6 @@ public class User implements Transferable<User.Transfer> {
         private int totalSent;
     }
 
-    @Override
     @Override
     public Transfer toTransfer() {
         return new Transfer(
