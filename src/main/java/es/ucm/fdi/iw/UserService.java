@@ -27,8 +27,6 @@ public class UserService {
     public void registerUser(String username, String password, String firstName, String lastName, String email) {
         User user = new User();
         user.setUsername(username);
-        user.setFirstName(firstName);
-        user.setLastName(lastName);
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password)); // Hash of password
         user.setRoles(User.Role.USER.toString()); // Set the user role
