@@ -123,6 +123,7 @@ public class User implements Transferable<User.Transfer> {
     /**
      * Checks whether this user has a given role.
      * 
+     * 
      * @param role to check
      * @return true iff this user has that role.
      */

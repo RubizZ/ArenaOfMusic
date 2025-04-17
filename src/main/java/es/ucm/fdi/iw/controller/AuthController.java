@@ -60,7 +60,6 @@ public class AuthController {
     public String register(@RequestParam String username,
             @RequestParam String password,
             @RequestParam String email,
-
             Model model,
             HttpServletRequest request,
             HttpServletResponse response) throws Exception {
