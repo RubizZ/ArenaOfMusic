@@ -5,12 +5,15 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
@@ -51,11 +54,14 @@ public class User implements Transferable<User.Transfer> {
 
     @Column(nullable = false, unique = true)
     private String username;
+
+    @Lob
+    @Column()
+    private String profileImage; // base64 encoded image
+
+    @JsonIgnore
     @Column(nullable = false)
     private String password;
-
-    private String firstName;
-    private String lastName;
 
     @Column(nullable = false)
     private boolean enabled = true;
@@ -68,7 +74,7 @@ public class User implements Transferable<User.Transfer> {
     private String description;
 
     @Column(nullable = false)
-    private Integer EXP_totale = 0;
+    private Integer EXP_total = 0;
 
     @Column(nullable = false)
     private Integer EXP = 0;
@@ -96,11 +102,27 @@ public class User implements Transferable<User.Transfer> {
     @OneToMany(mappedBy = "reported")
     private List<Report> reportsReceived;
 
-    // Faltan las relaciones con amigos, bloqueos e Inventario
-    // -> faltan las clases de amigos, bloqueos e inventario en model
+    @OneToMany(mappedBy = "user")
+    private List<Inventory> inventory;
+
+    @OneToMany(mappedBy = "user1")
+    private List<Friendship> friendsRequested;
+
+    @OneToMany(mappedBy = "user2")
+    private List<Friendship> friendsReceived;
+
+    @OneToMany(mappedBy = "blocker")
+    private List<Block> blocksMade;
+
+    @OneToMany(mappedBy = "blocked")
+    private List<Block> blocksReceived;
+
+    @OneToMany(mappedBy = "user")
+    private List<PlayerGame> partidas;
 
     /**
      * Checks whether this user has a given role.
+     * 
      * 
      * @param role to check
      * @return true iff this user has that role.
@@ -118,7 +140,7 @@ public class User implements Transferable<User.Transfer> {
         private String email;
         private boolean enabled;
         private boolean banned;
-        private int EXP_totale;
+        private int EXP_total;
         private int EXP;
         private Date creationDateTime;
         private Date lastLogin;
@@ -134,7 +156,7 @@ public class User implements Transferable<User.Transfer> {
                 email,
                 enabled,
                 banned,
-                EXP_totale,
+                EXP_total,
                 EXP,
                 creationDateTime,
                 lastLogin,

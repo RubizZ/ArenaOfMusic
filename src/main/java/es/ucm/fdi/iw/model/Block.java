@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @NoArgsConstructor
-@Table(name = "blocks")
+@Table(name = "block")
 public class Block implements Transferable<Block.Transfer> {
 
     @EmbeddedId
