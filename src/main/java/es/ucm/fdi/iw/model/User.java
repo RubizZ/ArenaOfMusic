@@ -13,6 +13,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
@@ -53,6 +54,10 @@ public class User implements Transferable<User.Transfer> {
 
     @Column(nullable = false, unique = true)
     private String username;
+
+    @Lob
+    @Column()
+    private String profileImage; // base64 encoded image
 
     @JsonIgnore
     @Column(nullable = false)
@@ -117,6 +122,7 @@ public class User implements Transferable<User.Transfer> {
 
     /**
      * Checks whether this user has a given role.
+     * 
      * 
      * @param role to check
      * @return true iff this user has that role.
