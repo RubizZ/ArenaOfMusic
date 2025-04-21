@@ -25,13 +25,13 @@ public class RoundInfoDTO {
             userAnswersString.append(entry.getKey()).append(":").append(entry.getValue());
         }
         return "roundNumber=" + roundNumber +
-                "|song=" + song + // Manejar valores nulos
-                "|userAnswers=" + userAnswersString;
+                "~song=" + song + // Manejar valores nulos
+                "~userAnswers=" + userAnswersString;
     }
 
     public void parseRoundInfoDTO(String roundInfo) {
         try {
-            String[] parts = roundInfo.split("|", 3); // Dividir en 3 partes principales
+            String[] parts = roundInfo.split("~", 3); // Dividir en 3 partes principales
             if (parts.length != 3) {
                 throw new IllegalArgumentException("Invalid input format: missing fields");
             }

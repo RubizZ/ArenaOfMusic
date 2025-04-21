@@ -17,17 +17,17 @@ public class GameRoundsDTO {
     private List<RoundInfoDTO> rounds = new ArrayList<>();
 
     public Long getSong(int roundNumber) {
-        if (roundNumber < 0 || roundNumber >= rounds.size()) {
+        if (roundNumber < 0 || roundNumber > songsIds.size()) {
             throw new IndexOutOfBoundsException("Round number out of bounds: " + roundNumber);
         }
-        return rounds.get(roundNumber).getSong();
+        return songsIds.get(roundNumber);
     }
 
     public void setSong(int roundNumber, Long song) {
-        if (roundNumber < 0 || roundNumber >= rounds.size()) {
+        if (roundNumber < 0 || roundNumber > songsIds.size()) {
             throw new IndexOutOfBoundsException("Round number out of bounds: " + roundNumber);
         }
-        this.rounds.get(roundNumber).setSong(song);
+        this.songsIds.set(roundNumber, song);
     }
 
     public RoundInfoDTO getRound(int roundNumber) {
@@ -65,7 +65,6 @@ public class GameRoundsDTO {
 
         // Construir el string final
         return "songsIds=" + songsIdsString +
-                "|roundNumber=" + roundNumber +
                 "|rounds=" + roundsString;
     }
 
@@ -80,8 +79,6 @@ public class GameRoundsDTO {
                         for (String id : ids) {
                             this.songsIds.add(Long.parseLong(id));
                         }
-                    } else if (keyValue[0].equals("roundNumber")) {
-                        this.roundNumber = Integer.parseInt(keyValue[1]);
                     } else if (keyValue[0].equals("rounds")) {
                         String[] roundsArray = keyValue[1].split(";");
                         for (String roundString : roundsArray) {

@@ -335,10 +335,11 @@ public class PartidaService {
             Long songId = gameRoundsDTO.getSong(gameRoundsDTO.getRoundNumber());
             Song song = entityManager.find(Song.class, songId);
 
-            roundInfo.setRoundNumber(gameRoundsDTO.getRoundNumber());
+            roundInfo.setRoundNumber(gameRoundsDTO.getRoundNumber() + 1);
             roundInfo.setSong(song.getId());
             gameRoundsDTO.addRound(roundInfo);
             game.setRoundJson(gameRoundsDTO.toString());
+            entityManager.persist(game);
 
         } catch (IllegalArgumentException e) {
             System.out.println("Argumento invalido: " + e.getMessage());

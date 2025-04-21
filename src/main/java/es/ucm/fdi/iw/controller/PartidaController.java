@@ -1,9 +1,16 @@
 package es.ucm.fdi.iw.controller;
 
 import java.util.UUID;
+import java.io.File;
+import java.io.IOException;
+import java.net.http.HttpHeaders;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.Set;
+
+import org.springframework.http.MediaType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -20,10 +27,16 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import es.ucm.fdi.iw.dto.game.GameConfigDTO;
 import es.ucm.fdi.iw.dto.game.GamePlayerDTO;
+import es.ucm.fdi.iw.dto.game.RoundInfoDTO;
+import es.ucm.fdi.iw.dto.game.RoundResponseDTO;
 import es.ucm.fdi.iw.model.Game;
 import es.ucm.fdi.iw.model.Playlist;
 import es.ucm.fdi.iw.model.User;
 import es.ucm.fdi.iw.service.PartidaService;
+import es.ucm.fdi.iw.service.SongService;
+import es.ucm.fdi.iw.util.FileGetter;
+import es.ucm.fdi.iw.util.NoDataException;
+import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
@@ -31,6 +44,10 @@ public class PartidaController {
 
     @Autowired
     private PartidaService partidaService;
+   
+    @Autowired
+    SongService songService;
+
 
     @ModelAttribute
     public void populateModel(HttpSession session, Model model) {
@@ -151,6 +168,18 @@ public class PartidaController {
             if (game.getGameState().equals(Game.GameState.WAITING)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha comenzado.");
             }
+
+            // Obtener Configuracion de la Partida
+            String gameConfigString = game.getConfigJson();
+            GameConfigDTO gameConfig = new GameConfigDTO();
+            gameConfig.parseGameConfigDTO(gameConfigString);
+            // Obtener jugadores de la partida
+            Set<GamePlayerDTO> players = partidaService.getGamePlayers(gameId);
+            // Agregar datos al modelo
+            model.addAttribute("gameId", game.getId().toString());
+            model.addAttribute("players", players);
+            model.addAttribute("gameConfig", gameConfig);
+
             return "partida";
         } catch (ResponseStatusException e) {
             model.addAttribute("msg", "Error al acceder a la sala de espera: " + e.getReason());
@@ -160,7 +189,7 @@ public class PartidaController {
     }
 
     @PostMapping("/partida/inicioRonda/{gameId}")
-    public ResponseEntity<Void> inicioRonda(@PathVariable UUID gameId) {
+    public ResponseEntity<RoundInfoDTO> inicioRonda(@PathVariable UUID gameId) {
         try {
             Game game = partidaService.getGameById(gameId);
             if (game == null || !game.getActive()) {
@@ -172,8 +201,8 @@ public class PartidaController {
             if (game.getGameState().equals(Game.GameState.WAITING)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha comenzado.");
             }
-            partidaService.iniciarRonda(game);
-            return ResponseEntity.ok().build();
+            RoundInfoDTO response = partidaService.iniciarRonda(game);
+            return ResponseEntity.ok(response);
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (Exception e) {
@@ -181,8 +210,18 @@ public class PartidaController {
         }
     }
 
+    @GetMapping("/partida/song/{id}/cover")
+    public ResponseEntity<byte[]> getSongCover(@PathVariable Long id) {
+        return responseEntityFromFileGetter(() -> songService.getSongCover(id));
+    }
+
+    @GetMapping("/partida/song/{id}/audio")
+    public ResponseEntity<byte[]> getSongAudio(@PathVariable Long id) {
+        return responseEntityFromFileGetter(() -> songService.getSongAudio(id));
+    }
+
     @PostMapping("/partida/finRonda/{gameId}")
-    public ResponseEntity<Void> finRonda(@PathVariable UUID gameId, @RequestBody Map<Long, String> body) {
+    public ResponseEntity<RoundResponseDTO> finRonda(@PathVariable UUID gameId, @RequestBody Map<Long, String> body) {
         try {
             Game game = partidaService.getGameById(gameId);
             if (game == null || !game.getActive()) {
@@ -194,8 +233,8 @@ public class PartidaController {
             if (game.getGameState().equals(Game.GameState.WAITING)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha comenzado.");
             }
-            partidaService.finalizarRonda(game, body);
-            return ResponseEntity.ok().build();
+            RoundResponseDTO response = partidaService.finalizarRonda(game, body);
+            return ResponseEntity.ok(response);
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (Exception e) {
@@ -213,4 +252,27 @@ public class PartidaController {
         return "resultados";
     }
 
+    private ResponseEntity<byte[]> responseEntityFromFileGetter(FileGetter fileGetter) {
+        try {
+            File file = fileGetter.get();
+
+            byte[] fileContent = Files.readAllBytes(file.toPath());
+            String contentType = Files.probeContentType(file.toPath());
+
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.valueOf(contentType))
+                    .body(fileContent);
+
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body(new byte[0]);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(new byte[0]);
+        } catch (NoDataException e) {
+            return ResponseEntity.status(410).body(new byte[0]);
+        }
+    }
 }
