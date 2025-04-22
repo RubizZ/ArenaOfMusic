@@ -242,6 +242,30 @@ public class PartidaController {
         }
     }
 
+    @PostMapping("/partida/finalizar/{gameId}")
+    public String finalizarPartida(@PathVariable UUID gameId,RedirectAttributes redirectAttributes) {
+        try {
+            Game game = partidaService.getGameById(gameId);
+            if (game == null || !game.getActive()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
+            }
+            if (game.getGameState().equals(Game.GameState.FINISHED)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
+            }
+            if (game.getGameState().equals(Game.GameState.WAITING)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha comenzado.");
+            }
+            partidaService.finalizarPartida(game);
+            return "redirect:/partida/resultados";// + gameId.toString();
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/error";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al iniciar la partida.");
+            return "redirect:/error";
+        }
+    }
+
     @GetMapping("/partida/resultados")
     public String resultados(Model model) {
         model.addAttribute("position", "¡Has acabado en 1ª posición!");

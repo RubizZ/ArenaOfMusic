@@ -7,13 +7,17 @@ let timePerRound = 0;
 let countdownTimer = null;    // Controlador para el temporizador.
 let selectedAnswer = "";      // Última respuesta confirmada por el jugador.
 let rondaFinalizada = false;
+let audioURL;
+let audio;
+let imageURL;
+
 
 function iniciarJuego(id, players, rondas, fragmentDuration) {
     gameId = id;
     playerId = players[0].id
     totalRounds = rondas;
     timePerRound = fragmentDuration;
-    
+
     iniciarRonda();
 }
 
@@ -76,29 +80,58 @@ function obtenerCancion(songId) {
         }
         return response.blob(); // asumimos que el backend envía audio como blob
     }).then(blob => {
-        const audioURL = URL.createObjectURL(blob);
-        reproducirCancion(audioURL); // devolverá la URL temporal para reproducir
+        audioURL = URL.createObjectURL(blob);
+        actualizarCover();
+        reproducirCancion(); // devolverá la URL temporal para reproducir
     }).catch(error => {
         console.error('Error al obtener la canción:', error);
     });
 }
 
-function reproducirCancion(audioUrl) {
-    const audio = new Audio(audioUrl);
+function obtenerCover(songId) {
+    fetch(`/partida/song/${songId}/cover`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error al obtener la cover: ${response.status}`);
+            }
+            return response.blob(); // Recibimos la imagen como Blob
+        })
+        .then(blob => {
+            imageURL = URL.createObjectURL(blob); // Convertimos el blob en URL para usar en <img>
+            actualizarCover();
+        })
+        .catch(error => {
+            console.error('Error cargando la cover:', error);
+        });
+}
+
+function actualizarCover() {
+    const img = document.querySelector("#songImage");
+    if (rondaFinalizada) {
+        img.src = imageURL;
+    } else {
+        img.src = "/img/preview-song-img.jpeg";
+    }
+}
+
+
+
+function reproducirCancion() {
+    audio = new Audio(audioURL);
 
     // Cuando la canción esté lista, inicia la cuenta atrás y la reproducción.
     audio.oncanplaythrough = () => {
         audio.play();
-        iniciarCuentaAtras(audio);
+        iniciarCuentaAtras();
     };
 
     audio.onended = () => {
         // Por si la canción es corta o termina antes del timer.
-        finalizarRonda(audio);
+        finalizarRonda();
     };
 }
 
-function iniciarCuentaAtras(audio) {
+function iniciarCuentaAtras() {
     let tiempoRestante = timePerRound;
     actualizarContador(tiempoRestante);
 
@@ -107,7 +140,16 @@ function iniciarCuentaAtras(audio) {
         actualizarContador(tiempoRestante);
         if (tiempoRestante <= 0) {
             clearInterval(countdownTimer);
-            finalizarRonda(audio);
+            if (audio) audio.pause();
+            if (!rondaFinalizada)
+                finalizarRonda();
+            else {
+                if (currentRound >= totalRounds)
+                    finalizarPartida(); // Finaliza la partida si es la última ronda.
+                else
+                    iniciarRonda(); // Reinicia la ronda si ya se ha finalizado.
+            }
+
         }
     }, 1000);
 }
@@ -129,11 +171,9 @@ function marcarRespuesta() {
     console.log("Respuesta marcada:", selectedAnswer);
 }
 
-function finalizarRonda(audio) {
-    if (rondaFinalizada) return;
+function finalizarRonda() {
     rondaFinalizada = true;
 
-    if (audio) audio.pause();
     clearInterval(countdownTimer);
 
     let respuesta = selectedAnswer || document.querySelector("#songInput").value;
@@ -152,17 +192,17 @@ function finalizarRonda(audio) {
         },
         body: JSON.stringify(body)
     })
-    .then(response => {
-        if (!response.ok) throw new Error(`Error enviando respuesta: ${response.status}`);
-        return response.json();
-    })
-    .then(data => {
-        mostrarResultadoRonda(data);
-        reproducirFragmentoDeNuevo();
-    })
-    .catch(error => {
-        console.error('Error enviando respuesta:', error);
-    });
+        .then(response => {
+            if (!response.ok) throw new Error(`Error enviando respuesta: ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            mostrarResultadoRonda(data);
+            reproducirCancion();
+        })
+        .catch(error => {
+            console.error('Error enviando respuesta:', error);
+        });
 }
 
 function mostrarResultadoRonda(data) {
@@ -173,32 +213,39 @@ function mostrarResultadoRonda(data) {
     for (let playerId in data.result) {
         console.log(`Jugador ${playerId}: ${data.result[playerId]} puntos`);
     }
+
+    obtenerCover(data.songId); // obtenemos la cover con el ID que vino del backend
 }
 
 
-function reproducirFragmentoDeNuevo() {
-    // Esperar un par de segundos para mostrar resultado y volver a reproducir fragmento.
-    // Lógica similar a reproducirCancion(), pero con la imagen de la canción ya mostrada.
-    // Al terminar: comprobar si es la última ronda, o iniciar otra ronda.
-    setTimeout(() => {
-        if (currentRound >= totalRounds) {
-            finalizarPartida();
-        } else {
-            iniciarRonda();
-        }
-    }, 5000);
+// function reproducirFragmentoDeNuevo() {
+//     // Esperar un par de segundos para mostrar resultado y volver a reproducir fragmento.
+//     // Lógica similar a reproducirCancion(), pero con la imagen de la canción ya mostrada.
+//     // Al terminar: comprobar si es la última ronda, o iniciar otra ronda.
+//     setTimeout(() => {
+//         if (currentRound >= totalRounds) {
+//             finalizarPartida();
+//         } else {
+//             iniciarRonda();
+//         }
+//     }, 5000);
 
-    // Ejemplo: 5 segundos para mostrar resultados antes de pasar.
-}
+//     // Ejemplo: 5 segundos para mostrar resultados antes de pasar.
+// }
 
 function finalizarPartida() {
+    const csrfToken = document.querySelector('input[name="_csrf"]').value;
+
     fetch(`/partida/finalizar/${gameId}`, {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken
+        },
     })
         .then(response => {
             if (!response.ok) throw new Error(`Error finalizando partida: ${response.status}`);
             // Redirigir a la vista de resultados.
-            window.location.href = `/partida/resultados/${gameId}`;
         })
         .catch(error => {
             console.error('Error al finalizar la partida:', error);

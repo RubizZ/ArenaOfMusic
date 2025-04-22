@@ -405,6 +405,22 @@ public class PartidaService {
         return roundResponse;
 
     }
+
+    @Transactional
+    public void finalizarPartida(Game game) {
+        try {
+            if (game == null) {
+                throw new IllegalArgumentException("La partida no existe.");
+            }
+            if (!game.getGameState().equals(Game.GameState.PLAYING)) {
+                throw new IllegalStateException("La partida no ha comenzado o ya ha finalizado.");
+            }
+            game.setGameState(Game.GameState.FINISHED);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Argumento invalido: " + e.getMessage());
+        } catch (IllegalStateException e) {
+            System.out.println("Invalid state: " + e.getMessage());
+        }    }
     
 
 }
