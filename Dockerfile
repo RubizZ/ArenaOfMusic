@@ -21,7 +21,9 @@ ENTRYPOINT ["/bin/bash", "-c", "\
   java -jar /app/app.jar --spring.profiles.active=default & \
   pid=$! && \
   sleep 10 && \
-  kill $pid && \
+  echo 'Matando proceso de creación de base de datos...' && \
+  kill $pid || true && \
   echo 'Base de datos creada. Lanzando en perfil container...' && \
   exec java -jar /app/app.jar --spring.profiles.active=container \
 "]
+
