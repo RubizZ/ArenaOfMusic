@@ -1,31 +1,27 @@
 FROM openjdk:21-jdk-slim AS build
 
+# Establecer el directorio de trabajo
 WORKDIR /app
 
+# Copiar el archivo pom.xml y el código fuente
 COPY pom.xml ./
 COPY src ./src
 
+# Instalar Maven y compilar la aplicación
 RUN apt-get update && apt-get install -y maven
 RUN mvn clean package -DskipTests
 
+# Etapa final: Usa OpenJDK 21 para la imagen final
 FROM openjdk:21-jdk-slim
 
+# Establecer el directorio de trabajo
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y netcat-openbsd procps
-
+# Copiar el JAR desde la etapa de construcción
 COPY --from=build /app/target/*.jar /app/app.jar
 
+# Exponer el puerto 8080
 EXPOSE 8080
 
-ENTRYPOINT ["/bin/bash", "-c", "\
-  echo 'Creando base de datos con perfil default...' && \
-  java -jar /app/app.jar --spring.profiles.active=default & \
-  echo 'Esperando a que la app esté disponible en el puerto 8080...' && \
-  while ! nc -z localhost 8080; do sleep 1; done && \
-  echo 'Base de datos creada. Matando proceso...' && \
-  pkill -f 'app.jar' && \
-  sleep 2 && \
-  echo 'Arrancando en perfil container...' && \
-  exec java -jar /app/app.jar --spring.profiles.active=container \
-"]
+# Cambiar el ENTRYPOINT para usar el perfil 'render'
+ENTRYPOINT ["java", "-jar", "/app/app.jar", "--spring.profiles.active=render"]
