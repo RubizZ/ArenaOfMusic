@@ -5,7 +5,6 @@ WORKDIR /app
 COPY pom.xml ./
 COPY src ./src
 
-RUN apt-get update && apt-get install -y netcat
 RUN apt-get update && apt-get install -y maven
 
 RUN mvn clean package -DskipTests
@@ -13,6 +12,8 @@ RUN mvn clean package -DskipTests
 FROM openjdk:21-jdk-slim
 
 WORKDIR /app
+
+RUN apt-get update && apt-get install -y netcat-openbsd
 
 COPY --from=build /app/target/*.jar /app/app.jar
 
