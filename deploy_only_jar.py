@@ -1,0 +1,105 @@
+#!/usr/bin/env python
+"""Despliega tu aplicación web en tu contenedor Docker de la FDI
+
+Requiere:
+    ejecutarse desde consola en la misma carpeta en la que esté tu pom.xml, volcado de BD, y ficheros de datos
+    que tu proyecto esté actualizado (y en particular, que tenga un application-container.properties)
+    credenciales en un fichero credentials.json (NO SUBAS CREDENCIALES A GITHUB)
+        puedes ver sus valores orientativos en credentials.json.template
+    
+Cómo ejecutar:
+    1. instala las dependencias, bien vía pip ó con un entorno virtual python
+        entorno virtual: créalo vía `python3 -m venv deploy`
+                         actívalo vía `deploy/scripts/activate.ps1` (Windows) ó `source deploy/bin/activate` (Linux)
+                         instala dependencias vía `pip install -r requirements.txt`
+    2. asegúrate de que tu base de datos está escribiéndose a disco, con JDBC URL jdbc:h2:file:./iwdb
+    3. asegúrate de que estás guardando ficheros de usuario a disco, a ./iwdata
+    4. ejecuta el script: python deploy.py      
+"""
+
+# dependencias no-incluídas en Python estándar
+import sshtunnel # instala via pip install sshtunnel (ó entorno virtual, ver más arriba)
+import fabric    # instala via pip install fabric
+
+# dependencias incluídas en Python estándar
+import sys
+import subprocess
+import glob
+import json
+from pathlib import Path
+import argparse
+
+def main(credentials_file):
+
+  print("Building deployment jar file... ")
+  try:
+      # shell=True works in windows/fails in Linux; and vice-versa
+      is_win = sys.platform.startswith("win")
+      subprocess.run(["mvn",
+                      "package",
+                      "-P",
+                      "linux,!windows,!macos",
+                      "-DskipTests=true"], shell=is_win, check=True)
+      jar_path = glob.glob("target/*.jar")[0]
+      jar_name = Path(jar_path).name
+      print(f"Deployment jar file is ready: {jar_path} ({jar_name})")
+  except Exception as e:
+      print(f"Error: Could not build jar file. Exiting: {e}")
+      sys.exit(1)
+
+  print(f"Loading credentials from `{credentials_file}` ... ")
+  try:
+      credentials = json.load(open(credentials_file))
+  except:
+      print("Error: Could not load credentials file. Exiting.")
+      sys.exit(1)
+
+  print("Connecting to jumphost ... ")
+  with sshtunnel.open_tunnel(
+      (credentials['jumphost'], 22),
+      ssh_username=credentials['jumphost_user'],
+      ssh_password=credentials['jumphost_pass'],
+      remote_bind_address=(credentials['target'], 22),
+      local_bind_address=('0.0.0.0', 2222),
+      allow_agent=False
+  ) as tunnel:
+      print(f"Tunnel to {credentials['jumphost']} over port 22 established, bind via localhost 2222 ...")
+      with fabric.connection.Connection(
+          host='127.0.0.1',
+          user=credentials['target_user'],
+          port=2222,
+          connect_kwargs={
+              "password": credentials['target_pass'],
+              "allow_agent": False
+          }
+      ) as c:
+          print(f"Connected to target host {credentials['target']} as {credentials['target_user']}")
+
+          print("Uploading jar file ... ")            
+          c.put(jar_path)
+          print(f"All files uploaded. Killing previous servers ...")
+          c.run("tmux kill-server || true")
+          print(f"creating a launch script (`run.sh`) for the web application ...")
+          c.run(f"echo 'SPRING_PROFILES_ACTIVE=container java -jar {jar_name}' > run.sh && chmod +x run.sh")
+          print(f"... and deploying in new tmux session `iw`; connect via `tmux a -t iw` to see logs")
+          c.run(f"tmux new-session -d -s iw ./run.sh")
+          target_prefix = credentials['target'].split(".")[0]
+          target_suffix = credentials['jumphost']
+          print(f"Deployment is now being completed at the server:\n"
+                f" - Visit https://{target_prefix}.{target_suffix} (after a minute or so) to access your site\n"
+                f" - To see progress/check logs, visit https://guacamole.{credentials['jumphost']} as `{target_prefix}` with password `{credentials['target_pass']}`\n"
+                f"   and open logs via  `tmux a -t iw`; disconnecting with Ctrl+b + d\n"
+                f" - If you need to kill the server, run `tmux kill-server`")
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description=\
+        "Upload all components of a Spring Boot application to a remote server")
+    parser.add_argument("--credentials", "-c", type=str, default="credentials.json", 
+                        help="Path to credentials")
+    args = parser.parse_args()
+    try:
+      main(args.credentials)
+    except Exception as e:
+      print(f"Aborting due to error: {e}")
+      sys.exit(1)
+    sys.exit(0)
