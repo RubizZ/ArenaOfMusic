@@ -1,5 +1,5 @@
-# Build Stage: Use Maven JDK image (Maven 4.0.0)
-FROM maven:3.6.0-jdk-21 AS build
+# Build Stage: Use OpenJDK 19 with Debian-based image (which has apt-get)
+FROM openjdk:21-jdk-slim AS build
 
 # Set the working directory in the container
 WORKDIR /app
@@ -8,11 +8,14 @@ WORKDIR /app
 COPY pom.xml ./
 COPY src ./src
 
-# Build the application using Maven 4.0.0
+# Install Maven (using apt-get available in slim version)
+RUN apt-get update && apt-get install -y maven
+
+# Build the application using Maven
 RUN mvn clean package -DskipTests
 
 # Stage 2: Final image based on OpenJDK 19
-FROM openjdk:21-jdk
+FROM openjdk:21-jdk-slim
 
 # Set the working directory in the container
 WORKDIR /app
