@@ -15,7 +15,8 @@
 
     <header th:replace="~{fragments/nav.html :: nav}"></header>
 
-    <main class="contenido-principal">
+    <main class="contenido-principal"
+        style="background-image: url('img/fondo.png'); background-size: cover; background-position: center; min-height: 100vh;">
         <!-- Título -->
         <div class="container-fluid text-center">
             <h1 class="titulo shadow-lg p-3 rounded">ARENA OF MUSIC</h1>
@@ -53,7 +54,8 @@
         <!-- Tarjeta del botón -->
         <div class="card tarjeta-boton shadow-lg mt-3">
             <div class="card-body text-center">
-                <button id="btn-jugar" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#modosModal">JUGAR</button>
+                <button id="btn-jugar" class="btn btn-success btn-lg" data-bs-toggle="modal"
+                    data-bs-target="#modosModal">JUGAR</button>
             </div>
         </div>
     </main>
@@ -80,7 +82,7 @@
                                 </div>
                             </div>
                             <div class="col">
-                                <div class="card desactivar mb-3 opacity-50"  id="modo-duelo">
+                                <div class="card desactivar mb-3 opacity-50" id="modo-duelo">
                                     <a th:href="@{configuracion-partida}" class="stretched-link" disabled></a>
                                     <img src="/img/iconos/duelo.png" alt="Modo Duelo" class="p-2">
                                     <div class="card-body">
@@ -89,8 +91,8 @@
                                 </div>
                             </div>
                             <div class="col">
-                                <div class="card desactivar mb-3 opacity-50"  id="modo-multijugador">
-                                    <a th:href="@{configuracion-partida}" class="stretched-link" disabled ></a>
+                                <div class="card desactivar mb-3 opacity-50" id="modo-multijugador">
+                                    <a th:href="@{configuracion-partida}" class="stretched-link" disabled></a>
                                     <img src="/img/iconos/fiesta.png" alt="Modo Multijugador" class="p-2">
                                     <div class="card-body">
                                         <h5 class="card-title">Multijugador</h5>
@@ -104,7 +106,7 @@
         </div>
     </div>
 
-    
+
 
     <th:block th:replace="~{fragments/footer.html :: footer}" />
 
