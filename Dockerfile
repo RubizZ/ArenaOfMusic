@@ -27,4 +27,4 @@ COPY --from=build /app/target/*.jar /app/app.jar
 EXPOSE 8080
 
 # Set the entrypoint to run the JAR file
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-jar", "/app/app.jar", "--spring.profiles.active=container"]
