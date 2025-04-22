@@ -36,7 +36,7 @@ function iniciarRonda() {
             console.log(data)
 
             currentRound = data.roundNumber;
-            currentSongId = data.song;
+            currentSongId = data.songId;
             actualizarVistaRonda(currentRound);  // Actualiza la UI con el número de ronda.
             obtenerCancion(currentSongId);       // Siguiente paso.
         })
@@ -165,6 +165,15 @@ function finalizarRonda(audio) {
     });
 }
 
+function mostrarResultadoRonda(data) {
+    console.log("=== Resultado de la Ronda ===");
+    console.log("Canción Correcta:", data.songName, `(ID: ${data.songId})`);
+
+    console.log("Puntuaciones de esta ronda:");
+    for (let playerId in data.result) {
+        console.log(`Jugador ${playerId}: ${data.result[playerId]} puntos`);
+    }
+}
 
 
 function reproducirFragmentoDeNuevo() {
