@@ -1,5 +1,5 @@
 # Build Stage: Use Maven JDK image (Maven 4.0.0)
-FROM maven:4.0.0-jdk-21 AS build
+FROM maven:3.6.0-jdk-21 AS build
 
 # Set the working directory in the container
 WORKDIR /app
@@ -12,7 +12,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Stage 2: Final image based on OpenJDK 19
-FROM maven:4.0.0-jdk-21
+FROM openjdk:21-jdk
 
 # Set the working directory in the container
 WORKDIR /app
