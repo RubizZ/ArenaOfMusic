@@ -55,9 +55,11 @@ function actualizarVistaRonda(roundData) {
 
     // Limpias el input de respuesta por si quedó texto
     const inputRespuesta = document.getElementById('songInput');
-    if (inputRespuesta) {
-        inputRespuesta.value = '';
-    }
+    const botonRespuesta = document.getElementById('marcarBtn');
+
+    inputRespuesta.value = '';
+    inputRespuesta.disabled = false;
+    botonRespuesta.disabled = false;
     selectedAnswer = "";  // Reinicia la respuesta previa
 
     // Puedes guardar el ID de la canción en una variable global para usar luego
@@ -174,6 +176,12 @@ function marcarRespuesta() {
 function finalizarRonda() {
     rondaFinalizada = true;
 
+    const inputRespuesta = document.getElementById('songInput');
+    const botonRespuesta = document.getElementById('marcarBtn');
+
+    inputRespuesta.disabled = true;
+    botonRespuesta.disabled = true;
+
     clearInterval(countdownTimer);
 
     let respuesta = selectedAnswer || document.querySelector("#songInput").value;
@@ -217,37 +225,19 @@ function mostrarResultadoRonda(data) {
     obtenerCover(data.songId); // obtenemos la cover con el ID que vino del backend
 }
 
-
-// function reproducirFragmentoDeNuevo() {
-//     // Esperar un par de segundos para mostrar resultado y volver a reproducir fragmento.
-//     // Lógica similar a reproducirCancion(), pero con la imagen de la canción ya mostrada.
-//     // Al terminar: comprobar si es la última ronda, o iniciar otra ronda.
-//     setTimeout(() => {
-//         if (currentRound >= totalRounds) {
-//             finalizarPartida();
-//         } else {
-//             iniciarRonda();
-//         }
-//     }, 5000);
-
-//     // Ejemplo: 5 segundos para mostrar resultados antes de pasar.
-// }
-
 function finalizarPartida() {
     const csrfToken = document.querySelector('input[name="_csrf"]').value;
 
     fetch(`/partida/finalizar/${gameId}`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
             'X-CSRF-TOKEN': csrfToken
         },
-    })
-        .then(response => {
-            if (!response.ok) throw new Error(`Error finalizando partida: ${response.status}`);
-            // Redirigir a la vista de resultados.
-        })
-        .catch(error => {
-            console.error('Error al finalizar la partida:', error);
-        });
+    }).then(response => {
+        if (!response.ok) throw new Error(`Error finalizando partida: ${response.status}`);
+        // Redirigir a la vista de resultados.
+        window.location.href = `/partida/resultados`;
+    }).catch(error => {
+        console.error('Error al finalizar la partida:', error);
+    });
 }

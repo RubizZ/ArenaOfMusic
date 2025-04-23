@@ -389,10 +389,6 @@ public class PartidaService {
 
             GameConfigDTO gameConfig = new GameConfigDTO();
             gameConfig.parseGameConfigDTO(game.getConfigJson());
-            if(gameRoundsDTO.getRoundNumber() >= gameConfig.getRounds()) {
-                game.setGameState(Game.GameState.FINISHED);
-            } 
-
             game.setRoundJson(gameRoundsDTO.toString());
             
 
@@ -403,7 +399,6 @@ public class PartidaService {
         }
 
         return roundResponse;
-
     }
 
     @Transactional
@@ -416,6 +411,7 @@ public class PartidaService {
                 throw new IllegalStateException("La partida no ha comenzado o ya ha finalizado.");
             }
             game.setGameState(Game.GameState.FINISHED);
+            entityManager.persist(game);
         } catch (IllegalArgumentException e) {
             System.out.println("Argumento invalido: " + e.getMessage());
         } catch (IllegalStateException e) {

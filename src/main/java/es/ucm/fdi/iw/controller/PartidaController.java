@@ -241,9 +241,8 @@ public class PartidaController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-
     @PostMapping("/partida/finalizar/{gameId}")
-    public String finalizarPartida(@PathVariable UUID gameId,RedirectAttributes redirectAttributes) {
+    public ResponseEntity<Void> finalizarPartida(@PathVariable UUID gameId) {
         try {
             Game game = partidaService.getGameById(gameId);
             if (game == null || !game.getActive()) {
@@ -256,13 +255,11 @@ public class PartidaController {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha comenzado.");
             }
             partidaService.finalizarPartida(game);
-            return "redirect:/partida/resultados";// + gameId.toString();
-        } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/error";
+            return ResponseEntity.ok().build();
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).build();
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Error al iniciar la partida.");
-            return "redirect:/error";
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
