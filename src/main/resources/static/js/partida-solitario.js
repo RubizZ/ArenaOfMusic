@@ -41,7 +41,7 @@ function iniciarRonda() {
 
             currentRound = data.roundNumber;
             currentSongId = data.songId;
-            actualizarVistaRonda(currentRound);  // Actualiza la UI con el número de ronda.
+            actualizarVistaRonda(currentRound);  // Actualiza la UI con la nueva ronda
             obtenerCancion(currentSongId);       // Siguiente paso.
         })
         .catch(error => {
@@ -50,27 +50,19 @@ function iniciarRonda() {
 }
 
 function actualizarVistaRonda(roundData) {
-    // Ejemplo: Actualizas el número de ronda en tu vista
     document.getElementById('numeroRonda').innerText = `${roundData}`;
 
-    // Limpias el input de respuesta por si quedó texto
     const inputRespuesta = document.getElementById('songInput');
     const botonRespuesta = document.getElementById('marcarBtn');
 
     const overlay = document.getElementById("songTitleOverlay");
 
-    if (overlay) {
-        overlay.style.display = "none";
-        console.log("NOOOOOOOOOOOOOOO")
-    }
+    overlay.style.display = "none";
 
     inputRespuesta.value = '';
     inputRespuesta.disabled = false;
     botonRespuesta.disabled = false;
     selectedAnswer = "";  // Reinicia la respuesta previa
-
-    // Puedes guardar el ID de la canción en una variable global para usar luego
-    window.cancionActualId = roundData.song;
 
     console.log("Vista actualizada para la ronda:", roundData);
 }
@@ -123,8 +115,6 @@ function actualizarCover() {
     }
 }
 
-
-
 function reproducirCancion() {
     audio = new Audio(audioURL);
 
@@ -132,11 +122,6 @@ function reproducirCancion() {
     audio.oncanplaythrough = () => {
         audio.play();
         iniciarCuentaAtras();
-    };
-
-    audio.onended = () => {
-        // Por si la canción es corta o termina antes del timer.
-        finalizarRonda();
     };
 }
 
@@ -153,8 +138,8 @@ function iniciarCuentaAtras() {
             if (!rondaFinalizada)
                 finalizarRonda();
             else {
-                if (currentRound >= totalRounds)
-                    finalizarPartida(); // Finaliza la partida si es la última ronda.
+                if (currentRound >= totalRounds)// Finaliza la partida si es la última ronda.
+                    finalizarPartida();
                 else
                     iniciarRonda(); // Reinicia la ronda si ya se ha finalizado.
             }
@@ -175,9 +160,7 @@ function actualizarContador(tiempoRestante) {
 }
 
 function marcarRespuesta() {
-    const selectedAnswer = document.getElementById('songInput').value;
-
-    console.log("Respuesta marcada:", selectedAnswer);
+    selectedAnswer = document.getElementById('songInput').value;
 }
 
 function finalizarRonda() {
@@ -221,16 +204,13 @@ function finalizarRonda() {
 }
 
 function mostrarResultadoRonda(data) {
-    obtenerCover(data.songId); // obtenemos la cover con el ID que vino del backend
+    obtenerCover(data.songId); // obtenemos la cover con el ID 
     const overlay = document.getElementById("songTitleOverlay");
     const overlayText = document.getElementById("songTitleText");
 
-    if (overlay && overlayText) {
-        overlayText.textContent = data.songName;
-        overlay.style.display = "block";
-        console.log("SIIIIIIIIIIII")
+    overlayText.textContent = data.songName;
+    overlay.style.display = "block";
 
-    }
     // Actualizamos los puntajes de cada jugador en su tarjeta
     for (let pid in data.result) {
         const puntos = data.result[pid];
