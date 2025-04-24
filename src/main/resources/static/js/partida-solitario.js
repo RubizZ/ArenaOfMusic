@@ -57,6 +57,13 @@ function actualizarVistaRonda(roundData) {
     const inputRespuesta = document.getElementById('songInput');
     const botonRespuesta = document.getElementById('marcarBtn');
 
+    const overlay = document.getElementById("songTitleOverlay");
+
+    if (overlay) {
+        overlay.style.display = "none";
+        console.log("NOOOOOOOOOOOOOOO")
+    }
+
     inputRespuesta.value = '';
     inputRespuesta.disabled = false;
     botonRespuesta.disabled = false;
@@ -214,15 +221,43 @@ function finalizarRonda() {
 }
 
 function mostrarResultadoRonda(data) {
-    console.log("=== Resultado de la Ronda ===");
-    console.log("Canción Correcta:", data.songName, `(ID: ${data.songId})`);
+    obtenerCover(data.songId); // obtenemos la cover con el ID que vino del backend
+    const overlay = document.getElementById("songTitleOverlay");
+    const overlayText = document.getElementById("songTitleText");
 
-    console.log("Puntuaciones de esta ronda:");
-    for (let playerId in data.result) {
-        console.log(`Jugador ${playerId}: ${data.result[playerId]} puntos`);
+    if (overlay && overlayText) {
+        overlayText.textContent = data.songName;
+        overlay.style.display = "block";
+        console.log("SIIIIIIIIIIII")
+
+    }
+    // Actualizamos los puntajes de cada jugador en su tarjeta
+    for (let pid in data.result) {
+        const puntos = data.result[pid];
+        const scoreSpan = document.getElementById(`player${pid}score`);
+        const cardDiv = document.getElementById(`playerCard${pid}`);
+
+        if (scoreSpan && cardDiv) {
+            const actual = parseInt(scoreSpan.innerText);
+            scoreSpan.innerText = actual + puntos;
+
+            // Elimina cualquier animación previa
+            cardDiv.classList.remove("flash-verde", "flash-rojo");
+
+            if (puntos > 0) {
+                cardDiv.classList.add("flash-verde");
+            } else {
+                cardDiv.classList.add("flash-rojo");
+            }
+
+            // Borra la animación tras un segundo
+            setTimeout(() => {
+                cardDiv.classList.remove("flash-verde", "flash-rojo");
+            }, 1000);
+        }
     }
 
-    obtenerCover(data.songId); // obtenemos la cover con el ID que vino del backend
+
 }
 
 function finalizarPartida() {

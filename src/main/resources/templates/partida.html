@@ -30,6 +30,29 @@
             }
         }
 
+        .song-image-container {
+            width: auto;
+            margin: 0 auto;
+        }
+
+        #songTitleOverlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 6px 12px;
+            padding-bottom: 0px;
+            /* Un poco menos de padding */
+            background-color: rgba(0, 0, 0, 0.7);
+            /* Fondo oscuro semitransparente */
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            border-bottom-left-radius: 0.5rem;
+            border-bottom-right-radius: 0.5rem;
+        }
+
+
         .btn-custom {
             background-color: #198754;
             color: white;
@@ -42,6 +65,32 @@
         .btn-custom.active {
             transform: scale(0.97);
             box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.5);
+        }
+
+        @keyframes flashGrow {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .flash-verde {
+            animation: flashGrow 0.6s ease;
+            box-shadow: 0 0 12px 4px green !important;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .flash-rojo {
+            animation: flashGrow 0.6s ease;
+            box-shadow: 0 0 12px 4px red !important;
+            transition: box-shadow 0.3s ease;
         }
     </style>
 </head>
@@ -66,14 +115,20 @@
                         /
                         <span th:text="${gameConfig.rounds}"></span>
                     </h1>
-
-                    <!-- Imagen -->
-                    <img src="/img/preview-song-img.jpeg" id="songImage" alt="Imagen de interrogación de partida"
-                        class="rounded shadow img-fluid my-3" style="max-height: 250px; object-fit: contain;">
-
+                    <div class="song-image-container position-relative text-center" style="display: inline-block; overflow: hidden;">
+                        <!-- Imagen -->
+                        <img src="/img/preview-song-img.jpeg" id="songImage" alt="Imagen de interrogación de partida"
+                            class="rounded shadow img-fluid my-3" style="max-height: 250px; object-fit: contain; width: 100%;">
+                    
+                        <!-- Título de la canción encima -->
+                        <div id="songTitleOverlay" class="position-absolute" style="display: none;">
+                            <strong id="songTitleText">Título de la canción</strong>
+                        </div>
+                    </div>
+                    
 
                     <!-- Input y botón -->
-                    <div class="input-group mt-3" >
+                    <div class="input-group mt-3">
                         <input type="text" class="form-control border-success border-3" id="songInput"
                             placeholder="Introduce el título de la canción..." value="">
                         <button class="btn-custom" id="marcarBtn" onclick="marcarRespuesta()">Marcar</button>
@@ -83,7 +138,7 @@
                 <!-- Sección de Jugadores -->
                 <div class="col-lg-3 col-md-6 col-sm-12">
                     <div class="card shadow rounded-4 p-2 h-100 d-flex flex-column justify-content-center align-items-center"
-                        th:each="player : ${players}">
+                        th:each="player : ${players}" th:id="'playerCard' + ${player.id}">
                         <!-- Imagen del jugador -->
                         <img src="/img/default-profile.png" class="img-fluid rounded-circle mb-3" alt="Imagen Perfil"
                             style="max-width: 140px; height: auto;">
@@ -117,9 +172,9 @@
     <script src="/js/partida-solitario.js"></script> <!-- Aquí tienes tu lógica JS que estructuramos -->
     <script th:inline="javascript">
         // Supongamos que tienes estos datos ya en la plantilla desde Thymeleaf o tu motor de vistas:
-        const game = [[${gameId}]]; // UUID que te pase tu backend
-        const rounds = [[${gameConfig.rounds}]]; // Total de rondas que configuraste en el servidor
-        const fragmentDuration = [[${gameConfig.fragmentDuration}]]; // Duración de cada fragmento
+        const game = [[${ gameId }]]; // UUID que te pase tu backend
+        const rounds = [[${ gameConfig.rounds }]]; // Total de rondas que configuraste en el servidor
+        const fragmentDuration = [[${ gameConfig.fragmentDuration }]]; // Duración de cada fragmento
 
         /*<![CDATA[*/
         const players = /*[[${players}]]*/[];
