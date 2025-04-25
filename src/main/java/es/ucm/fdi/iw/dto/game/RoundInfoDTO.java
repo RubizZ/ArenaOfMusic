@@ -14,8 +14,8 @@ import lombok.NoArgsConstructor;
 public class RoundInfoDTO {
     int roundNumber;
     Long songId;
-    String songName;
-    Map<Long, String> userAnswers = new HashMap<>();
+    //String songName;
+    Map<Long, Boolean> userAnswers = new HashMap<>();
 
     // @Override
     // public String toString() {
@@ -85,12 +85,11 @@ public class RoundInfoDTO {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(roundNumber).append("|")
-                .append(songId).append("|")
-                .append(Base64.getEncoder().encodeToString(songName.getBytes())).append("|");
+                .append(songId).append("|");
+                //.append(Base64.getEncoder().encodeToString(songName.getBytes())).append("|");
 
         userAnswers.forEach((key, value) -> {
-            String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
-            sb.append(key).append("=").append(encodedValue).append(";");
+            sb.append(key).append("=").append(value).append(";");
         });
 
         return sb.toString();
@@ -101,15 +100,15 @@ public class RoundInfoDTO {
         RoundInfoDTO dto = new RoundInfoDTO();
         dto.roundNumber = Integer.parseInt(parts[0]);
         dto.songId = Long.parseLong(parts[1]);
-        dto.songName = new String(Base64.getDecoder().decode(parts[2]));
+       // dto.songName = new String(Base64.getDecoder().decode(parts[2]));
 
-        if (!parts[3].isEmpty()) {
-            String[] entries = parts[3].split(";");
+        if (!parts[2].isEmpty()) {
+            String[] entries = parts[2].split(";");
             for (String entry : entries) {
                 if (!entry.isEmpty()) {
                     String[] kv = entry.split("=", 2);
                     Long key = Long.parseLong(kv[0]);
-                    String value = new String(Base64.getDecoder().decode(kv[1]));
+                    Boolean value = Boolean.parseBoolean(kv[1]);
                     dto.userAnswers.put(key, value);
                 }
             }

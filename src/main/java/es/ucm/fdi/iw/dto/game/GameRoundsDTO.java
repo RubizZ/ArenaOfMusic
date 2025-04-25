@@ -50,54 +50,6 @@ public class GameRoundsDTO {
         this.roundNumber++;
     }
 
-    // @Override
-    // public String toString() {
-    // // Construir el string de songsIds
-    // String songsIdsString = String.join(";",
-    // songsIds.stream().map(String::valueOf).toArray(String[]::new));
-
-    // // Construir el string de rounds usando el toString de RoundInfoDTO
-    // StringBuilder roundsString = new StringBuilder();
-    // for (RoundInfoDTO round : rounds) {
-    // if (roundsString.length() > 0) {
-    // roundsString.append(";"); // Separador entre rondas
-    // }
-    // roundsString.append(round.toString()); // Usa el toString de RoundInfoDTO
-    // }
-
-    // // Construir el string final
-    // return "songsIds=" + songsIdsString +
-    // "|rounds=" + roundsString;
-    // }
-
-    // public void parseGameRoundsDTO(String gameRounds) {
-    // try {
-    // String[] parts = gameRounds.split("\\|"); // Separador principal
-    // for (String part : parts) {
-    // String[] keyValue = part.split("=");
-    // if (keyValue.length == 2) {
-    // if (keyValue[0].equals("songsIds")) {
-    // String[] ids = keyValue[1].split(";");
-    // for (String id : ids) {
-    // this.songsIds.add(Long.parseLong(id));
-    // }
-    // } else if (keyValue[0].equals("rounds")) {
-    // String[] roundsArray = keyValue[1].split(";");
-    // for (String roundString : roundsArray) {
-    // RoundInfoDTO round = new RoundInfoDTO();
-    // round.parseRoundInfoDTO(roundString); // Usa el parse de RoundInfoDTO
-    // this.rounds.add(round);
-    // }
-    // }
-    // }
-    // }
-    // } catch (Exception e) {
-    // throw new RuntimeException("Failed to parse GameRoundsDTO: " +
-    // e.getMessage(), e);
-    // }
-
-    // }
-
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -111,8 +63,8 @@ public class GameRoundsDTO {
         if (!rounds.isEmpty()) {
             rounds.forEach(r -> {
                 String roundStr = r.toString();
-                String encodedRound = Base64.getEncoder().encodeToString(roundStr.getBytes());
-                sb.append("{").append(encodedRound).append("}");
+                //String encodedRound = Base64.getEncoder().encodeToString(roundStr.getBytes());
+                sb.append("{").append(roundStr).append("}");
             });
         }
 
@@ -120,7 +72,7 @@ public class GameRoundsDTO {
     }
 
     public static GameRoundsDTO parse(String input) {
-        String[] parts = input.split("\\|", -1);
+        String[] parts = input.split("\\|", 3);
         GameRoundsDTO dto = new GameRoundsDTO();
 
         if (!parts[0].isEmpty()) {
@@ -140,8 +92,8 @@ public class GameRoundsDTO {
                 if (open == -1 || close == -1)
                     break;
                 String encodedRound = roundsPart.substring(open + 1, close);
-                String decodedRound = new String(Base64.getDecoder().decode(encodedRound));
-                dto.rounds.add(RoundInfoDTO.parse(decodedRound));
+                //String decodedRound = new String(Base64.getDecoder().decode(encodedRound));
+                dto.rounds.add(RoundInfoDTO.parse(encodedRound));
                 start = close + 1;
             }
         }

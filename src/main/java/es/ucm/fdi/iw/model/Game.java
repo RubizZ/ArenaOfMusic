@@ -13,6 +13,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -40,6 +41,7 @@ public class Game implements Transferable<Game.Transfer> {
     @Column(name = "configuration", nullable = false)
     private String configJson;
 
+    @Lob
     @Column(name = "rounds", nullable = false)
     private String roundJson;
 

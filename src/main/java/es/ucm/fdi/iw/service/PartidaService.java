@@ -337,7 +337,7 @@ public class PartidaService {
 
             roundInfo.setRoundNumber(gameRoundsDTO.getRoundNumber() + 1);
             roundInfo.setSongId(song.getId());
-            roundInfo.setSongName(song.getName());
+            //roundInfo.setSongName(song.getName());
             gameRoundsDTO.addRound(roundInfo);
             game.setRoundJson(gameRoundsDTO.toString());
             entityManager.persist(game);
@@ -366,31 +366,35 @@ public class PartidaService {
             }
             gameRoundsDTO = GameRoundsDTO.parse(game.getRoundJson());
             roundInfo = gameRoundsDTO.getRound(gameRoundsDTO.getRoundNumber() - 1);
-            roundInfo.setUserAnswers(userAnswers);
             gameRoundsDTO.setRound(gameRoundsDTO.getRoundNumber() - 1, roundInfo);
-            game.setRoundJson(roundInfo.toString());
             Song song = entityManager.find(Song.class, gameRoundsDTO.getSong(gameRoundsDTO.getRoundNumber() - 1));
             roundResponse.setSongId(song.getId());
             roundResponse.setSongName(song.getName());
 
+            Map<Long, Boolean> userTry = new HashMap<>();
             userAnswers.forEach((key, value) -> {
                 PlayerGame playerGame = entityManager.find(PlayerGame.class,
                         new PlayerGameId(game.getId(), key));
                 int score = 0;
                 if (value.equalsIgnoreCase(song.getName())) {
-                    score += 10; 
-                } 
+                    score += 10;
+                    userTry.put(key, true); // Guardar el intento correcto
+                } else {
+                    userTry.put(key, false); // Guardar el intento incorrecto
+                }
                 if (playerGame != null) {
                     playerGame.setScore(playerGame.getScore() + score); // Incrementar el puntaje del jugador
                     entityManager.persist(playerGame); // Persistir el cambio en la base de datos
                 }
                 roundResponse.getResult().put(key, score); // Guardar el puntaje del jugador en el resultado
             });
+            roundInfo.setUserAnswers(userTry);
+            game.setRoundJson(roundInfo.toString());
+
 
             GameConfigDTO gameConfig = new GameConfigDTO();
             gameConfig.parseGameConfigDTO(game.getConfigJson());
             game.setRoundJson(gameRoundsDTO.toString());
-            
 
         } catch (IllegalArgumentException e) {
             System.out.println("Argumento invalido: " + e.getMessage());
@@ -416,7 +420,7 @@ public class PartidaService {
             System.out.println("Argumento invalido: " + e.getMessage());
         } catch (IllegalStateException e) {
             System.out.println("Invalid state: " + e.getMessage());
-        }    }
-    
+        }
+    }
 
 }
