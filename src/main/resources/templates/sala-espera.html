@@ -38,7 +38,7 @@
                     <ul class="list-group mb-3">
                         <li class="list-group-item d-flex align-items-center border-0" th:each="player : ${players}">
                             <div class="d-flex align-items-center">
-                                <img th:src="@{/img/default-profile.png}" alt="Foto de perfil de jugador"
+                                <img th:src="${u.profileImage != null ?  u.profileImage : '/img/default-profile.png'}" alt="Foto de perfil de jugador"
                                     class="rounded-circle me-3" style="width: 55px; height: 55px; object-fit: cover;">
                                 <div>
                                     <div class="fw-semibold fs-6" th:text="${player.username}">Nombre</div>

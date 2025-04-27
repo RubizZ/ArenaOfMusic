@@ -16,4 +16,6 @@ public class GamePlayerDTO {
     private int EXP_total;
 
     private Long totalWins;
+
+    private String encodedImage;
 }
