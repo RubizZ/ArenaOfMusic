@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.http.HttpHeaders;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -185,6 +186,18 @@ public class PartidaController {
             model.addAttribute("msg", "Error al acceder a la sala de espera: " + e.getReason());
             model.addAttribute("status", e.getStatusCode().value());
             return "error";
+        }
+    }
+
+    @GetMapping("/partida/obtenerTitulos")
+    public ResponseEntity<List<String>> obtenerTitulos() {
+        try {
+            List<String> titles = partidaService.getTitles();
+            return ResponseEntity.ok(titles);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 

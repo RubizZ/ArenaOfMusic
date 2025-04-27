@@ -337,7 +337,7 @@ public class PartidaService {
 
             roundInfo.setRoundNumber(gameRoundsDTO.getRoundNumber() + 1);
             roundInfo.setSongId(song.getId());
-            //roundInfo.setSongName(song.getName());
+            // roundInfo.setSongName(song.getName());
             gameRoundsDTO.addRound(roundInfo);
             game.setRoundJson(gameRoundsDTO.toString());
             entityManager.persist(game);
@@ -391,7 +391,6 @@ public class PartidaService {
             roundInfo.setUserAnswers(userTry);
             game.setRoundJson(roundInfo.toString());
 
-
             GameConfigDTO gameConfig = new GameConfigDTO();
             gameConfig.parseGameConfigDTO(game.getConfigJson());
             game.setRoundJson(gameRoundsDTO.toString());
@@ -421,6 +420,19 @@ public class PartidaService {
         } catch (IllegalStateException e) {
             System.out.println("Invalid state: " + e.getMessage());
         }
+    }
+
+    public List<String> getTitles() {
+        List<String> titulos = new ArrayList<>();
+        try {
+            titulos = entityManager.createNamedQuery("Song.getActiveSongsTitles", String.class)
+                    .getResultList();
+        } catch (IllegalArgumentException e) {
+            System.out.println("Argumento invalido: " + e.getMessage());
+        } catch (IllegalStateException e) {
+            System.out.println("Invalid state: " + e.getMessage());
+        }
+        return titulos;
     }
 
 }
