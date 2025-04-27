@@ -3,10 +3,12 @@ package es.ucm.fdi.iw.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -413,8 +415,25 @@ public class PartidaService {
             if (!game.getGameState().equals(Game.GameState.PLAYING)) {
                 throw new IllegalStateException("La partida no ha comenzado o ya ha finalizado.");
             }
+
             game.setGameState(Game.GameState.FINISHED);
-            entityManager.persist(game);
+            
+            List<PlayerGame> players = game.getParticipants();
+            PriorityQueue<PlayerGame> priorityQueue = new PriorityQueue<>(
+                    Comparator.comparingInt(PlayerGame::getScore).reversed());
+
+            priorityQueue.addAll(players);
+
+            while (!priorityQueue.isEmpty()) {
+                PlayerGame playerGame = priorityQueue.poll(); 
+                User user = entityManager.find(User.class, playerGame.getUser().getId());
+                int position = 1;
+                if (user != null) {
+                    user.setEXP(user.getEXP() + playerGame.getScore());
+                    user.setEXP_total(user.getEXP_total() + playerGame.getScore());
+                }
+                playerGame.setPosition(position++);
+            }
         } catch (IllegalArgumentException e) {
             System.out.println("Argumento invalido: " + e.getMessage());
         } catch (IllegalStateException e) {
