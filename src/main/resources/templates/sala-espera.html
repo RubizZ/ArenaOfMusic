@@ -11,12 +11,12 @@
     <header th:replace="~{fragments/nav.html :: nav}"></header>
 
     <main class="flex-shrink-0 mt-5">
-        <div class="container my-5" style="margin-right: 50px;">
+        <div class="container my-5">
             <div class="d-flex justify-content-center align-items-center mb-2">
                 <h2 class="fw-bold mb-0">Sala de Espera</h2>
             </div>
-            <div class="row align-items-start p-2 rounded">
-                <div class="col-md-5 offset-md-1">
+            <div class="row justify-content-center p-2 rounded">
+                <div class="col-md-5 mt-4 d-flex flex-column">
 
                     <p class="text-muted mb-3 fs-5">Esperando a otros jugadores...</p>
 
@@ -52,9 +52,8 @@
                     </ul>
                 </div>
 
-
                 <!-- Modo de juego -->
-                <div class="col-md-3 mt-5 offset-md-1 d-flex flex-column justify-content-center align-items-center">
+                <div class="col-md-5 mt-4 d-flex flex-column justify-content-center align-items-center">
                     <!-- Código -->
                     <div class="text-start ms-3">
                         <span class="badge bg-secondary px-4 py-3 rounded-pill" style="font-size: 1.0rem;"
