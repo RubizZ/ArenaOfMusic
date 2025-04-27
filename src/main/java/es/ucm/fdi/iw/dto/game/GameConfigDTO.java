@@ -27,7 +27,7 @@ public class GameConfigDTO {
     @Override
     public String toString() {
         return  "playlistId=" + playlistId +
-                ", gameMode='" + gameMode +
+                ", gameMode=" + gameMode +
                 ", rounds=" + rounds +
                 ", fragmentDuration=" + fragmentDuration;
     }

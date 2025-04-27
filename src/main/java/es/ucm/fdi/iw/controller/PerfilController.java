@@ -30,8 +30,8 @@ public class PerfilController {
 
     @GetMapping("/perfil")
     public String perfil(Model model) {
-        model.addAttribute("objects", perfilService.getObjectCards());
-        model.addAttribute("matches", perfilService.getMatches());
+        // model.addAttribute("objects", perfilService.getObjectCards());
+        // model.addAttribute("matches", perfilService.getMatches());
         return "perfil";
     }
 
@@ -49,7 +49,8 @@ public class PerfilController {
                     data.get("email"),
                     data.get("description"),
                     data.get("oldPassword"),
-                    data.get("password"));
+                    data.get("password"), data.get("img"));
+
             session.setAttribute("u", perfilService.findById(user.getId())); // actualiza sesión
             return ResponseEntity.ok(Map.of("message", "Perfil actualizado correctamente"));
         } catch (IllegalArgumentException e) {

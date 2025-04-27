@@ -254,6 +254,10 @@ public class PartidaService {
             GamePlayerDTO playerDTO = new GamePlayerDTO();
             playerDTO.setId(player.getId());
             playerDTO.setUsername(player.getUsername());
+            playerDTO.setEXP_total(player.getEXP_total());
+            playerDTO.setTotalWins(entityManager.createNamedQuery("PlayerGame.countWinsByUser", Long.class)
+                    .setParameter("userId", player.getId())
+                    .getSingleResult());
             players.add(playerDTO);
         }
 
@@ -417,7 +421,7 @@ public class PartidaService {
             }
 
             game.setGameState(Game.GameState.FINISHED);
-            
+
             List<PlayerGame> players = game.getParticipants();
             PriorityQueue<PlayerGame> priorityQueue = new PriorityQueue<>(
                     Comparator.comparingInt(PlayerGame::getScore).reversed());
@@ -425,7 +429,7 @@ public class PartidaService {
             priorityQueue.addAll(players);
 
             while (!priorityQueue.isEmpty()) {
-                PlayerGame playerGame = priorityQueue.poll(); 
+                PlayerGame playerGame = priorityQueue.poll();
                 User user = entityManager.find(User.class, playerGame.getUser().getId());
                 int position = 1;
                 if (user != null) {

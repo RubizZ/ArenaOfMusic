@@ -2,13 +2,11 @@ package es.ucm.fdi.iw.model;
 
 import java.util.UUID;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
-import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,15 +16,11 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @NoArgsConstructor
-@NamedQuery(
-    name = "PlayerGame.countWinsByUser",
-    query = "SELECT COUNT(pg) FROM PlayerGame pg WHERE pg.user.id = :userId AND pg.position = 1"
-)
-@Table(name = "Players_Game")
-public class PlayerGame implements Transferable<PlayerGame.Transfer> {
+@Table(name = "partida_usu")
+public class UserGame implements Transferable<UserGame.Transfer> {
 
     @EmbeddedId
-    private PlayerGameId id;
+    private UserGameId id;
 
     @ManyToOne
     @MapsId("gameId")
@@ -38,27 +32,18 @@ public class PlayerGame implements Transferable<PlayerGame.Transfer> {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "score", nullable = false)
-    private int score;
-
-    @Column(name = "position", nullable = false)
-    private int position;
-
     @Getter
     @AllArgsConstructor
     public static class Transfer {
         private UUID gameId;
         private long userId;
-        private int score;
-        private int position;
     }
 
     @Override
     public Transfer toTransfer() {
         return new Transfer(
-                id.getGameId(),
-                id.getUserId(),
-                score,
-                position);
+            id.getGameId(),
+            id.getUserId()
+        );
     }
 }

@@ -764,21 +764,11 @@ a[disabled] {
 
 /* TIENDA */
 
-.body-tienda {
-    background-image: url("/img/fondo.png");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-}
-
 .titulo-tienda {
     display: inline-block;
     font-size: 3rem;
     font-family: Arial, sans-serif;
     font-weight: bold;
-    background: linear-gradient(45deg, #307930, #77467b);
-    color: white;
     padding: 1rem;
     margin: 0.5rem;
     border-radius: 10px;
@@ -792,7 +782,6 @@ a[disabled] {
     margin: 0.5rem;
     font-style: italic;
     overflow: auto;
-    background-color: rgba(255, 255, 255, 0.85);
     border-radius: 10px;
 }
 

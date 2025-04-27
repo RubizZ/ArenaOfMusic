@@ -12,4 +12,8 @@ public class GamePlayerDTO {
     private long id;
     
     private String username;
+
+    private int EXP_total;
+
+    private Long totalWins;
 }
