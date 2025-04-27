@@ -4,98 +4,181 @@
 <head>
     <th:block th:replace="~{fragments/head :: header}" />
     <title>Arena of Music</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+
 </head>
 
 <body class="d-flex flex-column h-100">
     <header th:replace="~{fragments/nav.html :: nav}"></header>
     <main class="flex-shrink-0">
         <div class="container mt-5">
-            <div class="card border-2 p-4">
-                <h2 class="text-center">Configurar Partida</h2>
-                <form method="POST" action="/partida/crear-partida" id="formCrearPartida">
-                    <!-- Selección de Playlist -->
-                    <div class="mb-3">
-                        <label for="playlist" class="form-label">Selecciona una Playlist</label>
-                        <select class="form-select" id="playlist" name="playlistId" required>
-                            <option value="" disabled selected>Elige una Playlist...</option> <!-- Placeholder -->
-                            <option th:each="playlist : ${playlists}" th:value="${playlist.id}"
-                                th:text="${playlist.name}"></option>
-                        </select>
-                    </div>
+            <h2 class="fw-bold">Configuración de partida</h2>
+            <form method="POST" action="/partida/crear-partida" id="formCrearPartida">
 
-                    <!-- Número de Rondas -->
-                    <div class="mb-3">
-                        <label for="rondas" class="form-label">Número de Rondas: <span id="rondasValue"
-                                class="range-value">5</span></label>
-                        <input type="range" class="form-range" id="rondas" min="5" max="25" value="5" step="1"
-                            name="rondas">
-                    </div>
+                <div class="row align-items-start p-2">
+                    <!-- Selección de playlists -->
+                    <div class="col-md-5 left-panel me-md-4">
+                        <h5 class="fw-semibold mt-4 fs-4">Selecciona una playlist</h5>
 
-                    <!-- Tiempo de Fragmento -->
-                    <div class="mb-3">
-                        <label for="tiempo" class="form-label">Duración del Fragmento: <span id="tiempoValue"
-                                class="range-value">5</span> segundos</label>
-                        <input type="range" class="form-range" id="tiempo" min="5" max="30" value="5" step="1"
-                            name="tiempo">
-                    </div>
-
-                    <!-- Modo de Juego -->
-                    <div class="mb-3">
-                        <label class="form-label">Modo de Juego</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="modoJuego" id="song" value="song"
-                                checked>
-                            <label class="form-check-label" for="escribir">Escribir la Canción</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="modoJuego" id="artist" value="artist"
-                                disabled>
-                            <label class="form-check-label" for="opciones">Escribir el Artista <small
-                                    class="text-muted">(Próximamente...)</small></label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="modoJuego" id="options" value="options"
-                                disabled>
-                            <label class="form-check-label" for="opciones">Opciones <small
-                                    class="text-muted">(Próximamente...)</small></label>
+                        <!-- Lista de playlists disponibles -->
+                        <div class="row row-cols-2 row-cols-md-3 gx-0 mt-3">
+                            <div class="col d-flex text-center justify-content-center"
+                                th:each="playlist : ${playlists}">
+                                <input type="radio" class="btn-check playlist-radio" name="selectedPlaylist"
+                                    th:id="'playlist' + ${playlist.id}" th:value="${playlist.id}" autocomplete="off" />
+                                <label class="btn d-flex flex-column justify-content-center align-items-start rounded"
+                                    th:for="'playlist' + ${playlist.id}">
+                                    <img class="img-fluid img-fluid rounded-3 mb-2"
+                                        th:src="@{/img/default-profile.png}" />
+                                    <span class="fw-semibold" th:text="${playlist.name}">Título</span>
+                                </label>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Botón de Envío -->
-                    <div class="text-center">
-                        <button type="submit" id="btn-guardar-configuracion" class="btn btn-primary w-100">Iniciar
-                            Partida</button>
+
+                    <!-- Ajustes y modo de juego -->
+                    <div class="col-md-6 right-panel ms-md-4">
+
+                        <!-- Ajustes de juego -->
+                        <div class="mb-4">
+                            <h5 class="fw-semibold mt-4 mb-3 fs-4">Ajustes de juego</h5>
+                            <div class="mb-3">
+                                <label for="rounds" class="form-label d-flex justify-content-between me-3">
+                                    <span>Número de rondas</span>
+                                    <span class="fw-bold fs-5" id="roundsValue">5</span>
+                                </label>
+                                <input type="range" class="form-range" id="rounds" name="rounds" min="5" max="25"
+                                    step="1" value="5" />
+                            </div>
+                            <div class="mb-3">
+                                <label for="time" class="form-label d-flex justify-content-between me-3">
+                                    <span>Duración del fragmento (segundos)</span>
+                                    <span class="fw-bold fs-5" id="timeValue">5</span>
+                                </label>
+                                <input type="range" class="form-range" id="time" name="time" min="5" max="30" step="1"
+                                    value="5" />
+                            </div>
+                        </div>
+
+                        <!-- Modo de juego -->
+                        <div class="mb-4">
+                            <h5 class="fw-semibold mb-3 fs-4">Modo de juego</h5>
+                            <div class="row row-cols-1 row-cols-sm-3">
+                                <div class="col">
+                                    <input type="radio" class="btn-check" name="mode" id="options" value="options"
+                                        disabled />
+                                    <label class="btn btn-outline-dark w-100 h-100 text-center p-3" for="options">
+                                        <div><i class="bi bi-list-ul" style="font-size: 2rem;"></i></div>
+                                        <div class="fw-semibold text-dark mt-1">Opciones múltiples</div>
+                                        <small class="d-block mt-1">
+                                            Elige entre 4 opciones posibles
+                                        </small>
+                                        <small><i>Proximamente...</i></small>
+                                    </label>
+                                </div>
+                                <div class="col">
+                                    <input type="radio" class="btn-check" name="mode" id="song" value="song" checked />
+                                    <label class="btn btn-outline-dark w-100 h-100 text-center p-3" for="song">
+                                        <div><i class="bi bi-music-note-beamed" style="font-size: 2rem;"></i></div>
+                                        <div class="fw-semibold text-dark mt-1">Adivina la canción</div>
+                                        <small class="d-block mt-1">
+                                            Escribe el nombre de la canción
+                                        </small>
+
+                                    </label>
+                                </div>
+                                <div class="col">
+                                    <input type="radio" class="btn-check" name="mode" id="artist" value="artist"
+                                        disabled />
+                                    <label class="btn btn-outline-dark w-100 h-100 text-center p-3" for="artist">
+                                        <div><i class="bi bi-person-fill" style="font-size: 2rem;"></i></div>
+                                        <div class="fw-semibold text-dark mt-1">Adivina el artista</div>
+                                        <small class="d-block mt-1">
+                                            Escribe el nombre del artista de la canción
+                                        </small>
+                                        <small><i>Proximamente...</i></small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </form>
-            </div>
+
+
+                </div>
+                <!-- Botones de volver e iniciar partida -->
+                <div class="row mt-4">
+                    <!-- Volver -->
+                    <div class="col-md-6 text-start">
+                        <a class="btn btn-back fw-bold ms-3 rounded-4 text-dark" style="width: 220px;" th:href="@{/}">
+                            Volver
+                        </a>
+                    </div>
+
+                    <!-- Iniciar partida -->
+                    <div class="col-md-6 text-end">
+                        <a>
+                            <button class="btn btn-accept fw-bold rounded-4 text-dark"
+                                style="margin-right: 4.5rem; width: 220px;" type="submit">
+                                Iniciar
+                            </button>
+                        </a>
+                    </div>
+                </div>
+            </form>
         </div>
     </main>
     <script>
         // Mostrar valores dinámicamente
-        const rondasInput = document.getElementById("rondas");
-        const rondasValue = document.getElementById("rondasValue");
+        const rondasInput = document.getElementById("rounds");
+        const rondasValue = document.getElementById("roundsValue");
         rondasInput.addEventListener("input", () => rondasValue.textContent = rondasInput.value);
 
-        const tiempoInput = document.getElementById("tiempo");
-        const tiempoValue = document.getElementById("tiempoValue");
+        const tiempoInput = document.getElementById("time");
+        const tiempoValue = document.getElementById("timeValue");
         tiempoInput.addEventListener("input", () => tiempoValue.textContent = tiempoInput.value);
     </script>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            const playlists = document.querySelectorAll('.playlist-radio');
+
+            playlists.forEach(radio => {
+                const img = radio.nextElementSibling.querySelector('img');
+                const playlistId = radio.value;
+
+                fetch(`/partida/playlist/${playlistId}/cover`)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Error al cargar imagen');
+                        return response.blob();
+                    })
+                    .then(blob => {
+                        const imageUrl = URL.createObjectURL(blob);
+                        img.src = imageUrl;
+                    })
+                    .catch(error => {
+                        console.error('Error obteniendo carátula:', error);
+                        img.src = '/img/default-profile.png'; // Imagen por defecto en caso de error
+                    });
+            });
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
             const form = document.getElementById('formCrearPartida');
 
-            // Validación y envío del formulario por AJAX
             form.addEventListener('submit', function (event) {
-                event.preventDefault(); // Evita el envío tradicional del formulario
+                event.preventDefault();
 
                 // Obtenemos los valores del formulario
-                const playlistId = document.getElementById('playlist').value;  // Corregido aquí
-                const rondas = document.getElementById('rondas').value;
-                const tiempo = document.getElementById('tiempo').value;
-                const modoJuego = document.querySelector('input[name="modoJuego"]:checked').value;
+                const selectedPlaylistInput = document.querySelector('input[name="selectedPlaylist"]:checked');
+                const modeInput = document.querySelector('input[name="mode"]:checked');
 
-                // Comprobación de que todos los campos tienen datos válidos
+                const playlistId = selectedPlaylistInput ? selectedPlaylistInput.value : null;
+                const rondas = document.getElementById('rounds').value;
+                const tiempo = document.getElementById('time').value;
+                const modoJuego = modeInput ? modeInput.value : null;
+
+                // Validaciones
                 if (!playlistId || !rondas || !tiempo || !modoJuego) {
                     alert('Por favor, complete todos los campos del formulario.');
                     return;
@@ -106,10 +189,11 @@
                     return;
                 }
 
-                // Obtener el token CSRF directamente del formulario
-                const csrfToken = document.querySelector('input[name="_csrf"]').value;
+                // Obtener el token CSRF
+                const csrfInput = document.querySelector('input[name="_csrf"]');
+                const csrfToken = csrfInput ? csrfInput.value : '';
 
-                // Realizamos la petición AJAX
+                // Crear la petición
                 const formData = new URLSearchParams();
                 formData.append('playlistId', playlistId);
                 formData.append('rondas', rondas);
@@ -133,6 +217,7 @@
                 });
             });
         });
+
     </script>
 
     <th:block th:replace="~{fragments/footer.html :: footer}" />

@@ -34,6 +34,7 @@ import es.ucm.fdi.iw.model.Game;
 import es.ucm.fdi.iw.model.Playlist;
 import es.ucm.fdi.iw.model.User;
 import es.ucm.fdi.iw.service.PartidaService;
+import es.ucm.fdi.iw.service.PlaylistService;
 import es.ucm.fdi.iw.service.SongService;
 import es.ucm.fdi.iw.util.FileGetter;
 import es.ucm.fdi.iw.util.NoDataException;
@@ -47,7 +48,10 @@ public class PartidaController {
     private PartidaService partidaService;
    
     @Autowired
-    SongService songService;
+    private SongService songService;
+
+    @Autowired
+    private PlaylistService playlistService;
 
 
     @ModelAttribute
@@ -231,6 +235,11 @@ public class PartidaController {
     @GetMapping("/partida/song/{id}/audio")
     public ResponseEntity<byte[]> getSongAudio(@PathVariable Long id) {
         return responseEntityFromFileGetter(() -> songService.getSongAudio(id));
+    }
+
+    @GetMapping("/partida/playlist/{id}/cover")
+    public ResponseEntity<byte[]> getPlaylistCover(@PathVariable Long id) {
+        return responseEntityFromFileGetter(() -> playlistService.getPlaylistCover(id));
     }
 
     @PostMapping("/partida/finRonda/{gameId}")
