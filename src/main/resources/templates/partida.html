@@ -92,56 +92,77 @@
             box-shadow: 0 0 12px 4px red !important;
             transition: box-shadow 0.3s ease;
         }
+
+        .sugerencias-container {
+            margin-top: 5px;
+            border-radius: 8px;
+            width: 100%;
+            overflow-y: auto;
+            box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .sugerencia-item {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+
+        .sugerencia-item:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 
 <body class="d-flex flex-column h-100">
     <header th:replace="~{fragments/nav.html :: nav}"></header>
 
-    <main class="flex-grow-1 d-flex justify-content-center align-items-center">
+    <main class="flex-grow-1 d-flex justify-content-center">
         <div class="container p-3">
-            <div class="row g-3 justify-content-center align-items-center text-center" style="min-height: 80vh;">
-
+                <h1 class="rounded p-2 shadow-sm my-2 justify-content-center text-center">RONDA
+                    <span th:text="${currentRound != null ? currentRound : '1'}" id="numeroRonda"></span>
+                    /
+                    <span th:text="${gameConfig.rounds}"></span>
+                </h1>
+            <div class="row g-3 justify-content-center text-center">
 
                 <!-- Contador -->
-                <div class="col-lg-3 col-md-6 col-sm-12 d-flex justify-content-center align-items-center">
+                <div class="col-lg-3 col-md-6 col-sm-12 d-flex justify-content-center align-items-start">
                     <div id="countdown" class="countdown-box">COMIENZA!</div>
                 </div>
 
                 <!-- Contenido principal -->
-                <div class="col-lg-6 col-md-10 col-sm-12 d-flex flex-column justify-content-center align-items-center">
-                    <h1 class="rounded p-2 shadow-sm my-2">RONDA
-                        <span th:text="${currentRound != null ? currentRound : '1'}" id="numeroRonda"></span>
-                        /
-                        <span th:text="${gameConfig.rounds}"></span>
-                    </h1>
-                    <div class="song-image-container position-relative text-center" style="display: inline-block; overflow: hidden;">
+                <div class="col-lg-6 col-md-10 col-sm-12 d-flex flex-column justify-content-center align-items-start">
+                    
+                    <div class="song-image-container position-relative text-center"
+                        style="display: inline-block; overflow: hidden;">
                         <!-- Imagen -->
                         <img src="/img/preview-song-img.jpeg" id="songImage" alt="Imagen de interrogación de partida"
-                            class="rounded shadow img-fluid my-3" style="max-height: 250px; object-fit: contain; width: 100%;">
-                    
+                            class="rounded shadow img-fluid my-3"
+                            style="max-height: 250px; object-fit: contain; width: 100%;">
+
                         <!-- Título de la canción encima -->
                         <div id="songTitleOverlay" class="position-absolute" style="display: none;">
                             <strong id="songTitleText">Título de la canción</strong>
                         </div>
                     </div>
-                    
+
 
                     <!-- Input y botón -->
                     <div class="input-group mt-3">
                         <input type="text" class="form-control border-success border-3" id="songInput"
-                            placeholder="Introduce el título de la canción..." value="">
+                            placeholder="Introduce el título de la canción..." value="" autocomplete="off">
                         <button class="btn-custom" id="marcarBtn" onclick="marcarRespuesta()">Marcar</button>
                     </div>
+                    <div id="sugerencias" class="sugerencias-container"></div>
+
                 </div>
 
                 <!-- Sección de Jugadores -->
-                <div class="col-lg-3 col-md-6 col-sm-12">
-                    <div class="card shadow rounded-4 p-2 h-100 d-flex flex-column justify-content-center align-items-center"
+                <div class="col-lg-3 col-md-6 col-sm-12 align-items-start">
+                    <div class="card shadow rounded-4 p-2 d-flex text-center align-items-center justify-content-center"
                         th:each="player : ${players}" th:id="'playerCard' + ${player.id}">
                         <!-- Imagen del jugador -->
                         <img src="/img/default-profile.png" class="img-fluid rounded-circle mb-3" alt="Imagen Perfil"
-                            style="max-width: 140px; height: auto;">
+                            style="max-width: 140px;">
                         <!-- Nombre del jugador -->
                         <h5 class="mb-1" th:text="${player.username}">Jugador</h5>
                         <!-- Puntuación del jugador -->

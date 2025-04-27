@@ -10,6 +10,7 @@ let rondaFinalizada = false;
 let audioURL;
 let audio;
 let imageURL;
+let availableSongs = [];
 
 
 function iniciarJuego(id, players, rondas, fragmentDuration) {
@@ -18,7 +19,31 @@ function iniciarJuego(id, players, rondas, fragmentDuration) {
     totalRounds = rondas;
     timePerRound = fragmentDuration;
 
-    iniciarRonda();
+    obtenerListaCanciones()
+    .then(() => {
+        iniciarRonda();
+    })
+    .catch(error => {
+        console.error('Error obteniendo la lista de canciones:', error);
+    });
+}
+
+function obtenerListaCanciones() {
+    const csrfToken = document.querySelector('input[name="_csrf"]').value;
+
+    return fetch(`/partida/obtenerTitulos`, {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken
+        }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error(`Error al obtener la lista: ${response.status}`);
+        return response.json();
+    })
+    .then(data => {
+        availableSongs = data; // Guardamos la lista recibida
+    });
 }
 
 function iniciarRonda() {
@@ -49,6 +74,7 @@ function iniciarRonda() {
         });
 }
 
+
 function actualizarVistaRonda(roundData) {
     document.getElementById('numeroRonda').innerText = `${roundData}`;
 
@@ -65,6 +91,40 @@ function actualizarVistaRonda(roundData) {
     selectedAnswer = "";  // Reinicia la respuesta previa
 
     console.log("Vista actualizada para la ronda:", roundData);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('songInput');
+    input.addEventListener('input', actualizarSugerencias);
+});
+
+document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('sugerencia-item')) {
+        const input = document.getElementById('songInput');
+        input.value = e.target.innerText;
+        document.getElementById('sugerencias').innerHTML = '';
+    }
+});
+
+
+function actualizarSugerencias() {
+    const input = document.getElementById('songInput');
+    const valor = input.value.trim().toLowerCase();
+    const sugerenciasDiv = document.getElementById('sugerencias');
+
+    if (valor.length < 2) {
+        sugerenciasDiv.innerHTML = '';
+        return;
+    }
+
+    // Filtra los títulos que contengan el texto en cualquier parte
+    const sugerencias = availableSongs
+        .filter(titulo => titulo.toLowerCase().includes(valor))
+        .slice(0, 5); // Limitar a 5 sugerencias
+
+    sugerenciasDiv.innerHTML = sugerencias
+        .map(titulo => `<div class="sugerencia-item">${titulo}</div>`)
+        .join('');
 }
 
 function obtenerCancion(songId) {
@@ -115,13 +175,39 @@ function actualizarCover() {
     }
 }
 
+function iniciarCuentaAtrasInicial(callback) {
+    const countdown = document.getElementById('countdown');
+    const mensajes = ["Preparados...", "Listos...", "¡YA!"];
+    let indice = 0;
+
+    const preparacionTimer = setInterval(() => {
+        countdown.innerText = mensajes[indice];
+        indice++;
+
+        if (indice > mensajes.length) {
+            clearInterval(preparacionTimer);
+            if (callback) callback(); // Cuando termina, llama a la función para empezar la ronda normal
+        }
+    }, 1000);
+}
+
+
 function reproducirCancion() {
     audio = new Audio(audioURL);
 
     // Cuando la canción esté lista, inicia la cuenta atrás y la reproducción.
     audio.oncanplaythrough = () => {
-        audio.play();
-        iniciarCuentaAtras();
+        if (!rondaFinalizada) {
+            iniciarCuentaAtrasInicial(() => {
+                audio.play();
+                iniciarCuentaAtras(); // <-- Tu cuenta regresiva normal de tiempo por ronda
+            });
+        } else {
+            setTimeout(() => {  // Solo aquí la pausa de 1 segundo
+                audio.play();
+                iniciarCuentaAtras();
+            }, 1500);
+        }
     };
 }
 
