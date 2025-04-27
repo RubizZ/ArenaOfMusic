@@ -9,7 +9,7 @@
         .countdown-box {
             background: #0d6efd;
             color: white;
-            font-size: 3rem;
+            font-size: 2rem;
             font-weight: bold;
             padding: 1rem 2rem;
             border-radius: 1rem;
@@ -161,7 +161,7 @@
                     <div class="card shadow rounded-4 p-2 d-flex text-center align-items-center justify-content-center"
                         th:each="player : ${players}" th:id="'playerCard' + ${player.id}">
                         <!-- Imagen del jugador -->
-                        <img src="/img/default-profile.png" class="img-fluid rounded-circle mb-3" alt="Imagen Perfil"
+                        <img th:src="${u.profileImage != null ?  u.profileImage : '/img/default-profile.png'}" class="img-fluid rounded-circle mb-3" alt="Imagen Perfil"
                             style="max-width: 140px;">
                         <!-- Nombre del jugador -->
                         <h5 class="mb-1" th:text="${player.username}">Jugador</h5>
