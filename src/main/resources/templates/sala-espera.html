@@ -23,9 +23,10 @@
                     <!-- Información de la partida -->
                     <div class="d-flex align-items-center mb-4">
                         <img th:src="@{/img/preview-song-img.jpeg}" class="rounded me-3"
-                            style="width: 100px; height: 100px; object-fit: cover;" />
+                            style="width: 100px; height: 100px; object-fit: cover;" id="playlistCover" />
                         <div>
                             <h5 class="fw-bold mb-1 fs-4" th:text="${playlist.name}">Título</h5>
+                            <p style="display: none;" th:text="${playlist.id}" id="playlistId"></p>
                             <p class="text-muted mb-0 small"
                                 th:text="|${gameConfig.rounds} rondas • Fragmentos de canción de ${gameConfig.fragmentDuration} segundos|">
                                 Rondas
@@ -103,6 +104,26 @@
         </div>
         </div>
     </main>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const playlistImg = document.getElementById('playlistCover');
+            const playlistId = document.getElementById('playlistId').textContent.trim();
+
+            fetch(`/partida/playlist/${playlistId}/cover`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Error al cargar imagen');
+                    return response.blob();
+                })
+                .then(blob => {
+                    const imageUrl = URL.createObjectURL(blob);
+                    playlistImg.src = imageUrl;
+                })
+                .catch(error => {
+                    console.error('Error obteniendo carátula:', error);
+                    playlistImg.src = '/img/default-profile.png'; // Imagen por defecto en caso de error
+                });
+        });
+    </script>
 
     <th:block th:replace="~{fragments/footer.html :: footer}" />
 </body>
