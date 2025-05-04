@@ -33,7 +33,8 @@ import lombok.NoArgsConstructor;
 @Table(name = "song")
 @NamedQueries({
         @NamedQuery(name = "Song.findByPlaylistId", query = "SELECT s FROM Song s JOIN s.playlists p WHERE p.id = :playlistId"),
-        @NamedQuery(name = "Song.getActiveSongsTitles", query = "SELECT s.name FROM Song s WHERE s.active = true")})
+        @NamedQuery(name = "Song.getActiveSongsTitles", query = "SELECT s.name FROM Song s WHERE s.active = true"),
+        @NamedQuery(name = "Song.getSongsOfList", query = "SELECT s FROM Song s WHERE s.id IN :ids"), })
 
 public class Song implements Transferable<Song.Transfer> {
 
