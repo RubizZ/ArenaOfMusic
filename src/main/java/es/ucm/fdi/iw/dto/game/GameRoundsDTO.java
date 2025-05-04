@@ -71,7 +71,7 @@ public class GameRoundsDTO {
         return sb.toString();
     }
 
-    public static GameRoundsDTO parse(String input) {
+    public GameRoundsDTO parse(String input) {
         String[] parts = input.split("\\|", 3);
         GameRoundsDTO dto = new GameRoundsDTO();
 
