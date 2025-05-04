@@ -38,41 +38,36 @@ public class PartidaService {
     @PersistenceContext
     private EntityManager entityManager;
 
-    public Map<String, Object> getPlaylist() {
-        Map<String, Object> playlist = new HashMap<>();
-        playlist.put("image", "img/logo.jpeg");
-        playlist.put("name", "Top Hits 2010's");
-        playlist.put("songs", 30);
-        playlist.put("author", "ArenaOfMusic");
-        List<Map<String, String>> canciones = Arrays.asList(
-                Map.of("name", "Sorry", "artist", "Justin Bieber"),
-                Map.of("name", "God's Plan", "artist", "Drake"),
-                Map.of("name", "Memories", "artist", "David Guetta ft. Kid Cudi"),
-                Map.of("name", "Good Feeling", "artist", "Flo Rida"),
-                Map.of("name", "Can't Hold Us", "artist", "Macklemore ft. Ryan Lewis"));
-        playlist.put("canciones", canciones);
+    public Map<String, Object> getPlaylist(Game game) {
+        GameConfigDTO gameConfig = new GameConfigDTO();
+        gameConfig.parseGameConfigDTO(game.getConfigJson());
+        GameRoundsDTO rounds = new GameRoundsDTO();
+        rounds = rounds.parse(game.getRoundJson());
 
-        return playlist;
+        Playlist playlist = entityManager.find(Playlist.class, gameConfig.getPlaylistId());
+        Map<String, Object> GamePlaylist = new HashMap<>();
+        GamePlaylist.put("name", playlist.getName());
+        GamePlaylist.put("songs", gameConfig.getRounds());
+
+        List<Song> canciones = getSongsByGame(rounds.getSongsIds());
+        GamePlaylist.put("canciones", canciones);
+
+        return GamePlaylist;
     }
 
-    public List<Map<String, Object>> getSortedParticipants() {
-        List<Map<String, Object>> sortedParticipants = Arrays.asList(
-                Map.of(
-                        "user", Map.of("username", "Eric", "photoUrl", "img/logo.jpeg"),
-                        "hits", 13,
-                        "score", 5750),
-                Map.of(
-                        "user", Map.of("username", "Ava", "photoUrl", "img/logo.jpeg"),
-                        "hits", 11,
-                        "score", 5200),
-                Map.of(
-                        "user", Map.of("username", "Sam", "photoUrl", "img/logo.jpeg"),
-                        "hits", 10,
-                        "score", 4850),
-                Map.of(
-                        "user", Map.of("username", "Taylor", "photoUrl", "img/logo.jpeg"),
-                        "hits", 6,
-                        "score", 2650));
+    private List<Song> getSongsByGame(List<Long> ids) {
+        return entityManager.createNamedQuery("Song.getSongsOfList", Song.class)
+                .setParameter("ids", ids)
+                .getResultList();
+    }
+
+    public PriorityQueue<PlayerGame> getSortedParticipants(Game game) {
+        List<PlayerGame> players = game.getParticipants();
+        PriorityQueue<PlayerGame> sortedParticipants = new PriorityQueue<>(
+                Comparator.comparingInt(PlayerGame::getScore).reversed());
+
+        sortedParticipants.addAll(players);
+
         return sortedParticipants;
 
     }
@@ -336,8 +331,7 @@ public class PartidaService {
             if (!game.getGameState().equals(Game.GameState.PLAYING)) {
                 throw new IllegalStateException("La partida no se está jugando.");
             }
-
-            gameRoundsDTO = GameRoundsDTO.parse(game.getRoundJson());
+            gameRoundsDTO = gameRoundsDTO.parse(game.getRoundJson());
             Long songId = gameRoundsDTO.getSong(gameRoundsDTO.getRoundNumber());
             Song song = entityManager.find(Song.class, songId);
 
@@ -370,7 +364,7 @@ public class PartidaService {
             if (!game.getGameState().equals(Game.GameState.PLAYING)) {
                 throw new IllegalStateException("La partida no se está jugando.");
             }
-            gameRoundsDTO = GameRoundsDTO.parse(game.getRoundJson());
+            gameRoundsDTO = gameRoundsDTO.parse(game.getRoundJson());
             roundInfo = gameRoundsDTO.getRound(gameRoundsDTO.getRoundNumber() - 1);
             gameRoundsDTO.setRound(gameRoundsDTO.getRoundNumber() - 1, roundInfo);
             Song song = entityManager.find(Song.class, gameRoundsDTO.getSong(gameRoundsDTO.getRoundNumber() - 1));
@@ -456,6 +450,17 @@ public class PartidaService {
             System.out.println("Invalid state: " + e.getMessage());
         }
         return titulos;
+    }
+
+    public int getPosition(Game game, long id) {
+
+        PlayerGame playerGame = entityManager.find(PlayerGame.class,
+                new PlayerGameId(game.getId(), id));
+        if (playerGame != null) {
+            return playerGame.getPosition();
+        } else {
+            throw new IllegalArgumentException("El jugador no está en la partida.");
+        }
     }
 
 }

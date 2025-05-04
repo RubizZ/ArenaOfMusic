@@ -46,13 +46,12 @@ public class PartidaController {
 
     @Autowired
     private PartidaService partidaService;
-   
+
     @Autowired
     private SongService songService;
 
     @Autowired
     private PlaylistService playlistService;
-
 
     @ModelAttribute
     public void populateModel(HttpSession session, Model model) {
@@ -263,6 +262,7 @@ public class PartidaController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
     @PostMapping("/partida/finalizar/{gameId}")
     public ResponseEntity<Void> finalizarPartida(@PathVariable UUID gameId) {
         try {
@@ -285,11 +285,33 @@ public class PartidaController {
         }
     }
 
-    @GetMapping("/partida/resultados")
-    public String resultados(Model model) {
-        model.addAttribute("position", "¡Has acabado en 1ª posición!");
-        model.addAttribute("playlist", partidaService.getPlaylist());
-        model.addAttribute("sortedParticipants", partidaService.getSortedParticipants());
+    @GetMapping("/partida/resultados/{gameId}")
+    public String resultados(Model model, @PathVariable UUID gameId, HttpSession session) {
+        Game game;
+        try {
+            game = partidaService.getGameById(gameId);
+            if (game == null || !game.getActive()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
+            }
+            if (game.getGameState().equals(Game.GameState.FINISHED)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
+            }
+            if (game.getGameState().equals(Game.GameState.WAITING)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha comenzado.");
+            }
+        } catch (ResponseStatusException e) {
+            model.addAttribute("msg", "Error al acceder a la sala de espera: " + e.getReason());
+            model.addAttribute("status", e.getStatusCode().value());
+            return "error";
+        } catch (Exception e) {
+            model.addAttribute("msg", "Error al acceder a la sala de espera: " + e.getMessage());
+            return "error";
+        }
+        User creator = (User) session.getAttribute("u");
+        int position = partidaService.getPosition(game, creator.getId());
+        model.addAttribute("position", position);
+        model.addAttribute("playlist", partidaService.getPlaylist(game));
+        model.addAttribute("sortedParticipants", partidaService.getSortedParticipants(game));
         model.addAttribute("songResults", partidaService.getSongResults());
 
         return "resultados";
