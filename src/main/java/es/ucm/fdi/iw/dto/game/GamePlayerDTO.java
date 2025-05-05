@@ -17,5 +17,5 @@ public class GamePlayerDTO {
 
     private Long totalWins;
 
-    private String encodedImage;
+    private String profileImage;
 }
