@@ -1,5 +1,6 @@
 let gameId = null;            // UUID de la partida, lo asignas cuando cargues la vista.
 let playerId = null;           // ID del jugador, lo asignas cuando cargues la vista.
+let isHost = false;            // host, lo asignas cuando cargues la vista.
 let currentSongId = null;     // ID de la canción que se va a reproducir.
 let currentRound = 0;         // Ronda actual.
 let totalRounds = 0;           // Total de rondas, lo puedes leer desde el backend en la carga de la vista.
@@ -13,37 +14,21 @@ let imageURL;
 let availableSongs = [];
 
 
-function iniciarJuego(id, player, rondas, fragmentDuration) {
+//LÓGICA PARTIDA
+function iniciarJuego(id, player, hostId, rondas, fragmentDuration) {
     gameId = id;
     playerId = player
+    isHost = hostId === player;
     totalRounds = rondas;
     timePerRound = fragmentDuration;
 
     obtenerListaCanciones()
-    .then(() => {
-        iniciarRonda();
-    })
-    .catch(error => {
-        console.error('Error obteniendo la lista de canciones:', error);
-    });
-}
-
-function obtenerListaCanciones() {
-    const csrfToken = document.querySelector('input[name="_csrf"]').value;
-
-    return fetch(`/partida/obtenerTitulos`, {
-        method: 'GET',
-        headers: {
-            'X-CSRF-TOKEN': csrfToken
-        }
-    })
-    .then(response => {
-        if (!response.ok) throw new Error(`Error al obtener la lista: ${response.status}`);
-        return response.json();
-    })
-    .then(data => {
-        availableSongs = data; // Guardamos la lista recibida
-    });
+        .then(() => {
+            iniciarRonda();
+        })
+        .catch(error => {
+            console.error('Error obteniendo la lista de canciones:', error);
+        });
 }
 
 function iniciarRonda() {
@@ -62,8 +47,6 @@ function iniciarRonda() {
             return response.json();
         })
         .then(data => {
-            console.log(data)
-
             currentRound = data.roundNumber;
             currentSongId = data.songId;
             actualizarVistaRonda(currentRound);  // Actualiza la UI con la nueva ronda
@@ -74,59 +57,61 @@ function iniciarRonda() {
         });
 }
 
+function finalizarRonda() {
+    rondaFinalizada = true;
 
-function actualizarVistaRonda(roundData) {
-    document.getElementById('numeroRonda').innerText = `${roundData}`;
+    actualizarVistaRonda(currentRound);  // Actualiza la UI con la nueva ronda
 
-    const inputRespuesta = document.getElementById('songInput');
-    const botonRespuesta = document.getElementById('marcarBtn');
+    clearInterval(countdownTimer);
 
-    const overlay = document.getElementById("songTitleOverlay");
+    let respuesta = selectedAnswer || document.querySelector("#songInput").value;
 
-    overlay.style.display = "none";
+    const csrfToken = document.querySelector('input[name="_csrf"]').value;
 
-    inputRespuesta.value = '';
-    inputRespuesta.disabled = false;
-    botonRespuesta.disabled = false;
-    selectedAnswer = "";  // Reinicia la respuesta previa
+    // Construir el Map en JSON: { playerId: "respuesta" }
+    const body = {};
+    body[playerId] = respuesta;
 
-    console.log("Vista actualizada para la ronda:", roundData);
+    fetch(`/partida/finRonda/${gameId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken
+        },
+        body: JSON.stringify(body)
+    })
+        .then(response => {
+            if (!response.ok) throw new Error(`Error enviando respuesta: ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            mostrarResultadoRonda(data);
+            reproducirCancion();
+        })
+        .catch(error => {
+            console.error('Error enviando respuesta:', error);
+        });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    const input = document.getElementById('songInput');
-    input.addEventListener('input', actualizarSugerencias);
-});
+function finalizarPartida() {
+    const csrfToken = document.querySelector('input[name="_csrf"]').value;
 
-document.addEventListener('click', (e) => {
-    if (e.target.classList.contains('sugerencia-item')) {
-        const input = document.getElementById('songInput');
-        input.value = e.target.innerText;
-        document.getElementById('sugerencias').innerHTML = '';
-    }
-});
-
-
-function actualizarSugerencias() {
-    const input = document.getElementById('songInput');
-    const valor = input.value.trim().toLowerCase();
-    const sugerenciasDiv = document.getElementById('sugerencias');
-
-    if (valor.length < 2) {
-        sugerenciasDiv.innerHTML = '';
-        return;
-    }
-
-    // Filtra los títulos que contengan el texto en cualquier parte
-    const sugerencias = availableSongs
-        .filter(titulo => titulo.toLowerCase().includes(valor))
-        .slice(0, 5); // Limitar a 5 sugerencias
-
-    sugerenciasDiv.innerHTML = sugerencias
-        .map(titulo => `<div class="sugerencia-item">${titulo}</div>`)
-        .join('');
+    fetch(`/partida/finalizar/${gameId}`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken
+        },
+    }).then(response => {
+        if (!response.ok) throw new Error(`Error finalizando partida: ${response.status}`);
+        // Redirigir a la vista de resultados.
+        window.location.href = `/partida/resultados/${gameId}`;
+    }).catch(error => {
+        console.error('Error al finalizar la partida:', error);
+    });
 }
-
+//FIN LOGICA PARTIDA
+//-----------------------------------------------------
+//LOGICA CANCIONES
 function obtenerCancion(songId) {
     const csrfToken = document.querySelector('input[name="_csrf"]').value;
 
@@ -165,7 +150,66 @@ function obtenerCover(songId) {
             console.error('Error cargando la cover:', error);
         });
 }
+//FIN LOGICA CANCIONES
+//-----------------------------------------------------
+//LÓGICA SUGERENCIAS
+function obtenerListaCanciones() {
+    const csrfToken = document.querySelector('input[name="_csrf"]').value;
 
+    return fetch(`/partida/obtenerTitulos`, {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken
+        }
+    })
+        .then(response => {
+            if (!response.ok) throw new Error(`Error al obtener la lista: ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            availableSongs = data; // Guardamos la lista recibida
+        });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('songInput');
+    input.addEventListener('input', actualizarSugerencias);
+});
+
+document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('sugerencia-item')) {
+        const input = document.getElementById('songInput');
+        input.value = e.target.innerText;
+        document.getElementById('sugerencias').innerHTML = '';
+    }
+});
+
+function actualizarSugerencias() {
+    const input = document.getElementById('songInput');
+    const valor = input.value.trim().toLowerCase();
+    const sugerenciasDiv = document.getElementById('sugerencias');
+
+    if (valor.length < 2) {
+        sugerenciasDiv.innerHTML = '';
+        return;
+    }
+
+    // Filtra los títulos que contengan el texto en cualquier parte
+    const sugerencias = availableSongs
+        .filter(titulo => titulo.toLowerCase().includes(valor))
+        .slice(0, 5); // Limitar a 5 sugerencias
+
+    sugerenciasDiv.innerHTML = sugerencias
+        .map(titulo => `<div class="sugerencia-item">${titulo}</div>`)
+        .join('');
+}
+
+function marcarRespuesta() {
+    selectedAnswer = document.getElementById('songInput').value;
+}
+//FIN LÓGICA SUGERENCIAS
+//-----------------------------------------------------
+//LOGICA ACTUALIZACIÓN VISTAS
 function actualizarCover() {
     const img = document.querySelector("#songImage");
     if (rondaFinalizada) {
@@ -175,6 +219,66 @@ function actualizarCover() {
     }
 }
 
+function actualizarVistaRonda(roundData) {
+    document.getElementById('numeroRonda').innerText = `${roundData}`;
+
+    const inputRespuesta = document.getElementById('songInput');
+    const botonRespuesta = document.getElementById('marcarBtn');
+
+    const overlay = document.getElementById("songTitleOverlay");
+
+    if (!rondaFinalizada) {
+        overlay.style.display = "none";
+
+        inputRespuesta.value = '';
+        inputRespuesta.disabled = false;
+        botonRespuesta.disabled = false;
+        selectedAnswer = "";  // Reinicia la respuesta previa
+    } else {
+        inputRespuesta.disabled = true;
+        botonRespuesta.disabled = true;
+    }
+}
+
+function mostrarResultadoRonda(data) {
+    obtenerCover(data.songId); // obtenemos la cover con el ID 
+    const overlay = document.getElementById("songTitleOverlay");
+    const overlayText = document.getElementById("songTitleText");
+
+    overlayText.textContent = data.songName;
+    overlay.style.display = "block";
+
+    // Actualizamos los puntajes de cada jugador en su tarjeta
+    for (let pid in data.result) {
+        const puntos = data.result[pid];
+        const scoreSpan = document.getElementById(`player${pid}score`);
+        const cardDiv = document.getElementById(`playerCard${pid}`);
+
+        if (scoreSpan && cardDiv) {
+            const actual = parseInt(scoreSpan.innerText);
+            scoreSpan.innerText = actual + puntos;
+
+            // Elimina cualquier animación previa
+            cardDiv.classList.remove("flash-verde", "flash-rojo");
+
+            if (puntos > 0) {
+                cardDiv.classList.add("flash-verde");
+            } else {
+                cardDiv.classList.add("flash-rojo");
+            }
+
+            // Borra la animación tras un segundo
+            setTimeout(() => {
+                cardDiv.classList.remove("flash-verde", "flash-rojo");
+            }, 1000);
+        }
+    }
+
+
+}
+//FIN LOGICA ACTUALIZACIÓN VISTAS
+//-----------------------------------------------------
+//LOGICA REPRODCCION DE CANCIONES
 function iniciarCuentaAtrasInicial(callback) {
     const countdown = document.getElementById('countdown');
     const mensajes = ["Preparados...", "Listos...", "¡YA!"];
@@ -190,7 +294,6 @@ function iniciarCuentaAtrasInicial(callback) {
         }
     }, 1000);
 }
-
 
 function reproducirCancion() {
     audio = new Audio(audioURL);
@@ -244,101 +347,4 @@ function actualizarContador(tiempoRestante) {
     }
 
 }
-
-function marcarRespuesta() {
-    selectedAnswer = document.getElementById('songInput').value;
-}
-
-function finalizarRonda() {
-    rondaFinalizada = true;
-
-    const inputRespuesta = document.getElementById('songInput');
-    const botonRespuesta = document.getElementById('marcarBtn');
-
-    inputRespuesta.disabled = true;
-    botonRespuesta.disabled = true;
-
-    clearInterval(countdownTimer);
-
-    let respuesta = selectedAnswer || document.querySelector("#songInput").value;
-
-    const csrfToken = document.querySelector('input[name="_csrf"]').value;
-
-    // Construir el Map en JSON: { playerId: "respuesta" }
-    const body = {};
-    body[playerId] = respuesta;
-
-    fetch(`/partida/finRonda/${gameId}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': csrfToken
-        },
-        body: JSON.stringify(body)
-    })
-        .then(response => {
-            if (!response.ok) throw new Error(`Error enviando respuesta: ${response.status}`);
-            return response.json();
-        })
-        .then(data => {
-            mostrarResultadoRonda(data);
-            reproducirCancion();
-        })
-        .catch(error => {
-            console.error('Error enviando respuesta:', error);
-        });
-}
-
-function mostrarResultadoRonda(data) {
-    obtenerCover(data.songId); // obtenemos la cover con el ID 
-    const overlay = document.getElementById("songTitleOverlay");
-    const overlayText = document.getElementById("songTitleText");
-
-    overlayText.textContent = data.songName;
-    overlay.style.display = "block";
-
-    // Actualizamos los puntajes de cada jugador en su tarjeta
-    for (let pid in data.result) {
-        const puntos = data.result[pid];
-        const scoreSpan = document.getElementById(`player${pid}score`);
-        const cardDiv = document.getElementById(`playerCard${pid}`);
-
-        if (scoreSpan && cardDiv) {
-            const actual = parseInt(scoreSpan.innerText);
-            scoreSpan.innerText = actual + puntos;
-
-            // Elimina cualquier animación previa
-            cardDiv.classList.remove("flash-verde", "flash-rojo");
-
-            if (puntos > 0) {
-                cardDiv.classList.add("flash-verde");
-            } else {
-                cardDiv.classList.add("flash-rojo");
-            }
-
-            // Borra la animación tras un segundo
-            setTimeout(() => {
-                cardDiv.classList.remove("flash-verde", "flash-rojo");
-            }, 1000);
-        }
-    }
-
-
-}
-
-function finalizarPartida() {
-    const csrfToken = document.querySelector('input[name="_csrf"]').value;
-
-    fetch(`/partida/finalizar/${gameId}`, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': csrfToken
-        },
-    }).then(response => {
-        if (!response.ok) throw new Error(`Error finalizando partida: ${response.status}`);
-        // Redirigir a la vista de resultados.
-        window.location.href = `/partida/resultados/${gameId}`;
-    }).catch(error => {
-        console.error('Error al finalizar la partida:', error);
-    });
-}
+//FIN LOGICA REPRODUCCION DE CANCIONES
