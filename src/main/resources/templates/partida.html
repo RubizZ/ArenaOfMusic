@@ -117,11 +117,11 @@
 
     <main class="flex-grow-1 d-flex justify-content-center">
         <div class="container p-3">
-                <h1 class="rounded p-2 shadow-sm my-2 justify-content-center text-center">RONDA
-                    <span th:text="${currentRound != null ? currentRound : '1'}" id="numeroRonda"></span>
-                    /
-                    <span th:text="${gameConfig.rounds}"></span>
-                </h1>
+            <h1 class="rounded p-2 shadow-sm my-2 justify-content-center text-center">RONDA
+                <span th:text="${currentRound != null ? currentRound : '1'}" id="numeroRonda"></span>
+                /
+                <span th:text="${gameConfig.rounds}"></span>
+            </h1>
             <div class="row g-3 justify-content-center text-center">
 
                 <!-- Contador -->
@@ -131,7 +131,7 @@
 
                 <!-- Contenido principal -->
                 <div class="col-lg-6 col-md-10 col-sm-12 d-flex flex-column justify-content-center align-items-start">
-                    
+
                     <div class="song-image-container position-relative text-center"
                         style="display: inline-block; overflow: hidden;">
                         <!-- Imagen -->
@@ -161,8 +161,9 @@
                     <div class="card shadow rounded-4 p-2 m-1 d-flex text-center align-items-center justify-content-center"
                         th:each="player : ${players}" th:id="'playerCard' + ${player.id}">
                         <!-- Imagen del jugador -->
-                        <img th:src="${player.profileImage?: '/img/default-profile.png'}" class="img-fluid rounded-circle mb-3" alt="Imagen Perfil"
-                        style="width: 95px; height: 95px; object-fit: cover;">
+                        <img th:src="${player.profileImage?: '/img/default-profile.png'}"
+                            class="img-fluid rounded-circle mb-3" alt="Imagen Perfil"
+                            style="width: 95px; height: 95px; object-fit: cover;">
                         <!-- Nombre del jugador -->
                         <h5 class="mb-1" th:text="${player.username}">Jugador</h5>
                         <!-- Puntuación del jugador -->
@@ -196,12 +197,13 @@
         const game = [[${ gameId }]]; // UUID que te pase tu backend
         const rounds = [[${ gameConfig.rounds }]]; // Total de rondas que configuraste en el servidor
         const fragmentDuration = [[${ gameConfig.fragmentDuration }]]; // Duración de cada fragmento
+        const hostId = [[${ gameConfig.hostId }]]; // Id del Host
         const player = [[${ u.id }]];
         /*<![CDATA[*/
         const players = /*[[${players}]]*/[];
         /*]]>*/
         window.onload = function () {
-            iniciarJuego(game, player, rounds, fragmentDuration); // Arranca el loop al cargar la vista
+            iniciarJuego(game, player, hostId, rounds, fragmentDuration); // Arranca el loop al cargar la vista
         };
     </script>
 </body>
