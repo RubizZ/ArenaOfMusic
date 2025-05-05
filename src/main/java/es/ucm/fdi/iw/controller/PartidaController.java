@@ -75,7 +75,7 @@ public class PartidaController {
             RedirectAttributes redirectAttributes,
             HttpSession session) {
         User creator = (User) session.getAttribute("u");
-        GameConfigDTO gameConfig = new GameConfigDTO(playlistId, modoJuego, rondas, tiempo);
+        GameConfigDTO gameConfig = new GameConfigDTO(playlistId, modoJuego, rondas, tiempo, creator.getId());
         try {
             UUID gameId = partidaService.crearPartida(gameConfig, creator.getId());
             return "redirect:/partida/sala-espera/" + gameId.toString();
