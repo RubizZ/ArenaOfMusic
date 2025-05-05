@@ -26,40 +26,10 @@ import sys
 import subprocess
 import glob
 import json
-import zipfile
-from typing import Union
 from pathlib import Path
 import argparse
 
-
-# see https://stackoverflow.com/a/68817065/15472
-def zip_dir(dir: Union[Path, str], filename: Union[Path, str]):
-    """Zip the provided directory without navigating to that directory using `pathlib` module"""
-
-    # Convert to Path object
-    dir = Path(dir)
-
-    with zipfile.ZipFile(filename, "w", zipfile.ZIP_DEFLATED) as zip_file:
-        for entry in dir.rglob("*"):
-            zip_file.write(entry, entry.relative_to(dir))
-
-def main(credentials_file, db_file_root, data_file_root):
-  print(f"Checking for database files... (should be named {db_file_root}; ensure you have spring.datasource.url=jdbc:h2:file:./{db_file_root}) ")
-  dbfiles = glob.glob(f"{db_file_root}.*")
-  if len(dbfiles) > 0:
-      print(f"Found {len(dbfiles)} database files: {dbfiles}")
-  else:
-      print("No database files found, exiting.")
-      sys.exit(1)
-
-  print(f"Checking for data files... (should be in {data_file_root}; ensure you have es.ucm.fdi.base-path=./{data_file_root}) ")
-  datafiles = glob.glob(data_file_root, recursive=True)
-  if len(datafiles) > 0:
-      print(f"Found {len(datafiles)} data files, compressing... ")
-      zip_dir(data_file_root, "iwdata.zip")
-  else:
-      print("No data files found.")
-      sys.exit(1)
+def main(credentials_file):
 
   print("Building deployment jar file... ")
   try:
@@ -104,12 +74,7 @@ def main(credentials_file, db_file_root, data_file_root):
           }
       ) as c:
           print(f"Connected to target host {credentials['target']} as {credentials['target_user']}")
-          print("Uploading database files ... ")
-          for f in dbfiles:
-              c.put(f)
-          print("Uploading data files ... ")
-          c.put("iwdata.zip")
-          c.run(f"unzip iwdata.zip -d {data_file_root} && rm iwdata.zip")
+
           print("Uploading jar file ... ")            
           c.put(jar_path)
           print(f"All files uploaded. Killing previous servers ...")
@@ -131,13 +96,9 @@ if __name__ == '__main__':
         "Upload all components of a Spring Boot application to a remote server")
     parser.add_argument("--credentials", "-c", type=str, default="credentials.json", 
                         help="Path to credentials")
-    parser.add_argument("--db_file_root", "-d", type=str, default="iwdb", 
-                        help="Root name of database files (see application.properties' spring.datasource.url)")
-    parser.add_argument("--data_file_root", "-f", type=str, default="iwdata", 
-                        help="Folder with data files (see application.properties' es.ucm.fdi.base-path)")
     args = parser.parse_args()
     try:
-      main(args.credentials, args.db_file_root, args.data_file_root)
+      main(args.credentials)
     except Exception as e:
       print(f"Aborting due to error: {e}")
       sys.exit(1)

@@ -87,11 +87,34 @@
         <div class="flex-shrink-0 mt-2">
             <div class="container">
                 <div class="container flex-grow-1 px-3" id="userList">
-
                 </div>
             </div>
         </div>
+
+        <div class="modal fade" id="banUserModal" tabindex="-1" aria-labelledby="banUserModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header border-0">
+                        <h5 class="modal-title text-success" id="banUserModalLabel">Cambiar estado de ban</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p id="banUserMessage">¿Estás seguro de que deseas cambiar el estado de ban de este usuario?</p>
+                        <h5 id="displayName" class="text-center">Nombre de usuario</h5>
+                        <input type="hidden" id="userId" value="">
+                        <input type="hidden" id="myId" value="" th:value="${u.id}">
+
+                        <p>Esto cambiará el estado de ban del usuario </p>
+                        <div class="modal-footer border-0">
+                            <button type="button" class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal">Cancelar</button>
+                            <button type="button" class="btn btn-danger" id="BanButton">Confirmar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+
     </main>
 
     <th:block th:replace="~{fragments/footer.html :: footer}" />
@@ -99,6 +122,29 @@
     <script>
         const imagen = document.getElementById('adminUserOrderType');
         const boton = document.getElementById('adminUserOrderChange');
+        const banButton = document.getElementById('BanButton');
+
+        banButton.addEventListener('click', () => {
+            const userId = document.getElementById("userId").value;
+            const myId = document.getElementById("myId").value;
+
+            if (userId == myId) {
+                showErrorNotification("No puedes cambiar el estado de ban de tu propia cuenta.");
+                return;
+            }
+
+            go(config.rootUrl + '/admin/user/toggle-ban', "POST", { id: userId })
+                .then(response => {
+                    if (response.success) {
+                        loadUsers(); // Refresh the user list after banning
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('banUserModal'));
+                        modal.hide();
+                    } else {
+                        showErrorNotification("Error al banear al usuario");
+                    }
+                })
+                .catch(error => console.error(error));
+        });
 
         const imagenes = ['/img/admin/sort-down.svg', '/img/admin/sort-up.svg']
 
@@ -107,6 +153,7 @@
         boton.addEventListener('click', () => {
             actual = 1 - actual;
             imagen.src = imagenes[actual];
+            loadUsers(); // Call loadUsers to refresh the user list based on the new order
         });
 
         function getFilters() {
@@ -151,12 +198,18 @@
                         let formattedLastLoginDate = lastLoginDate.toLocaleString('es-ES', dateObj);
 
                         html += `
-                    <div class="card hoverable mb-3" style="background-color: ${backgroundColor}">
-                        <a href="#" class="stretched-link"></a>
+                    <div class="card hoverable mb-3" style="background-color: ${backgroundColor}" id="user-${u.id}" >
+                        <a href="#" class="stretched-link" data-bs-toggle="modal"
+                        data-bs-target="#banUserModal"></a>
                         <div class="card-body">
                             <div class="row row-cols-5 align-items-center justify-content-center text-center">
                                 <div class="col">
-                                    <img src="https://www.mdvacationclub.com/wp-content/uploads/2018/12/Placeholder.png" class="rounded-circle" alt="Foto de perfil" width="100" height="100">
+
+
+                                    <img id="previewImage"
+                                        src="${u.profileImage != null ? u.profileImage : config.rootUrl + '/img/default-profile.png'}"
+                                        class="rounded-circle border border-3  mb-3" alt="Foto de Perfil"
+                                        style="width: 100px; height: 100px; object-fit: cover;">
                                 </div>
                                 <div class="col">
                                     <h4>${u.username}</h4>
@@ -168,15 +221,23 @@
                                     <h6>Registrado: <span>${formattedCreationDate}</span></h6>
                                 </div>
                                 <div class="col">
-                                    <h5>${u.enabled ? 'Activo' : 'Inactivo'}</h5>
-                                    <h6>${u.enabled ? 'Última conexión: ' + formattedLastLoginDate : ''}</h6>
+                                    <h5 style="display:${u.banned ? 'none' : 'block'}">${u.enabled ? 'Activo' : 'Inactivo'}</h5>
                                     <h5 style="color: red; display:${u.banned ? 'block' : 'none'}" >Baneado</h5>
-                                </div>
+                                    <h6>${'Última conexión: ' + formattedLastLoginDate}</h6>
+                                    </div>
                             </div>
                         </div>
                     </div>`;
                     });
                     document.getElementById("userList").innerHTML = html;
+
+                    users.forEach(u => {
+                        let card = document.getElementById("user-" + u.id);
+                        card.addEventListener("click", () => {
+                            document.getElementById("displayName").innerText = u.username + " - " + u.id;
+                            document.getElementById("userId").value = u.id;
+                        });
+                    });
                 })
                 .catch(error => console.error(error));
         }
