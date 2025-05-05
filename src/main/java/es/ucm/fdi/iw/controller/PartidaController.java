@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.http.HttpHeaders;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -244,6 +245,21 @@ public class PartidaController {
         }
     }
 
+    @GetMapping("/{gameId}/estado-respuestas")
+    public ResponseEntity<Boolean> obtenerEstadoRespuestas(@PathVariable UUID gameId) {
+        Game game = partidaService.getGameById(gameId);
+        if (game == null || !game.getActive()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
+        }
+        if (!game.getGameState().equals(Game.GameState.PLAYING)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no está activa.");
+        }
+
+        int jugadores = partidaService.getGamePlayers(gameId).size();
+        int respuestasProcesadas = 0;// game.getRoundJson(). (coger las respuestas de la última ronda)
+        return ResponseEntity.ok(jugadores == respuestasProcesadas);
+    }
+
     @PostMapping("/partida/ronda/respuestas/{gameId}")
     public ResponseEntity<Void> enviarRespuestas(@PathVariable UUID gameId, @RequestBody Map<Long, String> body) {
         try {
@@ -298,49 +314,56 @@ public class PartidaController {
         }
     }
 
-    @PostMapping("/partida/inicioRonda/{gameId}")
-    public ResponseEntity<RoundInfoDTO> inicioRonda(@PathVariable UUID gameId) {
-        try {
-            Game game = partidaService.getGameById(gameId);
-            if (game == null || !game.getActive()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
-            }
-            if (game.getGameState().equals(Game.GameState.FINISHED)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
-            }
-            if (game.getGameState().equals(Game.GameState.WAITING)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha comenzado.");
-            }
-            RoundInfoDTO response = partidaService.iniciarRonda(game);
-            return ResponseEntity.ok(response);
-        } catch (ResponseStatusException e) {
-            return ResponseEntity.status(e.getStatusCode()).build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
+    // @PostMapping("/partida/inicioRonda/{gameId}")
+    // public ResponseEntity<RoundInfoDTO> inicioRonda(@PathVariable UUID gameId) {
+    // try {
+    // Game game = partidaService.getGameById(gameId);
+    // if (game == null || !game.getActive()) {
+    // throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no
+    // existe.");
+    // }
+    // if (game.getGameState().equals(Game.GameState.FINISHED)) {
+    // throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha
+    // finalizado.");
+    // }
+    // if (game.getGameState().equals(Game.GameState.WAITING)) {
+    // throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha
+    // comenzado.");
+    // }
+    // RoundInfoDTO response = partidaService.iniciarRonda(game);
+    // return ResponseEntity.ok(response);
+    // } catch (ResponseStatusException e) {
+    // return ResponseEntity.status(e.getStatusCode()).build();
+    // } catch (Exception e) {
+    // return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    // }
+    // }
 
-    @PostMapping("/partida/finRonda/{gameId}")
-    public ResponseEntity<RoundResponseDTO> finRonda(@PathVariable UUID gameId, @RequestBody Map<Long, String> body) {
-        try {
-            Game game = partidaService.getGameById(gameId);
-            if (game == null || !game.getActive()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
-            }
-            if (game.getGameState().equals(Game.GameState.FINISHED)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
-            }
-            if (game.getGameState().equals(Game.GameState.WAITING)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha comenzado.");
-            }
-            RoundResponseDTO response = partidaService.finalizarRonda(game, body);
-            return ResponseEntity.ok(response);
-        } catch (ResponseStatusException e) {
-            return ResponseEntity.status(e.getStatusCode()).build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
+    // @PostMapping("/partida/finRonda/{gameId}")
+    // public ResponseEntity<RoundResponseDTO> finRonda(@PathVariable UUID gameId,
+    // @RequestBody Map<Long, String> body) {
+    // try {
+    // Game game = partidaService.getGameById(gameId);
+    // if (game == null || !game.getActive()) {
+    // throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no
+    // existe.");
+    // }
+    // if (game.getGameState().equals(Game.GameState.FINISHED)) {
+    // throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha
+    // finalizado.");
+    // }
+    // if (game.getGameState().equals(Game.GameState.WAITING)) {
+    // throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha
+    // comenzado.");
+    // }
+    // RoundResponseDTO response = partidaService.finalizarRonda(game, body);
+    // return ResponseEntity.ok(response);
+    // } catch (ResponseStatusException e) {
+    // return ResponseEntity.status(e.getStatusCode()).build();
+    // } catch (Exception e) {
+    // return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    // }
+    // }
 
     @PostMapping("/partida/finalizar/{gameId}")
     public ResponseEntity<Void> finalizarPartida(@PathVariable UUID gameId) {
