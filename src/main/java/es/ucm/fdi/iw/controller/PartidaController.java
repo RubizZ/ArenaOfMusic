@@ -293,8 +293,8 @@ public class PartidaController {
             if (game == null || !game.getActive()) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
             }
-            if (game.getGameState().equals(Game.GameState.FINISHED)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
+            if (game.getGameState().equals(Game.GameState.PLAYING)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida se está jugando.");
             }
             if (game.getGameState().equals(Game.GameState.WAITING)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha comenzado.");
