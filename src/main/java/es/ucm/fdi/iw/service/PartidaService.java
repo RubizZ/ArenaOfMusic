@@ -253,6 +253,7 @@ public class PartidaService {
             playerDTO.setTotalWins(entityManager.createNamedQuery("PlayerGame.countWinsByUser", Long.class)
                     .setParameter("userId", player.getId())
                     .getSingleResult());
+            playerDTO.setProfileImage(player.getProfileImage());
             players.add(playerDTO);
         }
 
