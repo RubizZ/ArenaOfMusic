@@ -67,6 +67,19 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 		User u = entityManager.createNamedQuery("User.byUsername", User.class)
 				.setParameter("username", username)
 				.getSingleResult();
+
+
+		// Check if the user is banned
+		if (u.isBanned()) {
+			log.warn("User {} is banned. Redirecting to banned page.", username);
+			session.invalidate(); // Invalidate the session
+			// Remove the session cookie
+			response.setHeader(HttpHeaders.SET_COOKIE, "JSESSIONID=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0");
+			response.sendRedirect("/banned"); // Redirect alla pagina di avviso
+			return; // Termina l'esecuzione
+		}
+
+		
 		u.setLastLogin(new Date());
 		session.setAttribute("u", u);
 		entityManager.merge(u);
