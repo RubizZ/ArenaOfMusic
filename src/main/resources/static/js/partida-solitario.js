@@ -22,50 +22,21 @@ function iniciarJuego(id, player, hostId, rondas, fragmentDuration) {
     totalRounds = rondas;
     timePerRound = fragmentDuration;
 
-    obtenerListaCanciones()
-        .then(() => {
-            iniciarRonda();
-        })
-        .catch(error => {
-            console.error('Error obteniendo la lista de canciones:', error);
-        });
+    obtenerListaCanciones();
+    avanzarRonda();
+
 }
 
 function iniciarRonda() {
     rondaFinalizada = false;
-    obtenerInfoRonda().then(() => {
-        actualizarVistaRonda(currentRound);  // Actualiza la UI con la nueva ronda
-        reproducirCancion().then(() => {
-            finalizarRonda(); // Finaliza la ronda si es la última.
-        }).catch(error => {
-            console.error('Error reproduciendo la canción:', error);
-        });
-    }).catch(error => {
-        console.error('Error obteniendo info ronda:', error);
-    });
+    obtenerInfoRonda()
 }
 
 
 function finalizarRonda() {
     rondaFinalizada = true;
     clearInterval(countdownTimer);
-    enviarRespuesta().then(() => {
-        obtenerRespuestas().then(() => {
-            actualizarVistaRonda(currentRound);  // Actualiza la UI con la nueva ronda
-        }).catch(error => {
-            console.error('Error obteniendo las respuestas:', error);
-        });
-    }).catch(error => {
-        console.error('Error enviando las respuestas:', error);
-    });
-
-    reproducirCancion().then(() => {
-        if (currentRound >= totalRounds) { // Finaliza la partida si es la última ronda.
-            finalizarPartida();
-        } else {
-            avanzarRonda();
-        }
-    });
+    enviarRespuesta();
 }
 
 
@@ -98,7 +69,7 @@ function avanzarRonda() {
         }).then(response => {
             if (!response.ok) throw new Error(`Error al avanzar ronda: ${response.status}`);
             return response.json();
-        }).then(data => {
+        }).then(() => {
             iniciarRonda();
         }).catch(error => {
             console.error('Error al avanzar ronda:', error);
@@ -121,7 +92,9 @@ function obtenerInfoRonda() {
     }).then(data => {
         currentRound = data.roundNumber;
         currentSongId = data.songId;
-        return obtenerCancion(currentSongId);       // Siguiente paso.
+        console.log(data);
+        actualizarVistaRonda(currentRound);  // Actualiza la UI con la nueva ronda
+        obtenerCancion(currentSongId);       // Siguiente paso.
     }).catch(error => {
         console.error('Error obteniendo info ronda:', error);
     });
@@ -147,7 +120,9 @@ function enviarRespuesta() {
     })
         .then(response => {
             if (!response.ok) throw new Error(`Error enviando respuesta: ${response.status}`);
-            return response.json();
+            return
+        }).then(() => {
+            obtenerRespuestas();
         })
         .catch(error => {
             console.error('Error enviando respuesta:', error);
@@ -168,6 +143,7 @@ function obtenerRespuestas() {
         return response.json();
     }).then(data => {
         mostrarResultadoRonda(data);
+        reproducirCancion();
     }).catch(error => {
         console.error('Error obteniendo respuestas:', error);
     });
@@ -191,6 +167,7 @@ function obtenerCancion(songId) {
         return response.blob();
     }).then(blob => {
         audioURL = URL.createObjectURL(blob);
+        reproducirCancion();
     }).catch(error => {
         console.error('Error al obtener la canción:', error);
     });
@@ -393,7 +370,7 @@ function iniciarCuentaAtras() {
                 if (currentRound >= totalRounds)// Finaliza la partida si es la última ronda.
                     finalizarPartida();
                 else
-                    iniciarRonda(); // Reinicia la ronda si ya se ha finalizado.
+                    avanzarRonda(); // Reinicia la ronda si ya se ha finalizado.
             }
 
         }
@@ -411,3 +388,98 @@ function actualizarContador(tiempoRestante) {
 
 }
 //FIN LOGICA REPRODUCCION DE CANCIONES
+//-----------------------------------------------------
+//POLLING FUNCTIONS
+
+let pollingRespuestasInterval = null;
+
+function iniciarPollingRespuestas() {
+    pollingRespuestasInterval = setInterval(() => {
+        obtenerEstadoRespuestas()
+            .then(data => {
+                if (data.respuestasCompletadas) {
+                    // Si se han procesado todas las respuestas, actualizar la vista
+                    actualizarVistaResultados();
+                    detenerPollingRespuestas();  // Detener el polling hasta la siguiente ronda
+                    reproducirCancionSiguienteRonda();
+                }
+            })
+            .catch(error => {
+                console.error("Error al obtener el estado de las respuestas:", error);
+            });
+    }, 3000); // Cada 3 segundos
+}
+
+function detenerPollingRespuestas() {
+    clearInterval(pollingRespuestasInterval);
+}
+
+function obtenerEstadoRespuestas() {
+    const csrfToken = document.querySelector('input[name="_csrf"]').value;
+
+    return fetch(`/partida/${gameId}/estado-respuestas`, {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken
+        }
+    })
+        .then(response => {
+            if (!response.ok) throw new Error(`Error al obtener estado de respuestas: ${response.status}`);
+            return response.json();
+        });
+}
+
+function actualizarVistaResultados() {
+    // Actualizar los puntajes, mostrar la canción correcta, etc.
+    console.log("Mostrando los resultados...");
+}
+
+function reproducirCancionSiguienteRonda() {
+    // Reproducir la siguiente canción
+    console.log("Reproduciendo la siguiente canción...");
+}
+
+let pollingRondaInterval = null;
+
+function iniciarPollingRonda() {
+    pollingRondaInterval = setInterval(() => {
+        obtenerEstadoRonda()
+            .then(data => {
+                if (data.nuevaRonda) {
+                    // Si ha avanzado a la siguiente ronda, actualizar la vista
+                    actualizarVistaNuevaRonda(data.numeroRonda);
+                    detenerPollingRonda();  // Detener el polling hasta la próxima ronda
+                }
+            })
+            .catch(error => {
+                console.error("Error al obtener el estado de la ronda:", error);
+            });
+    }, 3000); // Cada 3 segundos
+}
+
+function detenerPollingRonda() {
+    clearInterval(pollingRondaInterval);
+}
+
+function obtenerEstadoRonda() {
+    const csrfToken = document.querySelector('input[name="_csrf"]').value;
+
+    return fetch(`/partida/${gameId}/estado-ronda`, {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken
+        }
+    })
+        .then(response => {
+            if (!response.ok) throw new Error(`Error al obtener estado de la ronda: ${response.status}`);
+            return response.json();
+        });
+}
+
+function actualizarVistaNuevaRonda(numeroRonda) {
+    // Actualizar la vista con el número de la nueva ronda
+    console.log(`Avanzando a la ronda: ${numeroRonda}`);
+}
+
+//FIN POLLING FUNCTIONS
+

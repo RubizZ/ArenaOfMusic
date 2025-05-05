@@ -269,7 +269,7 @@ public class PartidaController {
         }
 
         Integer jugadores = partidaService.getGamePlayers(gameId).size();
-        Integer respuestasProcesadas = partidaService.getRoundResponses(game);// game.getRoundJson(). (coger las respuestas de la última ronda)
+        Integer respuestasProcesadas = partidaService.getRoundResponses(game);
         return ResponseEntity.ok(jugadores == respuestasProcesadas);
     }
 

@@ -419,11 +419,11 @@ public class PartidaService {
         gameRoundsDTO = gameRoundsDTO.parse(game.getRoundJson());
 
         int roundIndex = gameRoundsDTO.getRoundNumber();
-        Long songId = gameRoundsDTO.getSong(roundIndex);
+        Long songId = gameRoundsDTO.getSong(roundIndex - 1);
         Song song = entityManager.find(Song.class, songId);
 
         RoundInfoDTO roundInfo = new RoundInfoDTO();
-        roundInfo.setRoundNumber(roundIndex + 1);
+        roundInfo.setRoundNumber(roundIndex);
         roundInfo.setSongId(song.getId());
 
         return roundInfo;
@@ -442,7 +442,6 @@ public class PartidaService {
         Song song = entityManager.find(Song.class, songId);
 
         RoundInfoDTO roundInfo = new RoundInfoDTO();
-        roundInfo.setRoundNumber(roundIndex + 1);
         roundInfo.setSongId(song.getId());
         gameRoundsDTO.addRound(roundInfo);
         game.setRoundJson(gameRoundsDTO.toString());
