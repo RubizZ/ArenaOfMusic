@@ -33,65 +33,41 @@ function iniciarJuego(id, player, hostId, rondas, fragmentDuration) {
 
 function iniciarRonda() {
     rondaFinalizada = false;
-    const csrfToken = document.querySelector('input[name="_csrf"]').value;
-
-    fetch("/partida/inicioRonda/" + gameId, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': csrfToken
-        }
-    })
-        .then(response => {
-            if (!response.ok) throw new Error(`Error al iniciar la ronda: ${response.status}`);
-            return response.json();
-        })
-        .then(data => {
-            currentRound = data.roundNumber;
-            currentSongId = data.songId;
-            actualizarVistaRonda(currentRound);  // Actualiza la UI con la nueva ronda
-            obtenerCancion(currentSongId);       // Siguiente paso.
-        })
-        .catch(error => {
-            console.error('Error iniciando ronda:', error);
+    obtenerInfoRonda().then(() => {
+        actualizarVistaRonda(currentRound);  // Actualiza la UI con la nueva ronda
+        reproducirCancion().then(() => {
+            finalizarRonda(); // Finaliza la ronda si es la última.
+        }).catch(error => {
+            console.error('Error reproduciendo la canción:', error);
         });
+    }).catch(error => {
+        console.error('Error obteniendo info ronda:', error);
+    });
 }
+
 
 function finalizarRonda() {
     rondaFinalizada = true;
-
-    actualizarVistaRonda(currentRound);  // Actualiza la UI con la nueva ronda
-
     clearInterval(countdownTimer);
-
-    let respuesta = selectedAnswer || document.querySelector("#songInput").value;
-
-    const csrfToken = document.querySelector('input[name="_csrf"]').value;
-
-    // Construir el Map en JSON: { playerId: "respuesta" }
-    const body = {};
-    body[playerId] = respuesta;
-
-    fetch(`/partida/finRonda/${gameId}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': csrfToken
-        },
-        body: JSON.stringify(body)
-    })
-        .then(response => {
-            if (!response.ok) throw new Error(`Error enviando respuesta: ${response.status}`);
-            return response.json();
-        })
-        .then(data => {
-            mostrarResultadoRonda(data);
-            reproducirCancion();
-        })
-        .catch(error => {
-            console.error('Error enviando respuesta:', error);
+    enviarRespuesta().then(() => {
+        obtenerRespuestas().then(() => {
+            actualizarVistaRonda(currentRound);  // Actualiza la UI con la nueva ronda
+        }).catch(error => {
+            console.error('Error obteniendo las respuestas:', error);
         });
+    }).catch(error => {
+        console.error('Error enviando las respuestas:', error);
+    });
+
+    reproducirCancion().then(() => {
+        if (currentRound >= totalRounds) { // Finaliza la partida si es la última ronda.
+            finalizarPartida();
+        } else {
+            avanzarRonda();
+        }
+    });
 }
+
 
 function finalizarPartida() {
     const csrfToken = document.querySelector('input[name="_csrf"]').value;
@@ -109,6 +85,94 @@ function finalizarPartida() {
         console.error('Error al finalizar la partida:', error);
     });
 }
+
+function avanzarRonda() {
+    if (isHost) {
+        const csrfToken = document.querySelector('input[name="_csrf"]').value;
+
+        fetch(`/partida/ronda/avanzar/${gameId}`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
+        }).then(response => {
+            if (!response.ok) throw new Error(`Error al avanzar ronda: ${response.status}`);
+            return response.json();
+        }).then(data => {
+            iniciarRonda();
+        }).catch(error => {
+            console.error('Error al avanzar ronda:', error);
+        });
+    }
+}
+
+
+function obtenerInfoRonda() {
+    const csrfToken = document.querySelector('input[name="_csrf"]').value;
+
+    fetch(`/partida/ronda/info/${gameId}`, {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken
+        },
+    }).then(response => {
+        if (!response.ok) throw new Error(`Error al obtener info ronda: ${response.status}`);
+        return response.json();
+    }).then(data => {
+        currentRound = data.roundNumber;
+        currentSongId = data.songId;
+        return obtenerCancion(currentSongId);       // Siguiente paso.
+    }).catch(error => {
+        console.error('Error obteniendo info ronda:', error);
+    });
+}
+
+
+function enviarRespuesta() {
+    let respuesta = selectedAnswer || document.querySelector("#songInput").value;
+
+    const csrfToken = document.querySelector('input[name="_csrf"]').value;
+
+    // Construir el Map en JSON: { playerId: "respuesta" }
+    const body = {};
+    body[playerId] = respuesta;
+
+    fetch(`/partida/ronda/respuestas/${gameId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken
+        },
+        body: JSON.stringify(body)
+    })
+        .then(response => {
+            if (!response.ok) throw new Error(`Error enviando respuesta: ${response.status}`);
+            return response.json();
+        })
+        .catch(error => {
+            console.error('Error enviando respuesta:', error);
+        });
+}
+
+
+function obtenerRespuestas() {
+    const csrfToken = document.querySelector('input[name="_csrf"]').value;
+
+    fetch(`/partida/ronda/resultados/${gameId}`, {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken
+        },
+    }).then(response => {
+        if (!response.ok) throw new Error(`Error al obtener respuestas: ${response.status}`);
+        return response.json();
+    }).then(data => {
+        mostrarResultadoRonda(data);
+    }).catch(error => {
+        console.error('Error obteniendo respuestas:', error);
+    });
+}
+
 //FIN LOGICA PARTIDA
 //-----------------------------------------------------
 //LOGICA CANCIONES
@@ -124,11 +188,9 @@ function obtenerCancion(songId) {
         if (!response.ok) {
             throw new Error("Error al obtener la canción");
         }
-        return response.blob(); // asumimos que el backend envía audio como blob
+        return response.blob();
     }).then(blob => {
         audioURL = URL.createObjectURL(blob);
-        actualizarCover();
-        reproducirCancion(); // devolverá la URL temporal para reproducir
     }).catch(error => {
         console.error('Error al obtener la canción:', error);
     });
@@ -238,6 +300,7 @@ function actualizarVistaRonda(roundData) {
         inputRespuesta.disabled = true;
         botonRespuesta.disabled = true;
     }
+    actualizarCover();
 }
 
 function mostrarResultadoRonda(data) {
@@ -306,7 +369,7 @@ function reproducirCancion() {
                 iniciarCuentaAtras(); // <-- Tu cuenta regresiva normal de tiempo por ronda
             });
         } else {
-            setTimeout(() => {  // Solo aquí la pausa de 1 segundo
+            setTimeout(() => {  // Una pausa de 1'5 segundos entre fin primera reproducción y comienzo de la segunda.
                 audio.play();
                 iniciarCuentaAtras();
             }, 1500);

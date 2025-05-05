@@ -406,6 +406,93 @@ public class PartidaService {
     }
 
     @Transactional
+    public RoundInfoDTO obtenerInfoRonda(Game game) {
+        if (game == null || !game.getGameState().equals(Game.GameState.PLAYING)) {
+            throw new IllegalStateException("La partida no es válida o no está activa.");
+        }
+
+        GameRoundsDTO gameRoundsDTO = new GameRoundsDTO();
+        gameRoundsDTO = gameRoundsDTO.parse(game.getRoundJson());
+
+        int roundIndex = gameRoundsDTO.getRoundNumber();
+        Long songId = gameRoundsDTO.getSong(roundIndex);
+        Song song = entityManager.find(Song.class, songId);
+
+        RoundInfoDTO roundInfo = new RoundInfoDTO();
+        roundInfo.setRoundNumber(roundIndex + 1);
+        roundInfo.setSongId(song.getId());
+
+        return roundInfo;
+    }
+
+    @Transactional
+    public RoundInfoDTO avanzarRonda(Game game) {
+        if (game == null || !game.getGameState().equals(Game.GameState.PLAYING)) {
+            throw new IllegalStateException("La partida no es válida o no está activa.");
+        }
+
+        GameRoundsDTO gameRoundsDTO = new GameRoundsDTO();
+        gameRoundsDTO = gameRoundsDTO.parse(game.getRoundJson());
+        int roundIndex = gameRoundsDTO.getRoundNumber();
+        Long songId = gameRoundsDTO.getSong(roundIndex);
+        Song song = entityManager.find(Song.class, songId);
+
+        RoundInfoDTO roundInfo = new RoundInfoDTO();
+        roundInfo.setRoundNumber(roundIndex + 1);
+        roundInfo.setSongId(song.getId());
+        gameRoundsDTO.addRound(roundInfo);
+        game.setRoundJson(gameRoundsDTO.toString());
+        entityManager.persist(game);
+
+        return roundInfo;
+    }
+
+    @Transactional
+    public void procesarRespuestaJugador(Game game, Long playerId, String playerAnswer) {
+        GameRoundsDTO gameRoundsDTO = new GameRoundsDTO();
+        gameRoundsDTO = gameRoundsDTO.parse(game.getRoundJson());
+        int roundIndex = gameRoundsDTO.getRoundNumber() - 1;
+        RoundInfoDTO roundInfo = gameRoundsDTO.getRound(roundIndex);
+        Song song = entityManager.find(Song.class, gameRoundsDTO.getSong(roundIndex));
+
+        PlayerGame playerGame = entityManager.find(PlayerGame.class, new PlayerGameId(game.getId(), playerId));
+        boolean correct = song.getName().equalsIgnoreCase(playerAnswer);
+        int score = correct ? 10 : 0;
+
+        if (playerGame != null) {
+            playerGame.setScore(playerGame.getScore() + score);
+            entityManager.merge(playerGame);
+        }
+
+        roundInfo.getUserAnswers().put(playerId, correct);
+        gameRoundsDTO.setRound(roundIndex, roundInfo);
+        game.setRoundJson(gameRoundsDTO.toString());
+        entityManager.merge(game);
+    }
+
+    @Transactional
+    public RoundResponseDTO obtenerRespuestas(Game game) {
+        GameRoundsDTO gameRoundsDTO = new GameRoundsDTO();
+        gameRoundsDTO = gameRoundsDTO.parse(game.getRoundJson());
+        int roundIndex = gameRoundsDTO.getRoundNumber() - 1;
+        RoundInfoDTO roundInfo = gameRoundsDTO.getRound(roundIndex);
+        Song song = entityManager.find(Song.class, gameRoundsDTO.getSong(roundIndex));
+
+        RoundResponseDTO response = new RoundResponseDTO();
+        response.setSongId(song.getId());
+        response.setSongName(song.getName());
+
+        for (Map.Entry<Long, Boolean> entry : roundInfo.getUserAnswers().entrySet()) {
+            Long userId = entry.getKey();
+            boolean correct = entry.getValue();
+            int score = correct ? 10 : 0;
+            response.getResult().put(userId, score);
+        }
+
+        return response;
+    }
+
+    @Transactional
     public void finalizarPartida(Game game) {
         try {
             if (game == null) {
