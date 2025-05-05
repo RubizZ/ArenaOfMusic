@@ -37,7 +37,7 @@
                     <!-- Lista de jugadores -->
                     <ul class="list-group mb-3">
                         <li class="list-group-item d-flex align-items-center border-0" th:each="player : ${players}">
-                            <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-center justify-content-around w-100">
                                 <img th:src="${player.profileImage ?: '/img/default-profile.png'}" alt="Foto de perfil de jugador"
                                     class="rounded-circle me-3" style="width: 55px; height: 55px; object-fit: cover;">
                                 <div>
@@ -47,6 +47,9 @@
                                         <span> • </span>
                                         <span th:text="${'Victorias: ' + player.totalWins}"></span>
                                     </div>
+                                </div>
+                                <div class="ms-auto">
+                                    <span th:if="${player.id} == ${gameConfig.hostId}" th:text="ANFITRIÓN"class="badge bg-accept fw-bold rounded-4 text-dark"></span>
                                 </div>
                         </li>
                     </ul>
