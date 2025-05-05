@@ -13,9 +13,9 @@ let imageURL;
 let availableSongs = [];
 
 
-function iniciarJuego(id, players, rondas, fragmentDuration) {
+function iniciarJuego(id, player, rondas, fragmentDuration) {
     gameId = id;
-    playerId = players[0].id
+    playerId = player
     totalRounds = rondas;
     timePerRound = fragmentDuration;
 

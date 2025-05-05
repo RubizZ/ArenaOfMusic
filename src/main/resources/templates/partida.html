@@ -158,11 +158,11 @@
 
                 <!-- Sección de Jugadores -->
                 <div class="col-lg-3 col-md-6 col-sm-12 align-items-start">
-                    <div class="card shadow rounded-4 p-2 d-flex text-center align-items-center justify-content-center"
+                    <div class="card shadow rounded-4 p-2 m-1 d-flex text-center align-items-center justify-content-center"
                         th:each="player : ${players}" th:id="'playerCard' + ${player.id}">
                         <!-- Imagen del jugador -->
-                        <img th:src="${u.profileImage != null ?  u.profileImage : '/img/default-profile.png'}" class="img-fluid rounded-circle mb-3" alt="Imagen Perfil"
-                            style="max-width: 140px;">
+                        <img th:src="${player.profileImage?: '/img/default-profile.png'}" class="img-fluid rounded-circle mb-3" alt="Imagen Perfil"
+                        style="width: 95px; height: 95px; object-fit: cover;">
                         <!-- Nombre del jugador -->
                         <h5 class="mb-1" th:text="${player.username}">Jugador</h5>
                         <!-- Puntuación del jugador -->
@@ -196,12 +196,12 @@
         const game = [[${ gameId }]]; // UUID que te pase tu backend
         const rounds = [[${ gameConfig.rounds }]]; // Total de rondas que configuraste en el servidor
         const fragmentDuration = [[${ gameConfig.fragmentDuration }]]; // Duración de cada fragmento
-
+        const player = [[${ u.id }]];
         /*<![CDATA[*/
         const players = /*[[${players}]]*/[];
         /*]]>*/
         window.onload = function () {
-            iniciarJuego(game, players, rounds, fragmentDuration); // Arranca el loop al cargar la vista
+            iniciarJuego(game, player, rounds, fragmentDuration); // Arranca el loop al cargar la vista
         };
     </script>
 </body>
