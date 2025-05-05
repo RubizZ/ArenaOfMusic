@@ -245,6 +245,19 @@ public class PartidaController {
         }
     }
 
+    @GetMapping("/{gameId}/estado-ronda")
+    public ResponseEntity<Integer> obtenerEstadoRonda(@PathVariable UUID gameId) {
+        Game game = partidaService.getGameById(gameId);
+        if (game == null || !game.getActive()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
+        }
+        if (!game.getGameState().equals(Game.GameState.PLAYING)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no está activa.");
+        }
+        Integer ronda = partidaService.getRondaActual(game);
+        return ResponseEntity.ok(ronda);
+    }
+
     @GetMapping("/{gameId}/estado-respuestas")
     public ResponseEntity<Boolean> obtenerEstadoRespuestas(@PathVariable UUID gameId) {
         Game game = partidaService.getGameById(gameId);
@@ -255,8 +268,8 @@ public class PartidaController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no está activa.");
         }
 
-        int jugadores = partidaService.getGamePlayers(gameId).size();
-        int respuestasProcesadas = 0;// game.getRoundJson(). (coger las respuestas de la última ronda)
+        Integer jugadores = partidaService.getGamePlayers(gameId).size();
+        Integer respuestasProcesadas = partidaService.getRoundResponses(game);// game.getRoundJson(). (coger las respuestas de la última ronda)
         return ResponseEntity.ok(jugadores == respuestasProcesadas);
     }
 

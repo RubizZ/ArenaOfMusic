@@ -322,87 +322,91 @@ public class PartidaService {
 
     // @Transactional
     // public RoundInfoDTO iniciarRonda(Game game) {
-    //     GameRoundsDTO gameRoundsDTO = new GameRoundsDTO();
-    //     RoundInfoDTO roundInfo = new RoundInfoDTO();
+    // GameRoundsDTO gameRoundsDTO = new GameRoundsDTO();
+    // RoundInfoDTO roundInfo = new RoundInfoDTO();
 
-    //     try {
-    //         if (game == null) {
-    //             throw new IllegalArgumentException("La partida no existe.");
-    //         }
-    //         if (!game.getGameState().equals(Game.GameState.PLAYING)) {
-    //             throw new IllegalStateException("La partida no se está jugando.");
-    //         }
-    //         gameRoundsDTO = gameRoundsDTO.parse(game.getRoundJson());
-    //         Long songId = gameRoundsDTO.getSong(gameRoundsDTO.getRoundNumber());
-    //         Song song = entityManager.find(Song.class, songId);
+    // try {
+    // if (game == null) {
+    // throw new IllegalArgumentException("La partida no existe.");
+    // }
+    // if (!game.getGameState().equals(Game.GameState.PLAYING)) {
+    // throw new IllegalStateException("La partida no se está jugando.");
+    // }
+    // gameRoundsDTO = gameRoundsDTO.parse(game.getRoundJson());
+    // Long songId = gameRoundsDTO.getSong(gameRoundsDTO.getRoundNumber());
+    // Song song = entityManager.find(Song.class, songId);
 
-    //         roundInfo.setRoundNumber(gameRoundsDTO.getRoundNumber() + 1);
-    //         roundInfo.setSongId(song.getId());
-    //         // roundInfo.setSongName(song.getName());
-    //         gameRoundsDTO.addRound(roundInfo);
-    //         game.setRoundJson(gameRoundsDTO.toString());
-    //         entityManager.persist(game);
+    // roundInfo.setRoundNumber(gameRoundsDTO.getRoundNumber() + 1);
+    // roundInfo.setSongId(song.getId());
+    // // roundInfo.setSongName(song.getName());
+    // gameRoundsDTO.addRound(roundInfo);
+    // game.setRoundJson(gameRoundsDTO.toString());
+    // entityManager.persist(game);
 
-    //     } catch (IllegalArgumentException e) {
-    //         System.out.println("Argumento invalido: " + e.getMessage());
-    //     } catch (IllegalStateException e) {
-    //         System.out.println("Invalid state: " + e.getMessage());
-    //     }
+    // } catch (IllegalArgumentException e) {
+    // System.out.println("Argumento invalido: " + e.getMessage());
+    // } catch (IllegalStateException e) {
+    // System.out.println("Invalid state: " + e.getMessage());
+    // }
 
-    //     return roundInfo;
+    // return roundInfo;
 
     // }
 
     // @Transactional
-    // public RoundResponseDTO finalizarRonda(Game game, Map<Long, String> userAnswers) {
-    //     GameRoundsDTO gameRoundsDTO = new GameRoundsDTO();
-    //     RoundInfoDTO roundInfo = new RoundInfoDTO();
-    //     RoundResponseDTO roundResponse = new RoundResponseDTO();
-    //     try {
-    //         if (game == null) {
-    //             throw new IllegalArgumentException("La partida no existe.");
-    //         }
-    //         if (!game.getGameState().equals(Game.GameState.PLAYING)) {
-    //             throw new IllegalStateException("La partida no se está jugando.");
-    //         }
-    //         gameRoundsDTO = gameRoundsDTO.parse(game.getRoundJson());
-    //         roundInfo = gameRoundsDTO.getRound(gameRoundsDTO.getRoundNumber() - 1);
-    //         gameRoundsDTO.setRound(gameRoundsDTO.getRoundNumber() - 1, roundInfo);
-    //         Song song = entityManager.find(Song.class, gameRoundsDTO.getSong(gameRoundsDTO.getRoundNumber() - 1));
-    //         roundResponse.setSongId(song.getId());
-    //         roundResponse.setSongName(song.getName());
+    // public RoundResponseDTO finalizarRonda(Game game, Map<Long, String>
+    // userAnswers) {
+    // GameRoundsDTO gameRoundsDTO = new GameRoundsDTO();
+    // RoundInfoDTO roundInfo = new RoundInfoDTO();
+    // RoundResponseDTO roundResponse = new RoundResponseDTO();
+    // try {
+    // if (game == null) {
+    // throw new IllegalArgumentException("La partida no existe.");
+    // }
+    // if (!game.getGameState().equals(Game.GameState.PLAYING)) {
+    // throw new IllegalStateException("La partida no se está jugando.");
+    // }
+    // gameRoundsDTO = gameRoundsDTO.parse(game.getRoundJson());
+    // roundInfo = gameRoundsDTO.getRound(gameRoundsDTO.getRoundNumber() - 1);
+    // gameRoundsDTO.setRound(gameRoundsDTO.getRoundNumber() - 1, roundInfo);
+    // Song song = entityManager.find(Song.class,
+    // gameRoundsDTO.getSong(gameRoundsDTO.getRoundNumber() - 1));
+    // roundResponse.setSongId(song.getId());
+    // roundResponse.setSongName(song.getName());
 
-    //         Map<Long, Boolean> userTry = new HashMap<>();
-    //         userAnswers.forEach((key, value) -> {
-    //             PlayerGame playerGame = entityManager.find(PlayerGame.class,
-    //                     new PlayerGameId(game.getId(), key));
-    //             int score = 0;
-    //             if (value.equalsIgnoreCase(song.getName())) {
-    //                 score += 10;
-    //                 userTry.put(key, true); // Guardar el intento correcto
-    //             } else {
-    //                 userTry.put(key, false); // Guardar el intento incorrecto
-    //             }
-    //             if (playerGame != null) {
-    //                 playerGame.setScore(playerGame.getScore() + score); // Incrementar el puntaje del jugador
-    //                 entityManager.persist(playerGame); // Persistir el cambio en la base de datos
-    //             }
-    //             roundResponse.getResult().put(key, score); // Guardar el puntaje del jugador en el resultado
-    //         });
-    //         roundInfo.setUserAnswers(userTry);
-    //         game.setRoundJson(roundInfo.toString());
+    // Map<Long, Boolean> userTry = new HashMap<>();
+    // userAnswers.forEach((key, value) -> {
+    // PlayerGame playerGame = entityManager.find(PlayerGame.class,
+    // new PlayerGameId(game.getId(), key));
+    // int score = 0;
+    // if (value.equalsIgnoreCase(song.getName())) {
+    // score += 10;
+    // userTry.put(key, true); // Guardar el intento correcto
+    // } else {
+    // userTry.put(key, false); // Guardar el intento incorrecto
+    // }
+    // if (playerGame != null) {
+    // playerGame.setScore(playerGame.getScore() + score); // Incrementar el puntaje
+    // del jugador
+    // entityManager.persist(playerGame); // Persistir el cambio en la base de datos
+    // }
+    // roundResponse.getResult().put(key, score); // Guardar el puntaje del jugador
+    // en el resultado
+    // });
+    // roundInfo.setUserAnswers(userTry);
+    // game.setRoundJson(roundInfo.toString());
 
-    //         GameConfigDTO gameConfig = new GameConfigDTO();
-    //         gameConfig.parseGameConfigDTO(game.getConfigJson());
-    //         game.setRoundJson(gameRoundsDTO.toString());
+    // GameConfigDTO gameConfig = new GameConfigDTO();
+    // gameConfig.parseGameConfigDTO(game.getConfigJson());
+    // game.setRoundJson(gameRoundsDTO.toString());
 
-    //     } catch (IllegalArgumentException e) {
-    //         System.out.println("Argumento invalido: " + e.getMessage());
-    //     } catch (IllegalStateException e) {
-    //         System.out.println("Invalid state: " + e.getMessage());
-    //     }
+    // } catch (IllegalArgumentException e) {
+    // System.out.println("Argumento invalido: " + e.getMessage());
+    // } catch (IllegalStateException e) {
+    // System.out.println("Invalid state: " + e.getMessage());
+    // }
 
-    //     return roundResponse;
+    // return roundResponse;
     // }
 
     @Transactional
@@ -549,6 +553,20 @@ public class PartidaService {
         } else {
             throw new IllegalArgumentException("El jugador no está en la partida.");
         }
+    }
+
+    public Integer getRondaActual(Game game) {
+        GameRoundsDTO rounds = new GameRoundsDTO();
+        rounds = rounds.parse(game.getRoundJson());
+        Integer actualRound = rounds.getRoundNumber();
+        return actualRound;
+    }
+
+    public Integer getRoundResponses(Game game) {
+        GameRoundsDTO rounds = new GameRoundsDTO();
+        rounds = rounds.parse(game.getRoundJson());
+        Integer numResponses = rounds.getRound(rounds.getRoundNumber() - 1).getUserAnswers().size();
+        return numResponses;
     }
 
 }
