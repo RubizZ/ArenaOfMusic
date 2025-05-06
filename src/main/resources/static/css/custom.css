@@ -74,7 +74,6 @@ footer {
 
 .error-notification {
     background-color: var(--bs-danger-bg-subtle);
-    color: var(--bs-danger);
     border: 1px solid var(--bs-danger-border-subtle);
     border-radius: 0.375rem;
     padding: 1rem;
@@ -93,7 +92,6 @@ footer {
 .error-icon {
     margin-right: 1rem;
     font-size: 1.5rem;
-    color: var(--bs-danger);
 }
 
 .error-content {
@@ -103,7 +101,7 @@ footer {
 .error-close {
     background: none;
     border: none;
-    color: var(--bs-danger);
+    color: var(--bs-secondary);
     opacity: 0.75;
     transition: opacity 0.15s ease-in-out;
     font-size: 1.25rem;
