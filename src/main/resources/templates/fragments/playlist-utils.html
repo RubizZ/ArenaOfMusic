@@ -579,23 +579,60 @@
                         const addButton = modalElement.querySelector('#add');
 
                         deleteButton.addEventListener('click', async function (event) {
-                            event.preventDefault();
+                            const confirmDeleteModal = document.createElement('div');
+                            confirmDeleteModal.className = 'modal fade';
+                            confirmDeleteModal.id = `confirmDeleteModal${playlist.id}`;
+                            confirmDeleteModal.tabIndex = -1;
+                            confirmDeleteModal.setAttribute('aria-labelledby', `confirmDeleteModalLabel${playlist.id}`);
+                            confirmDeleteModal.setAttribute('aria-hidden', 'true');
+                            confirmDeleteModal.innerHTML = `
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="confirmDeleteModalLabel${playlist.id}">Confirmar eliminación</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            ¿Estás seguro de que deseas eliminar la playlist con ID ${playlist.id}?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                            <button type="button" class="btn btn-danger" id="confirmDeleteButton${playlist.id}">Eliminar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            document.body.appendChild(confirmDeleteModal);
 
-                            const response = await fetch(`/admin/playlists/deletePlaylist?id=${playlist.id}`, {
-                                method: 'POST',
-                                headers: {
-                                    'X-CSRF-TOKEN': config.csrf.value
-                                },
-                                credentials: 'same-origin'
-                            });
+                            const deleteModal = new bootstrap.Modal(confirmDeleteModal);
+                            deleteModal.show();
 
-                            if (response.ok) {
-                                modal.hide();
-                                handlePlaylistFilterInput();
-                                showErrorNotification("Playlist eliminada correctamente", "success");
-                            } else {
-                                showErrorNotification("Error al eliminar la playlist: " + response.statusText, "error");
+                            function modalShow() {
+                                modal.show();
                             }
+
+                            deleteModal._element.addEventListener('hidden.bs.modal', modalShow);
+
+                            confirmDeleteModal.querySelector(`#confirmDeleteButton${playlist.id}`).addEventListener('click', async function () {
+                                const response = await fetch(`/admin/playlists/deletePlaylist?id=${playlist.id}`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'X-CSRF-TOKEN': config.csrf.value
+                                    },
+                                    credentials: 'same-origin'
+                                });
+
+                                if (response.ok) {
+                                    deleteModal._element.removeEventListener('hidden.bs.modal', modalShow);
+
+                                    confirmDeleteModal.remove();
+                                    deleteModal.hide();
+                                    handlePlaylistFilterInput();
+                                    showErrorNotification("Playlist eliminada correctamente", "success");
+                                } else {
+                                    showErrorNotification("Error al eliminar la playlist: " + response.statusText, "error");
+                                }
+                            });
                         });
 
                         saveButton.addEventListener('click', async function (event) {
@@ -816,6 +853,7 @@
 
                 const removeButton = songCard.querySelector('#remove');
                 removeButton.addEventListener('click', () => {
+
                     fetch(`/admin/playlists/removeSongFromPlaylist?playlistId=${playlistId}&songId=${songId}`, {
                         method: 'POST',
                         headers: {
@@ -1360,34 +1398,69 @@
                         });
 
                         deleteButton.addEventListener('click', function () {
-                            fetch(`/admin/playlists/deleteSong?id=${id}`, {
-                                method: 'POST',
-                                headers: {
-                                    'X-CSRF-TOKEN': config.csrf.value
-                                },
-                                credentials: 'same-origin'
-                            })
-                                .then(response => {
-                                    if (response.status === 404) {
-                                        showErrorNotification(`No existe ninguna canción con id ${id}`, "error");
-                                        return;
-                                    }
+                            const confirmDeleteModal = document.createElement('div');
+                            confirmDeleteModal.className = 'modal fade';
+                            confirmDeleteModal.id = `confirmDeleteModal${id}`;
+                            confirmDeleteModal.tabIndex = -1;
+                            confirmDeleteModal.setAttribute('aria-labelledby', `confirmDeleteModalLabel${id}`);
+                            confirmDeleteModal.setAttribute('aria-hidden', 'true');
+                            confirmDeleteModal.innerHTML = `
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="confirmDeleteModalLabel${id}">Confirmar eliminación</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                ¿Estás seguro de que deseas eliminar la canción con ID ${id}?
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                <button type="button" class="btn btn-danger" id="confirmDeleteButton${id}">Eliminar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            document.body.appendChild(confirmDeleteModal);
 
-                                    if (response.status === 500) {
-                                        showErrorNotification(`El servidor ha tenido un error interno al eliminar la canción ${id}, por favor, avisa a los programadores`, "error");
+                            const deleteModal = new bootstrap.Modal(confirmDeleteModal);
+                            deleteModal.show();
+
+                            confirmDeleteModal.querySelector(`#confirmDeleteButton${id}`).addEventListener('click', function () {
+                                fetch(`/admin/playlists/deleteSong?id=${id}`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'X-CSRF-TOKEN': config.csrf.value
+                                    },
+                                    credentials: 'same-origin'
+                                })
+                                    .then(response => {
+                                        if (response.status === 404) {
+                                            showErrorNotification(`No existe ninguna canción con id ${id}`, "error");
+                                            return;
+                                        }
+
+                                        if (response.status === 500) {
+                                            showErrorNotification(`El servidor ha tenido un error interno al eliminar la canción ${id}, por favor, avisa a los programadores`, "error");
+                                            handleSongFilterInput();
+                                            return;
+                                        }
+
+                                        if (!response.ok) {
+                                            showErrorNotification('Ha sucedido un error inesperado al eliminar la canción', "error");
+                                            handleSongFilterInput();
+                                            return;
+                                        }
+
+                                        showErrorNotification(`Se ha eliminado la canción ${id}`, "success");
                                         handleSongFilterInput();
-                                        return;
-                                    }
+                                    })
+                                    .finally(() => {
+                                        deleteModal.hide();
+                                        confirmDeleteModal.remove();
+                                    });
+                            });
 
-                                    if (!response.ok) {
-                                        showErrorNotification('Ha sucedido un error inesperado al eliminar la canción', "error");
-                                        handleSongFilterInput();
-                                        return;
-                                    }
-
-                                    showErrorNotification(`Se ha eliminado la canción ${id}`, "success");
-                                    handleSongFilterInput();
-                                });
                         });
 
                         confirmButton.addEventListener('click', function () {
