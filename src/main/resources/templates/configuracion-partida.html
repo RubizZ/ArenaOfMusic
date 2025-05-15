@@ -23,19 +23,12 @@
                     <!-- Lista de playlists disponibles -->
                     <div class="row row-cols-2 row-cols-md-3 gx-0 mt-3">
                         <div class="col" th:each="playlist : ${playlists}">
-                            <input
-                                type="radio"
-                                class="btn-check playlist-radio"
-                                name="selectedPlaylist"
-                                th:id="'playlist' + ${playlist.id}"
-                                th:value="${playlist.id}"
-                                autocomplete="off"
-                            />
+                            <input type="radio" class="btn-check playlist-radio" name="selectedPlaylist"
+                                th:id="'playlist' + ${playlist.id}" th:value="${playlist.id}" autocomplete="off" />
                             <label
                                 class="btn w-100 h-100 d-flex flex-column justify-content-center align-items-start rounded"
-                                th:for="'playlist' + ${playlist.id}"
-                            >
-                                <img class="img-fluid rounded-3 mb-2 w-75" th:src="${playlist.image}"/>
+                                th:for="'playlist' + ${playlist.id}">
+                                <img class="img-fluid rounded-3 mb-2 w-75" th:src="${playlist.image}" />
                                 <span class="fw-semibold" th:text="${playlist.title}">Título</span>
                                 <small class="text-muted small" th:text="'by ' + ${playlist.author}">Autor</small>
                             </label>
@@ -54,32 +47,16 @@
                                 <span>Número de rondas</span>
                                 <span class="fw-bold fs-5" id="roundsValue">5</span>
                             </label>
-                            <input
-                                type="range"
-                                class="form-range"
-                                id="rounds"
-                                name="rounds"
-                                min="5"
-                                max="25"
-                                step="1"
-                                value="5"
-                            />
+                            <input type="range" class="form-range" id="rounds" name="rounds" min="5" max="25" step="1"
+                                value="5" />
                         </div>
                         <div class="mb-3">
                             <label for="time" class="form-label d-flex justify-content-between me-3">
                                 <span>Duración del fragmento (segundos)</span>
                                 <span class="fw-bold fs-5" id="timeValue">5</span>
                             </label>
-                            <input
-                                type="range"
-                                class="form-range"
-                                id="time"
-                                name="time"
-                                min="5"
-                                max="30"
-                                step="1"
-                                value="5"
-                            />
+                            <input type="range" class="form-range" id="time" name="time" min="5" max="30" step="1"
+                                value="5" />
                         </div>
                     </div>
 
@@ -88,13 +65,7 @@
                         <h5 class="fw-semibold mb-3 fs-4">Modo de juego</h5>
                         <div class="row row-cols-1 row-cols-sm-3">
                             <div class="col">
-                                <input
-                                    type="radio"
-                                    class="btn-check"
-                                    name="mode"
-                                    id="options"
-                                    value="options"
-                                />
+                                <input type="radio" class="btn-check" name="mode" id="options" value="options" />
                                 <label class="btn btn-outline-dark w-100 h-100 text-center p-3" for="options">
                                     <div><i class="bi bi-list-ul" style="font-size: 2rem;"></i></div>
                                     <div class="fw-semibold text-dark mt-1">Opciones múltiples</div>
@@ -104,13 +75,7 @@
                                 </label>
                             </div>
                             <div class="col">
-                                <input
-                                    type="radio"
-                                    class="btn-check"
-                                    name="mode"
-                                    id="song"
-                                    value="song"
-                                />
+                                <input type="radio" class="btn-check" name="mode" id="song" value="song" />
                                 <label class="btn btn-outline-dark w-100 h-100 text-center p-3" for="song">
                                     <div><i class="bi bi-music-note-beamed" style="font-size: 2rem;"></i></div>
                                     <div class="fw-semibold text-dark mt-1">Adivina la canción</div>
@@ -120,13 +85,7 @@
                                 </label>
                             </div>
                             <div class="col">
-                                <input
-                                    type="radio"
-                                    class="btn-check"
-                                    name="mode"
-                                    id="artist"
-                                    value="artist"
-                                />
+                                <input type="radio" class="btn-check" name="mode" id="artist" value="artist" />
                                 <label class="btn btn-outline-dark w-100 h-100 text-center p-3" for="artist">
                                     <div><i class="bi bi-person-fill" style="font-size: 2rem;"></i></div>
                                     <div class="fw-semibold text-dark mt-1">Adivina el artista</div>
@@ -144,19 +103,14 @@
             <div class="row mt-4">
                 <!-- Volver -->
                 <div class="col-md-6 text-start">
-                    <a
-                        class="btn btn-back fw-bold ms-3 rounded-4 text-dark"
-                        style="width: 220px;"
-                        th:href="@{/}">
+                    <a class="btn btn-back fw-bold ms-3 rounded-4 text-dark" style="width: 220px;" th:href="@{/}">
                         Volver
                     </a>
                 </div>
 
                 <!-- Iniciar partida -->
                 <div class="col-md-6 text-end">
-                    <a
-                        class="btn btn-accept fw-bold rounded-4 text-dark"
-                        style="margin-right: 4.5rem; width: 220px;"
+                    <a class="btn btn-accept fw-bold rounded-4 text-dark" style="margin-right: 4.5rem; width: 220px;"
                         th:href="@{/sala-espera}">
                         Iniciar
                     </a>
