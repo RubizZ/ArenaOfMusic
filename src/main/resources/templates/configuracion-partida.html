@@ -15,30 +15,48 @@
             <h2 class="fw-bold">Configuración de partida</h2>
             <form method="POST" action="/partida/crear-partida" id="formCrearPartida">
 
-                <div class="row align-items-start p-2">
-                    <!-- Selección de playlists -->
+                <div class="row d-flex justify-content-between p-2">
+                    <!-- Selección de playlists y jugadores-->
                     <div class="col-md-5 left-panel me-md-4">
-                        <h5 class="fw-semibold mt-4 fs-4">Selecciona una playlist</h5>
+                        <div class="row">
+                            <div class="col-12">
+                                <h5 class="fw-semibold mt-4 fs-4">Selecciona una playlist</h5>
 
-                        <!-- Lista de playlists disponibles -->
-                        <div class="row row-cols-2 row-cols-md-3 gx-0 mt-3">
-                            <div class="col d-flex text-center justify-content-center"
-                                th:each="playlist : ${playlists}">
-                                <input type="radio" class="btn-check playlist-radio" name="selectedPlaylist"
-                                    th:id="'playlist' + ${playlist.id}" th:value="${playlist.id}" autocomplete="off" />
-                                <label class="btn d-flex flex-column justify-content-center align-items-start rounded"
-                                    th:for="'playlist' + ${playlist.id}">
-                                    <img class="img-fluid img-fluid rounded-3 mb-2"
-                                        th:src="@{/img/default-profile.png}" />
-                                    <span class="fw-semibold" th:text="${playlist.name}">Título</span>
-                                </label>
+                                <!-- Lista de playlists disponibles -->
+                                <div class="row row-cols-2 row-cols-md-3 gx-0 mt-3">
+                                    <div class="col d-flex text-center justify-content-center"
+                                        th:each="playlist : ${playlists}">
+                                        <input type="radio" class="btn-check playlist-radio" name="selectedPlaylist"
+                                            th:id="'playlist' + ${playlist.id}" th:value="${playlist.id}"
+                                            autocomplete="off" />
+                                        <label
+                                            class="btn d-flex flex-column justify-content-center align-items-start rounded"
+                                            th:for="'playlist' + ${playlist.id}">
+                                            <img class="img-fluid img-fluid rounded-3 mb-2"
+                                                th:src="@{/img/default-profile.png}" />
+                                            <span class="fw-semibold" th:text="${playlist.name}">Título</span>
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
+                            <div class="col-12">
+                                <h5 class="fw-semibold mt-4 fs-4">Selecciona el Máximo de Jugadores</h5>
+                                <label for="maxPlayers" class="form-label d-flex justify-content-between me-3">
+                                    <span>Número Máximo de Jugadores</span>
+                                    <span class="fw-bold fs-5" id="maxPlayersValue">[[${modo} == 'solo' ? 1 : (${modo}
+                                        =='duel' ? 2 : 4)]]</span>
+                                </label>
+
+                                <input type="text" class="form-text" id="maxPlayers" name="maxPlayers"
+                                    th:value="${modo} == 'solo' ? 1 : (${modo} == 'duel' ? 2 : 4)" style="display: none;"/>
+                            </div>
+
                         </div>
                     </div>
 
 
                     <!-- Ajustes y modo de juego -->
-                    <div class="col-md-6 right-panel ms-md-4">
+                    <div class="col-md-6 right-panel justify-content-end ms-md-4">
 
                         <!-- Ajustes de juego -->
                         <div class="mb-4">
@@ -107,19 +125,19 @@
 
                 </div>
                 <!-- Botones de volver e iniciar partida -->
-                <div class="row mt-4">
+                <div class="row my-4 d-flex justify-content-between">
                     <!-- Volver -->
-                    <div class="col-md-6 text-start">
+                    <div class="col-6 text-start">
                         <a class="btn btn-back fw-bold ms-3 rounded-4 text-dark" style="width: 220px;" th:href="@{/}">
                             Volver
                         </a>
                     </div>
 
                     <!-- Iniciar partida -->
-                    <div class="col-md-6 text-end">
+                    <div class="col-6 d-flex justify-content-end">
                         <a>
                             <button class="btn btn-accept fw-bold rounded-4 text-dark"
-                                style="margin-right: 4.5rem; width: 220px;" type="submit">
+                                style="width: 220px;" type="submit">
                                 Iniciar
                             </button>
                         </a>
@@ -130,6 +148,10 @@
     </main>
     <script>
         // Mostrar valores dinámicamente
+        const maxPlayersInput = document.getElementById("maxPlayers");
+        const maxPlayersValue = document.getElementById("maxPlayersValue");
+        maxPlayersInput.addEventListener("input", () => maxPlayersValue.textContent = maxPlayersInput.value);
+
         const rondasInput = document.getElementById("rounds");
         const rondasValue = document.getElementById("roundsValue");
         rondasInput.addEventListener("input", () => rondasValue.textContent = rondasInput.value);
@@ -174,24 +196,24 @@
                 const modeInput = document.querySelector('input[name="mode"]:checked');
 
                 const playlistId = selectedPlaylistInput ? selectedPlaylistInput.value : null;
+                const maxPlayers = document.getElementById('maxPlayers').value;
                 const rondas = document.getElementById('rounds').value;
                 const tiempo = document.getElementById('time').value;
                 const modoJuego = modeInput ? modeInput.value : null;
 
                 // Validaciones
-                if (!playlistId || !rondas || !tiempo || !modoJuego) {
+                if (!playlistId || !maxPlayers || !rondas || !tiempo || !modoJuego) {
                     alert('Por favor, complete todos los campos del formulario.');
                     return;
                 }
 
-                if (isNaN(rondas) || isNaN(tiempo) || rondas <= 0 || tiempo <= 0) {
+                if (isNaN(maxPlayers) || isNaN(rondas) || isNaN(tiempo) || rondas <= 0 || tiempo <= 0) {
                     alert('Las rondas y el tiempo deben ser números positivos.');
                     return;
                 }
 
                 // Obtener el token CSRF
-                const csrfInput = document.querySelector('input[name="_csrf"]');
-                const csrfToken = csrfInput ? csrfInput.value : '';
+                const csrfToken = config.csrf.value;
 
                 // Crear la petición
                 const formData = new URLSearchParams();
@@ -199,6 +221,7 @@
                 formData.append('rondas', rondas);
                 formData.append('tiempo', tiempo);
                 formData.append('modoJuego', modoJuego);
+                formData.append('maxPlayers', maxPlayers);
 
                 fetch('/partida/crear-partida', {
                     method: 'POST',

@@ -20,6 +20,8 @@ public class GameConfigDTO {
 
     int maxPlayers;
 
+    int numPlayers;
+
     Boolean multiplayer;
 
     public void parseGameConfigDTO(String gameConfig) {
@@ -30,7 +32,8 @@ public class GameConfigDTO {
         this.fragmentDuration = Integer.parseInt(parts[3].split("=")[1]);
         this.hostId = Long.parseLong(parts[4].split("=")[1]);
         this.maxPlayers = Integer.parseInt(parts[5].split("=")[1]);
-        this.multiplayer = Boolean.parseBoolean(parts[6].split("=")[1]);
+        this.numPlayers = Integer.parseInt(parts[6].split("=")[1]);
+        this.multiplayer = Boolean.parseBoolean(parts[7].split("=")[1]);
     }
 
     @Override
@@ -40,7 +43,8 @@ public class GameConfigDTO {
                 ", rounds=" + rounds +
                 ", fragmentDuration=" + fragmentDuration +
                 ", hostId=" + hostId +
-                ", numPlayers=" + maxPlayers +
+                ", maxPlayers=" + maxPlayers +
+                ", numPlayers=" + numPlayers +
                 ", multiplayer=" + multiplayer;
     }
 }
