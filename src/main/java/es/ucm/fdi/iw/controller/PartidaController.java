@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
@@ -39,6 +40,7 @@ import es.ucm.fdi.iw.service.SongService;
 import es.ucm.fdi.iw.util.FileGetter;
 import es.ucm.fdi.iw.util.NoDataException;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
@@ -60,9 +62,10 @@ public class PartidaController {
         }
     }
 
-    @GetMapping("/partida/configuracion-partida")
-    public String configPartida(Model model) {
+    @GetMapping("/partida/configuracion-partida/{modo}")
+    public String configPartida(Model model, @PathVariable String modo) {
         model.addAttribute("playlists", partidaService.getActivePlaylists());
+        model.addAttribute("modo", modo);
         return "configuracion-partida";
     }
 
@@ -72,13 +75,13 @@ public class PartidaController {
             @RequestParam int rondas,
             @RequestParam int tiempo,
             @RequestParam String modoJuego,
-            //@RequestParam int maxPlayers, //Se añadirá cuando se implemente el modo multijugador
+            @RequestParam int maxPlayers, // Se añadirá cuando se implemente el modo multijugador
             RedirectAttributes redirectAttributes,
             HttpSession session) {
 
         User creator = (User) session.getAttribute("u");
-        Integer maxPlayers = 1; // Se establece un valor por defecto de 1 jugador para evitar errores en la creación de la partida(Se refactorizará más adelante)
-        GameConfigDTO gameConfig = new GameConfigDTO(playlistId, modoJuego, rondas, tiempo, creator.getId(), maxPlayers, maxPlayers > 1);
+        GameConfigDTO gameConfig = new GameConfigDTO(playlistId, modoJuego, rondas, tiempo, creator.getId(), maxPlayers,
+                0, maxPlayers > 1);
         try {
             UUID gameId = partidaService.crearPartida(gameConfig, creator.getId());
             return "redirect:/partida/sala-espera/" + gameId.toString();
@@ -102,6 +105,10 @@ public class PartidaController {
 
             if (game.getGameState().equals(Game.GameState.FINISHED)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
+            }
+
+            if (game.getGameState().equals(Game.GameState.ABANDONED)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida fue abandonada.");
             }
 
             if (!game.getGameState().equals(Game.GameState.WAITING)) {
@@ -134,16 +141,26 @@ public class PartidaController {
     }
 
     @PostMapping("/partida/abandonar/{gameId}")
-    public ResponseEntity<String> abandonarPartida(@PathVariable UUID gameId) {
+    public ResponseEntity<String> abandonarPartida(@PathVariable UUID gameId, HttpServletResponse response) {
         try {
             Game game = partidaService.getGameById(gameId);
             if (game == null || !game.getActive()) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
             }
-            if (game.getGameState().equals(Game.GameState.FINISHED) || game.getGameState().equals(Game.GameState.ABANDONED)) {
+            if (game.getGameState().equals(Game.GameState.FINISHED)
+                    || game.getGameState().equals(Game.GameState.ABANDONED)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no se puede abandonar.");
             }
             partidaService.abandonarPartida(game);
+
+            ResponseCookie cookie = ResponseCookie.from("partidaAbandonada", "true")
+                    .path("/")
+                    .maxAge(15) // 15 segundos para reaccionar
+                    .sameSite("Lax")
+                    .httpOnly(false)
+                    .build();
+
+            response.addHeader("Set-Cookie", cookie.toString());
             return ResponseEntity.ok("Partida abandonada con éxito.");
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
