@@ -117,7 +117,6 @@
         </div>
         </div>
     </main>
-    <script src="/js/leaveGame.js"></script>
 
     <script th:inline="javascript">
         document.addEventListener("DOMContentLoaded", function () {
@@ -138,12 +137,9 @@
                     console.error('Error obteniendo carátula:', error);
                     playlistImg.src = '/img/default-profile.png'; // Imagen por defecto en caso de error
                 });
-            document.getElementById('startButton').addEventListener("click", () => {
-                window.shouldConfirmExit = false;
-            });
-
         });
     </script>
+    <script src="/js/leaveGame.js"></script>
 
     <th:block th:replace="~{fragments/footer.html :: footer}" />
 </body>
