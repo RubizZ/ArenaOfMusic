@@ -133,6 +133,25 @@ public class PartidaController {
         }
     }
 
+    @PostMapping("/partida/abandonar/{gameId}")
+    public ResponseEntity<String> abandonarPartida(@PathVariable UUID gameId) {
+        try {
+            Game game = partidaService.getGameById(gameId);
+            if (game == null || !game.getActive()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
+            }
+            if (game.getGameState().equals(Game.GameState.FINISHED) || game.getGameState().equals(Game.GameState.ABANDONED)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no se puede abandonar.");
+            }
+            partidaService.abandonarPartida(game);
+            return ResponseEntity.ok("Partida abandonada con éxito.");
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
     @PostMapping("/partida/iniciar/{gameId}")
     public String iniciarPartida(@PathVariable UUID gameId, RedirectAttributes redirectAttributes) {
         try {

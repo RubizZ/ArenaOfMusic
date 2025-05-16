@@ -33,7 +33,7 @@ function iniciarJuego(id, player, hostId, rondas, fragmentDuration) {
 
 function iniciarRonda() {
     rondaFinalizada = false;
-    const csrfToken = document.querySelector('input[name="_csrf"]').value;
+    const csrfToken = config.csrf.value;
 
     fetch("/partida/inicioRonda/" + gameId, {
         method: 'POST',
@@ -66,7 +66,7 @@ function finalizarRonda() {
 
     let respuesta = selectedAnswer || document.querySelector("#songInput").value;
 
-    const csrfToken = document.querySelector('input[name="_csrf"]').value;
+    const csrfToken = config.csrf.value;
 
     // Construir el Map en JSON: { playerId: "respuesta" }
     const body = {};
@@ -94,7 +94,7 @@ function finalizarRonda() {
 }
 
 function finalizarPartida() {
-    const csrfToken = document.querySelector('input[name="_csrf"]').value;
+    const csrfToken = config.csrf.value;
 
     fetch(`/partida/finalizar/${gameId}`, {
         method: 'POST',
@@ -104,6 +104,7 @@ function finalizarPartida() {
     }).then(response => {
         if (!response.ok) throw new Error(`Error finalizando partida: ${response.status}`);
         // Redirigir a la vista de resultados.
+        window.shouldConfirmExit = false;
         window.location.href = `/partida/resultados/${gameId}`;
     }).catch(error => {
         console.error('Error al finalizar la partida:', error);
@@ -113,7 +114,7 @@ function finalizarPartida() {
 //-----------------------------------------------------
 //LOGICA CANCIONES
 function obtenerCancion(songId) {
-    const csrfToken = document.querySelector('input[name="_csrf"]').value;
+    const csrfToken = config.csrf.value;
 
     fetch(`/partida/song/${songId}/audio`, {
         method: 'GET',
@@ -154,21 +155,19 @@ function obtenerCover(songId) {
 //-----------------------------------------------------
 //LÓGICA SUGERENCIAS
 function obtenerListaCanciones() {
-    const csrfToken = document.querySelector('input[name="_csrf"]').value;
+    const csrfToken = config.csrf.value;
 
     return fetch(`/partida/obtenerTitulos`, {
         method: 'GET',
         headers: {
             'X-CSRF-TOKEN': csrfToken
         }
-    })
-        .then(response => {
-            if (!response.ok) throw new Error(`Error al obtener la lista: ${response.status}`);
-            return response.json();
-        })
-        .then(data => {
-            availableSongs = data; // Guardamos la lista recibida
-        });
+    }).then(response => {
+        if (!response.ok) throw new Error(`Error al obtener la lista: ${response.status}`);
+        return response.json();
+    }).then(data => {
+        availableSongs = data; // Guardamos la lista recibida
+    });
 }
 
 document.addEventListener('DOMContentLoaded', () => {

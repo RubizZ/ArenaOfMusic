@@ -31,7 +31,8 @@ public class Game implements Transferable<Game.Transfer> {
     public enum GameState {
         WAITING, // Estado cuando la partida está esperando a comenzar
         PLAYING, // Estado cuando la partida está en curso
-        FINISHED // Estado cuando la partida ha terminado
+        FINISHED, // Estado cuando la partida ha terminado
+        ABANDONED // Estado cuando la partida ha sido abandonada
     }
 
     @Id

@@ -113,8 +113,16 @@
 </head>
 
 <body class="d-flex flex-column h-100">
-    <header th:replace="~{fragments/nav.html :: nav}"></header>
-
+    <header class="w-100 d-flex justify-content-end p-4">
+        <button id="botonSalir" class="btn btn-danger d-flex justify-content-center align-items-center"><svg
+                xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                class="bi bi-box-arrow-right" viewBox="0 0 16 16">
+                <path fill-rule="evenodd"
+                    d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z" />
+                <path fill-rule="evenodd"
+                    d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z" />
+            </svg> Salir</button>
+    </header>
     <main class="flex-grow-1 d-flex justify-content-center">
         <div class="container p-3">
             <h1 class="rounded p-2 shadow-sm my-2 justify-content-center text-center">RONDA
@@ -191,9 +199,11 @@
             }
         });
     </script>
+    <script src="/js/leaveGame.js"></script>
     <script src="/js/partida-solitario.js"></script> <!-- Aquí tienes tu lógica JS que estructuramos -->
     <script th:inline="javascript">
         // Supongamos que tienes estos datos ya en la plantilla desde Thymeleaf o tu motor de vistas:
+        window.gameId = [[${ gameId }]];
         const game = [[${ gameId }]]; // UUID que te pase tu backend
         const rounds = [[${ gameConfig.rounds }]]; // Total de rondas que configuraste en el servidor
         const fragmentDuration = [[${ gameConfig.fragmentDuration }]]; // Duración de cada fragmento
@@ -206,6 +216,7 @@
             iniciarJuego(game, player, hostId, rounds, fragmentDuration); // Arranca el loop al cargar la vista
         };
     </script>
+
 </body>
 
 </html>

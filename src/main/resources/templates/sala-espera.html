@@ -8,7 +8,16 @@
 </head>
 
 <body class="d-flex flex-column h-100">
-    <header th:replace="~{fragments/nav.html :: nav}"></header>
+    <header class="w-100 d-flex justify-content-end p-4">
+        <button id="botonSalir" class="btn btn-danger d-flex justify-content-center align-items-center"><svg
+                xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                class="bi bi-box-arrow-right" viewBox="0 0 16 16">
+                <path fill-rule="evenodd"
+                    d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z" />
+                <path fill-rule="evenodd"
+                    d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z" />
+            </svg> Salir</button>
+    </header>
 
     <main class="flex-shrink-0 mt-5">
         <div class="container my-5">
@@ -38,8 +47,9 @@
                     <ul class="list-group mb-3">
                         <li class="list-group-item d-flex align-items-center border-0" th:each="player : ${players}">
                             <div class="d-flex align-items-center justify-content-around w-100">
-                                <img th:src="${player.profileImage ?: '/img/default-profile.png'}" alt="Foto de perfil de jugador"
-                                    class="rounded-circle me-3" style="width: 55px; height: 55px; object-fit: cover;">
+                                <img th:src="${player.profileImage ?: '/img/default-profile.png'}"
+                                    alt="Foto de perfil de jugador" class="rounded-circle me-3"
+                                    style="width: 55px; height: 55px; object-fit: cover;">
                                 <div>
                                     <div class="fw-semibold fs-6" th:text="${player.username}">Nombre</div>
                                     <div class="text-muted small">
@@ -49,7 +59,8 @@
                                     </div>
                                 </div>
                                 <div class="ms-auto">
-                                    <span th:if="${player.id} == ${gameConfig.hostId}" th:text="ANFITRIÓN"class="badge bg-accept fw-bold rounded-4 text-dark"></span>
+                                    <span th:if="${player.id} == ${gameConfig.hostId}" th:text="ANFITRIÓN"
+                                        class="badge bg-accept fw-bold rounded-4 text-dark"></span>
                                 </div>
                         </li>
                     </ul>
@@ -106,10 +117,13 @@
         </div>
         </div>
     </main>
-    <script>
+    <script src="/js/leaveGame.js"></script>
+
+    <script th:inline="javascript">
         document.addEventListener("DOMContentLoaded", function () {
             const playlistImg = document.getElementById('playlistCover');
             const playlistId = document.getElementById('playlistId').textContent.trim();
+            window.gameId = [[${ gameId }]];
 
             fetch(`/partida/playlist/${playlistId}/cover`)
                 .then(response => {
@@ -124,6 +138,10 @@
                     console.error('Error obteniendo carátula:', error);
                     playlistImg.src = '/img/default-profile.png'; // Imagen por defecto en caso de error
                 });
+            document.getElementById('startButton').addEventListener("click", () => {
+                window.shouldConfirmExit = false;
+            });
+
         });
     </script>
 

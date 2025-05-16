@@ -464,4 +464,21 @@ public class PartidaService {
         }
     }
 
+    @Transactional
+    public void abandonarPartida(Game game) {
+        try {
+            if (game == null) {
+                throw new IllegalArgumentException("La partida no existe.");
+            }
+            if (game.getGameState().equals(Game.GameState.FINISHED) || game.getGameState().equals(Game.GameState.ABANDONED)) {
+                throw new IllegalStateException("La partida no se puede abandonar.");
+            }
+            game.setGameState(Game.GameState.ABANDONED);
+        }catch (IllegalArgumentException e) {
+            System.out.println("Argumento invalido: " + e.getMessage());
+        } catch (IllegalStateException e) {
+            System.out.println("Invalid state: " + e.getMessage());
+        }
+    }
+
 }
