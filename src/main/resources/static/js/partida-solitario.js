@@ -105,6 +105,8 @@ function finalizarPartida() {
         if (!response.ok) throw new Error(`Error finalizando partida: ${response.status}`);
         // Redirigir a la vista de resultados.
         window.shouldConfirmExit = false;
+        window.removeEventListener("beforeunload", handleBeforeUnload);
+
         window.location.href = `/partida/resultados/${gameId}`;
     }).catch(error => {
         console.error('Error al finalizar la partida:', error);
