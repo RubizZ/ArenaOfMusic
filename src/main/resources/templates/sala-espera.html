@@ -123,6 +123,7 @@
             const playlistImg = document.getElementById('playlistCover');
             const playlistId = document.getElementById('playlistId').textContent.trim();
             window.gameId = [[${ gameId }]];
+            window.currentView = "sala-espera";
 
             fetch(`/partida/playlist/${playlistId}/cover`)
                 .then(response => {

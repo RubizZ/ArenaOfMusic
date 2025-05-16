@@ -65,10 +65,12 @@ window.addEventListener("DOMContentLoaded", () => {
         location.href = "/";
     }
     shouldConfirmExit = true;
-    document.getElementById("botonSalir").addEventListener("click", handleBotonSalir);
-    window.addEventListener("beforeunload", handleBeforeUnload);
     window.addEventListener("popstate", handlePopState);
     history.pushState(null, null, location.href);
+    document.getElementById("botonSalir").addEventListener("click", handleBotonSalir);
+    if (window.currentView !== "sala-espera") {
+        window.addEventListener("beforeunload", handleBeforeUnload);
+    }
 
     // Desactivar confirmación si se hace clic en estos botones
     registrarExcepcionTemporal("#startButton");
