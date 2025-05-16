@@ -59,10 +59,10 @@ function registrarExcepcionTemporal(selector) {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-    if (document.cookie.includes("partidaAbandonada=true")) {
+    if (document.cookie.includes("partidaAbandonada" + gameId + "=true")) {
         // Borrar la cookie para evitar redirección futura
-        document.cookie = "partidaAbandonada=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        window.location.href = "/";
+        document.cookie = "partidaAbandonada" + gameId + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        location.href = "/";
     }
     shouldConfirmExit = true;
     document.getElementById("botonSalir").addEventListener("click", handleBotonSalir);

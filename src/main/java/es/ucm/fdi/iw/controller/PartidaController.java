@@ -153,9 +153,9 @@ public class PartidaController {
             }
             partidaService.abandonarPartida(game);
 
-            ResponseCookie cookie = ResponseCookie.from("partidaAbandonada", "true")
+            ResponseCookie cookie = ResponseCookie.from("partidaAbandonada" + gameId, "true")
                     .path("/")
-                    .maxAge(15) // 15 segundos para reaccionar
+                    .maxAge(10)
                     .sameSite("Lax")
                     .httpOnly(false)
                     .build();
@@ -210,6 +210,9 @@ public class PartidaController {
             }
             if (game.getGameState().equals(Game.GameState.WAITING)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha comenzado.");
+            }
+            if (game.getGameState().equals(Game.GameState.ABANDONED)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida fue abandonada.");
             }
 
             // Obtener Configuracion de la Partida
