@@ -351,10 +351,16 @@ public class PartidaController {
         }
         User creator = (User) session.getAttribute("u");
         int position = partidaService.getPosition(game, creator.getId());
+
+        String gameConfigString = game.getConfigJson();
+        GameConfigDTO gameConfig = new GameConfigDTO();
+        gameConfig.parseGameConfigDTO(gameConfigString);
+
         model.addAttribute("position", position);
         model.addAttribute("playlist", partidaService.getPlaylist(game));
         model.addAttribute("sortedParticipants", partidaService.getSortedParticipants(game));
         model.addAttribute("songResults", partidaService.getSongResults());
+        model.addAttribute("gameConfig", gameConfig);
 
         return "resultados";
     }

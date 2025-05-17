@@ -17,8 +17,9 @@
                 <div class="col-md-6 left-panel me-md-4">
                     <h2 class="fw-bold mb-2">Resultados</h2>
 
-                    <p class="fs-5 text-muted fw-semibold">¡Has terminado 
-                        <span th:text="${position}"></span>º!</p>
+                    <p class="fs-5 text-muted fw-semibold">¡Has terminado
+                        <span th:text="${position}"></span>º!
+                    </p>
 
                     <!-- Podio -->
                     <div class="position-relative mb-6 mt-4 d-flex justify-content-center" style="height: 150px;">
@@ -80,9 +81,18 @@
 
                     <!-- Botones de acción -->
                     <div class="d-flex justify-content-center gap-4 mt-5">
-                        <a th:href="@{/partida/configuracion-partida}" class="btn btn-light rounded-3 btn-sm px-5 py-1"
-                            id="btn-playAgain" style="background-color: #F0F0F0; color: black; ">Volver a jugar
-                        </a>
+                        <a th:if="${gameConfig.maxPlayers == 1}" th:href="@{/partida/configuracion-partida/solo}"
+                            class="btn btn-light rounded-3 btn-sm px-5 py-1"
+                            style="background-color: #F0F0F0; color: black;">Volver a jugar</a>
+
+                        <a th:if="${gameConfig.maxPlayers == 2}" th:href="@{/partida/configuracion-partida/duel}"
+                            class="btn btn-light rounded-3 btn-sm px-5 py-1"
+                            style="background-color: #F0F0F0; color: black;">Volver a jugar</a>
+
+                        <a th:if="${gameConfig.maxPlayers == 4}" th:href="@{/partida/configuracion-partida/multiplayer}"
+                            class="btn btn-light rounded-3 btn-sm px-5 py-1"
+                            style="background-color: #F0F0F0; color: black;">Volver a jugar</a>
+
                         <a th:href="@{/}" class="btn btn-success rounded-3 btn-sm px-5 py-1" id="btn-continue"
                             style="background-color: #8ED269; border-color: #8ED269; color: black;">Continuar
                         </a>
