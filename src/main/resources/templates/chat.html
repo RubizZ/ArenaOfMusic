@@ -51,18 +51,23 @@
         function appendMessage({from, text, sent}) {
             const box = document.getElementById("chatBox");
             const time = new Date(sent).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-
             const mine = (from === myName);
-            const sideChat = mine ? "msg-out" : "msg-in";
 
-            const html = `
-                <div class="${sideChat} mb-2">
-                    <div class="msg-bubble">
-                        ${text}
-                        <div class="msg-time">${time}</div>
-                    </div>
-                </div>`;
-            box.insertAdjacentHTML("beforeend", html);
+            const wrapper = document.createElement("div");
+            wrapper.className = mine ? "msg-out" : "msg-in";
+
+            const bubble = document.createElement("div");
+            bubble.className = "msg-bubble";
+            bubble.textContent = text;
+
+            const timeElement = document.createElement("div");
+            timeElement.className = "msg-time";
+            timeElement.textContent = time;
+
+            bubble.appendChild(timeElement);
+            wrapper.appendChild(bubble);
+            box.appendChild(wrapper);
+
             box.scrollTop = box.scrollHeight; // bajar al último mensaje
         }
 
