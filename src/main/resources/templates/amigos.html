@@ -119,13 +119,40 @@
                             <li class="list-group-item d-flex align-items-center border-0"
                                 data-username="${item.username}"
                                 data-photourl="${item.photoUrl}"
-                                data-status="${item.status}">
+                                data-status="${item.status}"
+                                onclick="handleUser(event)">
 
                                 <!-- Foto de perfil -->
                                 <img src="${item.photoUrl}" class="rounded-circle me-3" style="width: 55px; height: 55px; object-fit: cover;"/>
-                                <div>
+                                <div class="flex-grow-1">
                                     <div class="fw-semibold">${item.username}</div>
                                     <small class="text-muted">Nivel ${item.level} • ${item.winRate}% victorias</small>
+                                </div>
+
+                                <!-- Botón de acciones -->
+                                <div class="dropdown">
+                                    <button
+                                        class="btn border-0" data-bs-toggle="dropdown"
+                                        onclick="event.stopPropagation();">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a
+                                                class="dropdown-item small"
+                                                onclick="event.stopPropagation(); openChat('${item.username}')">
+                                                <i class="bi bi-chat-left-text me-3"></i>Enviar mensaje
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a
+                                                class="dropdown-item text-danger small"
+                                                onclick="event.stopPropagation(); deleteFriend('${item.username}')">
+                                                <i class="bi bi-person-x me-3"></i>Eliminar
+                                            </a>
+                                        </li>
+                                    </ul>
                                 </div>
                             </li>
                         `;
@@ -270,6 +297,22 @@
             .then(data => {
                 if(data.success) {
                     loadList('solicitudes');
+                }
+            })
+            .catch(error => console.error(error));
+        }
+
+        // Abrir el panel de chat
+        function openChat(username) {
+            window.location.href = `${config.rootUrl}/chat/${username}`;
+        }
+
+        // Eliminar usuario de la lista de amigos
+        function deleteFriend(username) {
+            go(config.rootUrl + "/amigos/delete", "POST", { username: username })
+            .then(data => {
+                if(data.success) {
+                    loadList('amigos');
                 }
             })
             .catch(error => console.error(error));

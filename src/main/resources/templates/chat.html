@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html class="h-100" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <th:block th:replace="~{fragments/head :: header}" />
+    <title>Arena of Music</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+</head>
+
+<body class="d-flex flex-column h-100">
+    <header th:replace="~{fragments/nav.html :: nav}"></header>
+
+    <main class="flex-shrink-0 mt-5">
+        <div class="container my-5">
+            <div class="row align-items-start d-flex justify-content-center p-2 rounded ">
+                <section style="max-width: 600px;">
+                    <h2 class="fw-semibold mb-3">
+                        <a th:href="@{/amigos}" class="me-2 text-decoration-none">
+                            <i class="bi bi-arrow-left-circle text-dark"></i>
+                        </a>
+                        Chat con <span th:text="${friend.username}"></span>
+                    </h2>
+
+                    <!-- Mensajes -->
+                    <div
+                        id="chatBox" class="border rounded p-3 mb-2"
+                        style="height: 400px; overflow: auto; background: #FAFAFA;">
+                    </div>
+
+                    <!-- Escribir nuevo mensaje -->
+                    <div class="input-group">
+                        <textarea id="message" class="form-control" rows="1" placeholder="Escribe un mensaje..."></textarea>
+                        <button class="btn btn-primary" onclick="sendMessage()">Enviar</button>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <th:block th:replace="~{fragments/footer.html :: footer}" />
+
+    <script th:inline="javascript">
+        const friendName = /*[[${friend.username}]]*/ "friend";
+        const myName = /*[[${u.username}]]*/ "me";
+
+        ws.receive = (m) => {
+            const involved = (m.from === friendName || m.to === friendName);
+            if (involved) appendMessage(m);
+        }
+
+        function appendMessage({from, text, sent}) {
+            const box = document.getElementById("chatBox");
+            const time = new Date(sent).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+            const mine = (from === myName);
+            const sideChat = mine ? "msg-out" : "msg-in";
+
+            const html = `
+                <div class="${sideChat} mb-2">
+                    <div class="msg-bubble">
+                        ${text}
+                        <div class="msg-time">${time}</div>
+                    </div>
+                </div>`;
+            box.insertAdjacentHTML("beforeend", html);
+            box.scrollTop = box.scrollHeight; // bajar al último mensaje
+        }
+
+        // Enviar mensaje
+        function sendMessage() {
+            const msgText = document.getElementById("message");
+            const message = msgText.value.trim();
+            if (!message) return;
+
+            go(`${config.rootUrl}/chat/${friendName}/messages`, "POST", {message})
+                .then(() => {
+                    appendMessage({
+                        from: myName,
+                        text: message,
+                        sent: new Date().toISOString()
+                    });
+                    msgText.value = "";
+                })
+                .catch(() => alert("Error al enviar"));
+        }
+
+        // Historial
+        function loadHistory() {
+            go(`${config.rootUrl}/chat/${friendName}/messages`, "GET")
+            .then(messages => messages.forEach(appendMessage))
+            .catch((error) => console.error(error));
+        }
+
+        // Enviar mensaje al pulsar enter
+        document.getElementById("message").addEventListener("keydown", e => {
+            if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+        });
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadHistory();
+        });
+
+    </script>
+</body>

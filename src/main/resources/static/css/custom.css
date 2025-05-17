@@ -944,6 +944,58 @@ input[type=range].form-range:focus::-moz-focus-inner {
 /* ---PARTIDA--- */
 
 
+/* ---CHAT--- */
+
+/* Alineación de las líneas de mensaje */
+.msg-in {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.msg-out {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Burbuja de mensaje */
+.msg-bubble {
+    display: inline-block;
+    padding: .4rem .8rem;
+    border-radius: 1rem;
+    max-width: 80%;
+    word-break: break-word;
+}
+
+/* Colores de los mensajes */
+.msg-in
+.msg-bubble {
+    background-color: #F5F5F5;
+    color: #000;
+}
+
+.msg-out
+.msg-bubble {
+    background-color: #94D977;
+    color: #000;
+}
+
+/* Hora del mensaje */
+.msg-time {
+    font-size: .7rem;
+    color: #C9C9C9;
+    display: block;
+    text-align: right;
+    margin-top: .2rem;
+}
+
+.msg-out
+.msg-time {
+    color: black;
+}
+
+/* ---CHAT--- */
+
+
 /* ---NAVBAR--- */
 
 /*

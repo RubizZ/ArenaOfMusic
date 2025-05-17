@@ -32,4 +32,12 @@ public class UserService {
         user.setRoles(User.Role.USER.toString()); // Set the user role
         entityManager.persist(user);
     }
+
+    // Buscar un usuario por su username
+    public User findByUsername(String username) {
+        return entityManager.createQuery(
+            "SELECT u FROM User u WHERE u.username = :username", User.class)
+            .setParameter("username", username)
+            .getSingleResult();
+    }
 }

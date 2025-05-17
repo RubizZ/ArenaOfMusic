@@ -84,6 +84,15 @@ public class AmigosService {
         return requests.removeIf(item -> item.get("username").equals(username));
     }
 
+    // Eliminar amigo
+    public boolean deleteFriend(Map<String, Object> friendData) {
+        String username = (String) friendData.get("username");
+        System.out.println("Amigo eliminado: " + username);
+
+        // Eliminar usuario de la lista de amigos
+        return friends.removeIf(item -> item.get("username").equals(username));
+    }
+
     // Obtener detalles del perfil de un amigo
     public Map<String, Object> getFriendProfile(Map<String, Object> friendData) {
         return Map.of(

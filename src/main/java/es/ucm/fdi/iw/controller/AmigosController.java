@@ -97,4 +97,12 @@ public class AmigosController {
         boolean result = amigosService.rejectRequest(requestData);
         return Map.of("success", result);
     }
+
+    // Eliminar usuario de la lista de amigos
+    @PostMapping("/delete")
+    @ResponseBody
+    public Map<String, Object> deleteFriend(@RequestBody Map<String, Object> friendData) {
+        boolean result = amigosService.deleteFriend(friendData);
+        return Map.of("success", result);
+    }
 }
