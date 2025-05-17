@@ -199,7 +199,6 @@
             }
         });
     </script>
-    <script src="/js/leaveGame.js"></script>
     <script src="/js/partida-solitario.js"></script> <!-- Aquí tienes tu lógica JS que estructuramos -->
     <script th:inline="javascript">
         // Supongamos que tienes estos datos ya en la plantilla desde Thymeleaf o tu motor de vistas:
@@ -216,6 +215,7 @@
             iniciarJuego(game, player, hostId, rounds, fragmentDuration); // Arranca el loop al cargar la vista
         };
     </script>
+    <script src="/js/leaveGame.js"></script>
 
 </body>
 
