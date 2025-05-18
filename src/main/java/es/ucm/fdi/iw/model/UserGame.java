@@ -42,8 +42,7 @@ public class UserGame implements Transferable<UserGame.Transfer> {
     @Override
     public Transfer toTransfer() {
         return new Transfer(
-            id.getGameId(),
-            id.getUserId()
-        );
+                id.getGameId(),
+                id.getUserId());
     }
 }
