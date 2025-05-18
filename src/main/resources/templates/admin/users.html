@@ -9,21 +9,18 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <title>Admin - Arena of Music</title>
-
 </head>
 
 <body class="d-flex flex-column h-100">
     <header th:replace="~{fragments/nav.html :: nav}"></header>
     <main>
         <h1 class="mt-5 mb-5 text-center">Administrar usuarios</h1>
-        <!-- Contenedor fijo para filtros y ordenar por -->
 
         <div class="container sticky-filters">
             <div class="row d-flex mb-3">
-                <!--Filtros-->
                 <div class="col-8 d-flex flex-column">
                     <div class="card text-center flex-grow-1">
-                        <div class="row align-items-center justify-content-center ">
+                        <div class="row align-items-center justify-content-center">
                             <div class="col ps-4">
                                 <h4>Filtros</h4>
                             </div>
@@ -61,7 +58,6 @@
                     </div>
                 </div>
 
-                <!--Ordenar por-->
                 <div class="col-4 d-flex">
                     <div class="card flex-grow-1 align-items-center justify-content-center">
                         <div class="row justify-content-center align-items-center text-center">
@@ -86,29 +82,52 @@
 
         <div class="flex-shrink-0 mt-2">
             <div class="container">
-                <div class="container flex-grow-1 px-3" id="userList">
-                </div>
+                <div class="container flex-grow-1 px-3" id="userList"></div>
             </div>
         </div>
 
+        <!-- Modale Ban -->
         <div class="modal fade" id="banUserModal" tabindex="-1" aria-labelledby="banUserModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header border-0">
-                        <h5 class="modal-title text-success" id="banUserModalLabel">Cambiar estado de ban</h5>
+                        <h5 class="modal-title text-danger" id="banUserModalLabel">Cambiar estado de ban</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <p id="banUserMessage">¿Estás seguro de que deseas cambiar el estado de ban de este usuario?</p>
                         <h5 id="displayName" class="text-center">Nombre de usuario</h5>
-                        <input type="hidden" id="userId" value="">
-                        <input type="hidden" id="myId" value="" th:value="${u.id}">
-
-                        <p>Esto cambiará el estado de ban del usuario </p>
+                        <input type="hidden" id="userId">
+                        <input type="hidden" id="myId" th:value="${u.id}">
                         <div class="modal-footer border-0">
                             <button type="button" class="btn btn-outline-secondary"
                                 data-bs-dismiss="modal">Cancelar</button>
                             <button type="button" class="btn btn-danger" id="BanButton">Confirmar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modale Enable -->
+        <div class="modal fade" id="enableUserModal" tabindex="-1" aria-labelledby="enableUserModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header border-0">
+                        <h5 class="modal-title text-success" id="enableUserModalLabel">Cambiar estado de habilitación
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p id="enableUserMessage">¿Deseas habilitar o deshabilitar a este usuario?</p>
+                        <h5 id="displayEnableName" class="text-center">Nombre de usuario</h5>
+                        <input type="hidden" id="enableUserId">
+                        <input type="hidden" id="myIdEnable" th:value="${u.id}">
+                        <div class="modal-footer border-0">
+                            <button type="button" class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal">Cancelar</button>
+                            <button type="button" class="btn btn-primary" id="EnableButton">Confirmar</button>
                         </div>
                     </div>
                 </div>
@@ -123,37 +142,53 @@
         const imagen = document.getElementById('adminUserOrderType');
         const boton = document.getElementById('adminUserOrderChange');
         const banButton = document.getElementById('BanButton');
+        const enableButton = document.getElementById('EnableButton');
+
+        const imagenes = ['/img/admin/sort-down.svg', '/img/admin/sort-up.svg'];
+        let actual = 0;
+
+        boton.addEventListener('click', () => {
+            actual = 1 - actual;
+            imagen.src = imagenes[actual];
+            loadUsers();
+        });
 
         banButton.addEventListener('click', () => {
             const userId = document.getElementById("userId").value;
             const myId = document.getElementById("myId").value;
-
             if (userId == myId) {
-                showErrorNotification("No puedes cambiar el estado de ban de tu propia cuenta.");
+                showErrorNotification("No puedes banearte a ti mismo.");
                 return;
             }
 
             go(config.rootUrl + '/admin/user/toggle-ban', "POST", { id: userId })
                 .then(response => {
                     if (response.success) {
-                        loadUsers(); // Refresh the user list after banning
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('banUserModal'));
-                        modal.hide();
+                        loadUsers();
+                        bootstrap.Modal.getInstance(document.getElementById('banUserModal')).hide();
                     } else {
-                        showErrorNotification("Error al banear al usuario");
+                        showErrorNotification("Error al cambiar el estado de ban");
                     }
-                })
-                .catch(error => console.error(error));
+                });
         });
 
-        const imagenes = ['/img/admin/sort-down.svg', '/img/admin/sort-up.svg']
+        enableButton.addEventListener('click', () => {
+            const userId = document.getElementById("enableUserId").value;
+            const myId = document.getElementById("myIdEnable").value;
+            if (userId == myId) {
+                showErrorNotification("No puedes cambiar tu propio estado.");
+                return;
+            }
 
-        let actual = 0;
-
-        boton.addEventListener('click', () => {
-            actual = 1 - actual;
-            imagen.src = imagenes[actual];
-            loadUsers(); // Call loadUsers to refresh the user list based on the new order
+            go(config.rootUrl + '/admin/user/toggle-enable', "POST", { id: userId })
+                .then(response => {
+                    if (response.success) {
+                        loadUsers();
+                        bootstrap.Modal.getInstance(document.getElementById('enableUserModal')).hide();
+                    } else {
+                        showErrorNotification("Error al cambiar el estado");
+                    }
+                });
         });
 
         function getFilters() {
@@ -173,94 +208,62 @@
             go(config.rootUrl + '/admin/users/list', "POST", filters)
                 .then(users => {
                     let html = "";
-                    document.getElementById("userList").innerHTML = html;
-
                     users.forEach(u => {
-                        console.log(u);
-                        let backgroundColor = u.banned
-                            ? 'rgba(255, 0, 0, 0.2)'
-                            : (u.enabled ? 'rgba(77, 185, 34, 0.4)' : 'rgba(53, 47, 47, 0.2)');
-
-
-                        let dateObj = {
-                            year: 'numeric',    // 2025
-                            month: '2-digit',   // 03
-                            day: '2-digit',     // 18
-                            hour: '2-digit',    // 14
-                            minute: '2-digit',  // 30
-                            second: '2-digit',  // 45
-                            hour12: false       // Usa il formato 24 ore
-                        };
-                        let creationDate = new Date(u.creationDateTime);
-                        let formattedCreationDate = creationDate.toLocaleString('es-ES', dateObj);
-
-                        let lastLoginDate = new Date(u.lastLogin);
-                        let formattedLastLoginDate = lastLoginDate.toLocaleString('es-ES', dateObj);
+                        let bgColor = u.banned ? 'rgba(255,0,0,0.2)' : (u.enabled ? 'rgba(77,185,34,0.4)' : 'rgba(53,47,47,0.2)');
+                        let dateOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+                        let regDate = new Date(u.creationDateTime).toLocaleString('es-ES', dateOptions);
+                        let lastLogin = new Date(u.lastLogin).toLocaleString('es-ES', dateOptions);
 
                         html += `
-                    <div class="card hoverable mb-3" style="background-color: ${backgroundColor}" id="user-${u.id}" >
-                        <a href="#" class="stretched-link" data-bs-toggle="modal"
-                        data-bs-target="#banUserModal"></a>
-                        <div class="card-body">
-                            <div class="row row-cols-5 align-items-center justify-content-center text-center">
-                                <div class="col">
-
-
-                                    <img id="previewImage"
-                                        src="${u.profileImage != null ? u.profileImage : config.rootUrl + '/img/default-profile.png'}"
-                                        class="rounded-circle border border-3  mb-3" alt="Foto de Perfil"
-                                        style="width: 100px; height: 100px; object-fit: cover;">
-                                </div>
-                                <div class="col">
-                                    <h4>${u.username}</h4>
-                                    <h6>ID: <span>${u.id}</span></h6>
-                                    <h6>Roles: <span>${u.roles}</span></h6>
-                                </div>
-                                <div class="col">
-                                    <h6>Email: <span>${u.email}</span></h6>
-                                    <h6>Registrado: <span>${formattedCreationDate}</span></h6>
-                                </div>
-                                <div class="col">
-                                    <h5 style="display:${u.banned ? 'none' : 'block'}">${u.enabled ? 'Activo' : 'Inactivo'}</h5>
-                                    <h5 style="color: red; display:${u.banned ? 'block' : 'none'}" >Baneado</h5>
-                                    <h6>${'Última conexión: ' + formattedLastLoginDate}</h6>
+                        <div class="card  mb-3" style="background-color: ${bgColor}">
+                            <div class="card-body">
+                                <div class="row row-cols-5 align-items-center text-center">
+                                    <div class="col">
+                                        <img src="${u.profileImage ?? config.rootUrl + '/img/default-profile.png'}"
+                                            class="rounded-circle border border-3 mb-3" style="width:100px;height:100px;object-fit:cover;">
                                     </div>
+                                    <div class="col">
+                                        <h4>${u.username}</h4>
+                                        <h6>ID: ${u.id}</h6>
+                                        <h6>Roles: ${u.roles}</h6>
+                                    </div>
+                                    <div class="col">
+                                        <h6>Email: ${u.email}</h6>
+                                        <h6>Registrado: ${regDate}</h6>
+                                    </div>
+                                    <div class="col">
+                                        <h5 style="display:${u.banned ? 'none' : 'block'}">${u.enabled ? 'Activo' : 'Inactivo'}</h5>
+                                        <h5 style="color:red;display:${u.banned ? 'block' : 'none'}">Baneado</h5>
+                                        <h6>Última conexión: ${lastLogin}</h6>
+                                    </div>
+                                    <div class="col">
+                                        <button class="btn btn-danger mb-2" data-bs-toggle="modal" data-bs-target="#banUserModal"
+                                            onclick="document.getElementById('displayName').innerText='${u.username} - ${u.id}';document.getElementById('userId').value='${u.id}'">
+                                            Ban/Desban
+                                        </button>
+                                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#enableUserModal"
+                                            onclick="document.getElementById('displayEnableName').innerText='${u.username} - ${u.id}';document.getElementById('enableUserId').value='${u.id}'">
+                                            Enable/Disable
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>`;
+                        </div>`;
                     });
                     document.getElementById("userList").innerHTML = html;
-
-                    users.forEach(u => {
-                        let card = document.getElementById("user-" + u.id);
-                        card.addEventListener("click", () => {
-                            document.getElementById("displayName").innerText = u.username + " - " + u.id;
-                            document.getElementById("userId").value = u.id;
-                        });
-                    });
-                })
-                .catch(error => console.error(error));
+                });
         }
-
 
         document.getElementById("floatingAdminUserID").addEventListener("input", loadUsers);
         document.getElementById("floatingAdminUserUsername").addEventListener("input", loadUsers);
         document.getElementById("floatingAdminUserEmail").addEventListener("input", loadUsers);
         document.getElementById("adminUserOrder").addEventListener("change", loadUsers);
-        document.getElementById("adminUserOrderChange").addEventListener("click", () => {
-            actual = 1 - actual;
-            imagen.src = imagenes[actual];
-            loadUsers();
-        });
         $('#floatingAdminUserRoles').on('change', loadUsers);
-
 
         document.addEventListener("DOMContentLoaded", () => {
             $('.multi-select').select2();
             loadUsers();
         });
-
-
     </script>
 
 </body>
