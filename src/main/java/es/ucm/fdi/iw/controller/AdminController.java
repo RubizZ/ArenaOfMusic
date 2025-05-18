@@ -60,6 +60,7 @@ public class AdminController {
         return "admin/users";
     }
 
+    @lombok.Data
     public static class UserFilterRequest {
         private Long id;
         private String username;
@@ -67,56 +68,6 @@ public class AdminController {
         private List<String> roles;
         private int orderBy = 1;
         private String direction = "asc";
-
-        // Getter e Setter
-
-        public Long getId() {
-            return id;
-        }
-
-        public void setId(Long id) {
-            this.id = id;
-        }
-
-        public String getUsername() {
-            return username;
-        }
-
-        public void setUsername(String username) {
-            this.username = username;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
-        public List<String> getRoles() {
-            return roles;
-        }
-
-        public void setRoles(List<String> roles) {
-            this.roles = roles;
-        }
-
-        public int getOrderBy() {
-            return orderBy;
-        }
-
-        public void setOrderBy(int orderBy) {
-            this.orderBy = orderBy;
-        }
-
-        public String getDirection() {
-            return direction;
-        }
-
-        public void setDirection(String direction) {
-            this.direction = direction;
-        }
     }
 
     @PostMapping("/users/list")
