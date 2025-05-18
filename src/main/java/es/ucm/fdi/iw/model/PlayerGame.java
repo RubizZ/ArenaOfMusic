@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
+import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,6 +18,10 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @NoArgsConstructor
+@NamedQuery(
+    name = "PlayerGame.countWinsByUser",
+    query = "SELECT COUNT(pg) FROM PlayerGame pg WHERE pg.user.id = :userId AND pg.position = 1"
+)
 @Table(name = "Players_Game")
 public class PlayerGame implements Transferable<PlayerGame.Transfer> {
 

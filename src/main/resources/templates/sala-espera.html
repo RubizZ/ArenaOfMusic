@@ -8,25 +8,36 @@
 </head>
 
 <body class="d-flex flex-column h-100">
-    <header th:replace="~{fragments/nav.html :: nav}"></header>
+    <header class="w-100 d-flex justify-content-end p-4">
+        <button id="botonSalir" class="btn btn-danger d-flex justify-content-center align-items-center"><svg
+                xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                class="bi bi-box-arrow-right" viewBox="0 0 16 16">
+                <path fill-rule="evenodd"
+                    d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z" />
+                <path fill-rule="evenodd"
+                    d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z" />
+            </svg> Salir</button>
+    </header>
 
     <main class="flex-shrink-0 mt-5">
-        <div class="container my-5" style="margin-right: 50px;">
-            <div class="row align-items-start p-2 rounded">
-                <div class="col-md-5 offset-md-1">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h2 class="fw-bold mb-0">Sala de Espera</h2>
-                    </div>
+        <div class="container my-5">
+            <div class="d-flex justify-content-center align-items-center mb-2">
+                <h2 class="fw-bold mb-0">Sala de Espera</h2>
+            </div>
+            <div class="row justify-content-center p-2 rounded">
+                <div class="col-md-5 mt-4 d-flex flex-column">
+
                     <p class="text-muted mb-3 fs-5">Esperando a otros jugadores...</p>
 
                     <!-- Información de la partida -->
                     <div class="d-flex align-items-center mb-4">
-                        <img th:src="${playlist.image}" class="rounded me-3"
-                            style="width: 100px; height: 100px; object-fit: cover;" />
+                        <img th:src="@{/img/preview-song-img.jpeg}" class="rounded me-3"
+                            style="width: 100px; height: 100px; object-fit: cover;" id="playlistCover" />
                         <div>
-                            <h5 class="fw-bold mb-1 fs-4" th:text="${playlist.title}">Título</h5>
+                            <h5 class="fw-bold mb-1 fs-4" th:text="${playlist.name}">Título</h5>
+                            <p style="display: none;" th:text="${playlist.id}" id="playlistId"></p>
                             <p class="text-muted mb-0 small"
-                                th:text="|${game.rounds} rondas • Fragmentos de canción de ${game.songTime} segundos|">
+                                th:text="|${gameConfig.rounds} rondas • Fragmentos de canción de ${gameConfig.fragmentDuration} segundos|">
                                 Rondas
                             </p>
                         </div>
@@ -34,59 +45,39 @@
 
                     <!-- Lista de jugadores -->
                     <ul class="list-group mb-3">
-                        <!-- Anfritrión -->
-                        <li class="list-group-item d-flex align-items-center border-0">
-                            <div class="d-flex align-items-center flex-grow-1">
-                                <img th:src="${host.photoUrl}" class="rounded-circle me-3"
-                                    style="width: 55px; height: 55px; object-fit: cover;" />
-                                <div>
-                                    <div class="fw-semibold" th:text="${host.username}">Nombre</div>
-                                    <div class="text-muted small">
-                                        <span th:text="${'Nivel ' + host.level}">Nivel</span>
-                                        <span> • </span>
-                                        <span th:text="${host.winRate + '% victorias'}">Victorias</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="ms-auto">
-                                <span class="badge bg-accept fw-bold rounded-4 text-dark">ANFITRIÓN</span>
-                            </div>
-                        </li>
-
-                        <!-- Resto de jugadores -->
                         <li class="list-group-item d-flex align-items-center border-0" th:each="player : ${players}">
-                            <div class="d-flex align-items-center">
-                                <img th:src="${player.photoUrl}" class="rounded-circle me-3"
-                                    style="width: 55px; height: 55px; object-fit: cover;" />
+                            <div class="d-flex align-items-center justify-content-around w-100">
+                                <img th:src="${player.profileImage ?: '/img/default-profile.png'}"
+                                    alt="Foto de perfil de jugador" class="rounded-circle me-3"
+                                    style="width: 55px; height: 55px; object-fit: cover;">
                                 <div>
                                     <div class="fw-semibold fs-6" th:text="${player.username}">Nombre</div>
                                     <div class="text-muted small">
-                                        <span th:text="${'Nivel ' + player.level}">Nivel</span>
+                                        <span th:text="${'Total EXP: ' + player.EXP_total}">Total EXP</span>
                                         <span> • </span>
-                                        <span th:text="${player.winRate + '% victorias'}">Victorias</span>
+                                        <span th:text="${'Victorias: ' + player.totalWins}"></span>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="ms-auto">
-                                <button th:if="${isHost}" class="btn text-dark border-0" title="Expulsar">
-                                    <i class="bi bi-three-dots-vertical"></i>
-                                </button>
-                            </div>
+                                <div class="ms-auto">
+                                    <span th:if="${player.id} == ${gameConfig.hostId}" th:text="ANFITRIÓN"
+                                        class="badge bg-accept fw-bold rounded-4 text-dark"></span>
+                                </div>
                         </li>
+                    </ul>
                     </ul>
                 </div>
 
                 <!-- Modo de juego -->
-                <div class="col-md-3 mt-5 offset-md-1">
+                <div class="col-md-5 mt-4 d-flex flex-column justify-content-center align-items-center">
                     <!-- Código -->
                     <div class="text-start ms-3">
-                        <span class="badge bg-dark px-4 py-3 rounded-pill" style="font-size: 1.0rem;"
-                            th:text="|CÓDIGO: ${game.code}|"></span>
+                        <span class="badge bg-secondary px-4 py-3 rounded-pill" style="font-size: 1.0rem;"
+                            th:text="|CÓDIGO: ${gameId}|"></span>
                     </div>
 
-                    <div class="bg-secondary p-4 rounded mt-5 text-center" style="max-width: 200px; max-height: 250px;">
+                    <div class="bg-secondary p-4 rounded mt-4 text-center" style="max-width: 200px; max-height: 250px;">
                         <!-- Opciones múltiples -->
-                        <div th:if="${game.mode == 'options'}">
+                        <div th:if="${gameConfig.gameMode == 'options'}">
                             <div class="d-flex justify-content-center mb-4 mt-3">
                                 <i class="bi bi-list-ul" style="font-size: 50px;"></i>
                             </div>
@@ -95,7 +86,7 @@
                         </div>
 
                         <!-- Adivina la canción -->
-                        <div th:if="${game.mode == 'song'}">
+                        <div th:if="${gameConfig.gameMode == 'song'}">
                             <div class="d-flex justify-content-center mb-4 mt-3">
                                 <i class="bi bi-music-note-beamed" style="font-size: 50px;"></i>
                             </div>
@@ -104,7 +95,7 @@
                         </div>
 
                         <!-- Adivina el artista -->
-                        <div th:if="${game.mode == 'artist'}">
+                        <div th:if="${gameConfig.gameMode == 'artist'}">
                             <div class="d-flex justify-content-center mb-4 mt-3">
                                 <i class="bi bi-person-fill" style="font-size: 50px;"></i>
                             </div>
@@ -114,18 +105,43 @@
                     </div>
 
                     <!-- Comenzar partida -->
-                    <div class="text-start" style="margin-top: 80px; margin-left: 40px;">
-                        <a th:href="@{/partida}">
-                            <button class="btn btn-accept fw-bold rounded-4 text-dark" id="startButton" type="button">
+                    <div class="text-start mt-4">
+                        <form th:action="@{/partida/iniciar/{gameId}(gameId=${gameId})}" method="post">
+                            <button class="btn btn-accept fw-bold rounded-4 text-dark" id="startButton" type="submit">
                                 Comenzar partida
                             </button>
-                        </a>
+                        </form>
                     </div>
-
                 </div>
+
             </div>
         </div>
+        </div>
     </main>
+
+    <script th:inline="javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+            const playlistImg = document.getElementById('playlistCover');
+            const playlistId = document.getElementById('playlistId').textContent.trim();
+            window.gameId = [[${ gameId }]];
+            window.currentView = "sala-espera";
+
+            fetch(`/partida/playlist/${playlistId}/cover`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Error al cargar imagen');
+                    return response.blob();
+                })
+                .then(blob => {
+                    const imageUrl = URL.createObjectURL(blob);
+                    playlistImg.src = imageUrl;
+                })
+                .catch(error => {
+                    console.error('Error obteniendo carátula:', error);
+                    playlistImg.src = '/img/default-profile.png'; // Imagen por defecto en caso de error
+                });
+        });
+    </script>
+    <script src="/js/leaveGame.js"></script>
 
     <th:block th:replace="~{fragments/footer.html :: footer}" />
 </body>
