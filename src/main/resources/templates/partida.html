@@ -199,21 +199,22 @@
             }
         });
     </script>
-    <script src="/js/partida-solitario.js"></script> <!-- Aquí tienes tu lógica JS que estructuramos -->
+    <script th:if="${gameConfig.maxPlayers == 1}" src="/js/partida-solitario.js"></script>
+    <!-- Aquí tienes tu lógica JS que estructuramos -->
     <script th:inline="javascript">
         // Supongamos que tienes estos datos ya en la plantilla desde Thymeleaf o tu motor de vistas:
         window.gameId = [[${ gameId }]];
         const game = [[${ gameId }]]; // UUID que te pase tu backend
-        const rounds = [[${ gameConfig.rounds }]]; // Total de rondas que configuraste en el servidor
-        const fragmentDuration = [[${ gameConfig.fragmentDuration }]]; // Duración de cada fragmento
-        const hostId = [[${ gameConfig.hostId }]]; // Id del Host
+        const gameConfig = [[${ gameConfig }]]
         const player = [[${ u.id }]];
         /*<![CDATA[*/
         const players = /*[[${players}]]*/[];
         /*]]>*/
-        window.onload = function () {
-            iniciarJuego(game, player, hostId, rounds, fragmentDuration); // Arranca el loop al cargar la vista
-        };
+        if (gameConfig.maxPlayers == 1) {
+            window.onload = function () {
+                iniciarJuego(game, player, gameConfig.hostId, gameConfig.rounds, gameConfig.fragmentDuration); // Arranca el loop al cargar la vista
+            };
+        }
     </script>
     <script src="/js/leaveGame.js"></script>
 

@@ -72,32 +72,24 @@ public class PartidaService {
 
     }
 
-    public List<Map<String, Object>> getSongResults() {
-        List<Map<String, Object>> songResults = Arrays.asList(
-                Map.of(
-                        "song", Map.of("name", "Sorry", "artist", "Justin Bieber"),
-                        "winnerName", "Sam",
-                        "time", 2.1),
-                Map.of(
-                        "song", Map.of("name", "God's Plan", "artist", "Drake"),
-                        "winnerName", "Eric",
-                        "time", 3.9),
-                Map.of(
-                        "song",
-                        Map.of("name", "Memories", "artist", "David Guetta ft. Kid Cudi"),
-                        "winnerName", "Eric",
-                        "time", 3.5),
-                Map.of(
-                        "song", Map.of("name", "Good Feeling", "artist", "Flo Rida"),
-                        "winnerName", "Sam",
-                        "time", 4.8),
-                Map.of(
-                        "song",
-                        Map.of("name", "Can't Hold Us", "artist", "Macklemore ft. Ryan Lewis"),
-                        "winnerName", "Ava",
-                        "time", 2.7));
-        return songResults;
+    public List<Map<String, Object>> getGameResults(GameRoundsDTO gameRoundsDTO) {
+        List<Map<String, Object>> songResults = new ArrayList<>();
+        for (int i = 0; i < gameRoundsDTO.getRounds().size(); i++) {
+            Map<String, Object> songResult = new HashMap<>();
+            RoundInfoDTO roundInfo = gameRoundsDTO.getRound(i);
+            Song song = entityManager.find(Song.class, roundInfo.getSongId());
 
+            Map<String, Object> songInfo = new HashMap<>();
+            songResult.put("id", song.getId());
+            songInfo.put("name", song.getName());
+            songInfo.put("artists", song.getArtists());
+
+            songResult.put("song", songInfo);
+            songResult.put("responses", roundInfo.getUserAnswers());
+
+            songResults.add(songResult);
+        }
+        return songResults;
     }
 
     public List<Playlist> getActivePlaylists() {
@@ -423,7 +415,11 @@ public class PartidaService {
                     Comparator.comparingInt(PlayerGame::getScore).reversed());
 
             priorityQueue.addAll(players);
-            int position = priorityQueue.size() > 1 ? 1 : 0;
+
+            GameConfigDTO gameConfig = new GameConfigDTO();
+            gameConfig.parseGameConfigDTO(game.getConfigJson());
+
+            int position = gameConfig.getMaxPlayers() > 1 ? 1 : 0;
             while (!priorityQueue.isEmpty()) {
                 PlayerGame playerGame = priorityQueue.poll();
                 User user = entityManager.find(User.class, playerGame.getUser().getId());
