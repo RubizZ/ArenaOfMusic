@@ -147,6 +147,22 @@ public class AdminController {
         }
     }
 
+    @PostMapping("/user/toggle-enable")
+    @ResponseBody
+    @Transactional
+    public String toggleEnable(@RequestBody User user) {
+
+        log.info("Toggling enable for user: " + user.getId());
+        User u = entityManager.find(User.class, user.getId());
+        if (u != null) {
+            u.setEnabled(!u.isEnabled());
+            entityManager.persist(u);
+            return "{\"success\": true}";
+        } else {
+            return "{\"success\": false}";
+        }
+    }
+
     @GetMapping({ "/reports", "/reports/" })
     public String reports(Model model) {
         return "admin/reports";
