@@ -108,7 +108,7 @@
           const id = row.getAttribute('data-report-id');
           const selected = row.querySelector(`input[name="btnradio-${id}"]:checked`);
           if (!selected) return;
-          const action = selected.id.endsWith('-open')  ? 'none'
+          const action = selected.id.endsWith('-open')  ? 'reopen'
                        : selected.id.endsWith('-noban') ? 'resolve'
                        : selected.id.endsWith('-ban')   ? 'ban'
                        : 'none';
@@ -121,6 +121,10 @@
           } else if (action === 'resolve') {
             fetch(`/admin/reports/${id}/resolver`, { method: 'POST', headers: { 'X-CSRF-TOKEN': csrfToken } })
               .then(r => r.ok ? row.remove() : alert('Error resolviendo reporte ' + id));
+          }
+          else if (action === 'reopen') {
+            fetch(`/admin/reports/${id}/reopen`, { method: 'POST', headers: { 'X-CSRF-TOKEN': csrfToken } })
+              .then(r => r.ok ? row.remove() : alert('Error reabriendo reporte ' + id));
           }
         });
         var modalEl = document.getElementById('confirmModal');

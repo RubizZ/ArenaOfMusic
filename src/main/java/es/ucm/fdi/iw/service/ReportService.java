@@ -43,7 +43,6 @@ public class ReportService {
         if (r != null && r.getReported() != null) {
             r.setSolved(true);
             r.setBanned(true);
-            // Obtén el usuario actual (admin) de tu contexto de seguridad
             r.setAdmin(currentAdmin);
             r.setResolutionDate(LocalDateTime.now());
 
@@ -60,6 +59,7 @@ public class ReportService {
         Report r = entityManager.find(Report.class, id);
         if (r != null) {
             r.setSolved(true);
+            r.setBanned(false);
             r.setAdmin(currentAdmin);
             r.setResolutionDate(LocalDateTime.now());
             entityManager.merge(r);
@@ -118,5 +118,26 @@ public class ReportService {
 
         return query.getResultList();
     }
+
+
+    @Transactional
+public void reopenReport(long id) {
+    Report r = entityManager.find(Report.class, id);
+    if (r != null) {
+        // Si estaba baneado, desbanear al usuario reportado
+        if (r.isBanned() && r.getReported() != null) {
+            User u = r.getReported();
+            u.setBanned(false);
+            entityManager.merge(u);
+        }
+        // Revertir campos del reporte
+        r.setSolved(false);
+        r.setBanned(false);
+        r.setAdmin(null);
+        r.setResolutionDate(null);
+        entityManager.merge(r);
+    }
+}
+
 
 }

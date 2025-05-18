@@ -118,5 +118,14 @@ public class ReportController {
     return "ver-perfil";
 }
 
+
+@PostMapping("/{id}/reopen")
+@ResponseBody
+public ResponseEntity<Void> reopenReporte(@PathVariable long id, HttpSession session) {
+    reportService.reopenReport(id);
+    return ResponseEntity.ok().build();
+}
+
+
     
 }
