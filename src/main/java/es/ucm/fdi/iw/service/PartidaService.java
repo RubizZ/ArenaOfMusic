@@ -169,6 +169,11 @@ public class PartidaService {
 
             entityManager.persist(playerGame);
 
+            GameConfigDTO gameConfig = new GameConfigDTO();
+            gameConfig.parseGameConfigDTO(game.getConfigJson());
+            gameConfig.setNumPlayers(gameConfig.getNumPlayers() + 1);
+            game.setConfigJson(gameConfig.toString());
+
             return playerGame;
         } catch (IllegalArgumentException e) {
             System.out.println("Argumento invalido: " + e.getMessage());
@@ -200,13 +205,9 @@ public class PartidaService {
     }
 
     @Transactional
-    public UUID crearPartida(GameConfigDTO gameConfig, long playerId) {
+    public void accederPartida(UUID gameId, long playerId) {
         try {
-            UUID gameId = createPartida(gameConfig);
-            PlayerGame pg = addPlayerIntoGame(playerId, gameId);
-            addPlayerGameToUser(playerId, pg);
-            addPlayerGameToGame(gameId, pg);
-            return gameId;
+            addPlayerToGame(gameId, playerId);
         } catch (Exception e) {
             System.err.println("Error al crear partida o vincular host con partida: " + e.getMessage());
             throw new RuntimeException("No se pudo crear partida o vincular host a partida, intenta nuevamente.");
@@ -422,16 +423,18 @@ public class PartidaService {
                     Comparator.comparingInt(PlayerGame::getScore).reversed());
 
             priorityQueue.addAll(players);
-
+            int position = 1;
             while (!priorityQueue.isEmpty()) {
                 PlayerGame playerGame = priorityQueue.poll();
                 User user = entityManager.find(User.class, playerGame.getUser().getId());
-                int position = 1;
                 if (user != null) {
                     user.setEXP(user.getEXP() + playerGame.getScore());
                     user.setEXP_total(user.getEXP_total() + playerGame.getScore());
+                    System.out.println("El jugador " + user.getUsername() + " ha ganado " + playerGame.getScore()
+                            + " puntos de EXP.");
                 }
                 playerGame.setPosition(position++);
+                //position++;
             }
         } catch (IllegalArgumentException e) {
             System.out.println("Argumento invalido: " + e.getMessage());
@@ -470,11 +473,12 @@ public class PartidaService {
             if (game == null) {
                 throw new IllegalArgumentException("La partida no existe.");
             }
-            if (game.getGameState().equals(Game.GameState.FINISHED) || game.getGameState().equals(Game.GameState.ABANDONED)) {
+            if (game.getGameState().equals(Game.GameState.FINISHED)
+                    || game.getGameState().equals(Game.GameState.ABANDONED)) {
                 throw new IllegalStateException("La partida no se puede abandonar.");
             }
             game.setGameState(Game.GameState.ABANDONED);
-        }catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             System.out.println("Argumento invalido: " + e.getMessage());
         } catch (IllegalStateException e) {
             System.out.println("Invalid state: " + e.getMessage());

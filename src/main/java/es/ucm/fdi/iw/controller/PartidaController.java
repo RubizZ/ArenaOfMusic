@@ -83,7 +83,7 @@ public class PartidaController {
         GameConfigDTO gameConfig = new GameConfigDTO(playlistId, modoJuego, rondas, tiempo, creator.getId(), maxPlayers,
                 0, maxPlayers > 1);
         try {
-            UUID gameId = partidaService.crearPartida(gameConfig, creator.getId());
+            UUID gameId = partidaService.createPartida(gameConfig);
             return "redirect:/partida/sala-espera/" + gameId.toString();
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -115,18 +115,24 @@ public class PartidaController {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha comenzado.");
             }
 
+            // Ingresar jugador a la partida
+            User creator = (User) session.getAttribute("u");
+            partidaService.accederPartida(gameId, creator.getId());
+
             // Obtener Configuracion de la Partida
             String gameConfigString = game.getConfigJson();
             GameConfigDTO gameConfig = new GameConfigDTO();
             gameConfig.parseGameConfigDTO(gameConfigString);
+            
             // Obtener jugadores de la partida
-            Set<GamePlayerDTO> players = partidaService.getGamePlayers(gameId);
+            //Set<GamePlayerDTO> players = partidaService.getGamePlayers(gameId);
+
             // Obtener información de la playlist
             Playlist playlist = game.getPlaylist();
 
             // Agregar datos al modelo
             model.addAttribute("gameId", game.getId().toString());
-            model.addAttribute("players", players);
+            model.addAttribute("players", partidaService.getGamePlayers(gameId));
             model.addAttribute("gameConfig", gameConfig);
             model.addAttribute("playlist", playlist);
             return "sala-espera";
