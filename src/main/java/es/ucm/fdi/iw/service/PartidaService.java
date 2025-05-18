@@ -423,7 +423,7 @@ public class PartidaService {
                     Comparator.comparingInt(PlayerGame::getScore).reversed());
 
             priorityQueue.addAll(players);
-            int position = 1;
+            int position = priorityQueue.size() > 1 ? 1 : 0;
             while (!priorityQueue.isEmpty()) {
                 PlayerGame playerGame = priorityQueue.poll();
                 User user = entityManager.find(User.class, playerGame.getUser().getId());
