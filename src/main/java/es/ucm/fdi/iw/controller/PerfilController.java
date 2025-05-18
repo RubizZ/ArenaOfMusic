@@ -50,6 +50,7 @@ public class PerfilController {
         private int position;
         private int guessedSongs;
         private int totalSongs;
+        private String playlistName;
     }
 
     @GetMapping("/perfil")
@@ -73,18 +74,20 @@ public class PerfilController {
                 int guessedSongs = 0;
                 for (var p : game.getParticipants()) {
                     if (p.getUser().getId() == user.getId()) {
-                        guessedSongs = p.getScore();
+                        guessedSongs = p.getScore() / 10;
                         break;
                     }
                 }
-
+                String playlistName = game.getPlaylist().getName();
                 int totalSongs = songResults.size();
 
                 summaries.add(new GameSummary(
                         game.getId(),
                         position,
                         guessedSongs,
-                        totalSongs));
+                        totalSongs,
+                        playlistName));
+
             } catch (Exception e) {
                 // log error se vuoi
                 continue;

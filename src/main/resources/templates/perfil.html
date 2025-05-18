@@ -88,16 +88,21 @@
                 </li>
                 <li th:each="game : ${games}" class="list-group-item d-flex justify-content-between align-items-center">
                     <span>
-                        <b>Game ID:</b> <span th:text="${game.gameId}"></span>
+                        <b>Playlist:</b>
+                        <span th:text="${game.playlistName}"></span>
                     </span>
                     <span>
-                        <b>Posición:</b> <span th:text="${game.position}"></span>
+                        <b th:if="${game.position != 0}">Posición:</b>
+                        <span th:text="${game.position == 0 ? 'Solitario' : game.position}"></span>
                     </span>
                     <span>
                         <b>Aciertos:</b> <span th:text="${game.guessedSongs}"></span> / <span
                             th:text="${game.totalSongs}"></span>
                     </span>
-
+                    <a th:href="@{/partida/resultados/{id}(id=${game.gameId})}"
+                        class="btn btn-outline-success btn-sm ms-2">
+                        Ver detalles
+                    </a>
                 </li>
             </ul>
         </div>
