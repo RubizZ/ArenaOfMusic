@@ -52,10 +52,9 @@ public class Game implements Transferable<Game.Transfer> {
     @Override
     public Transfer toTransfer() {
         return new Transfer(
-            id,
-            configJson,
-            roundJson,
-            playlist.getId()
-        );
+                id,
+                configJson,
+                roundJson,
+                playlist.getId());
     }
 }

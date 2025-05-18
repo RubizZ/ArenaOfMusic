@@ -126,14 +126,6 @@ public class AdminController {
 
         StringBuilder query = new StringBuilder("SELECT u FROM User u WHERE 1=1");
 
-        System.out.println("=== Filtro ricevuto ===");
-        System.out.println("ID: " + filter.getId());
-        System.out.println("Username: " + filter.getUsername());
-        System.out.println("Email: " + filter.getEmail());
-        System.out.println("Roles: " + filter.getRoles());
-        System.out.println("OrderBy: " + filter.getOrderBy());
-        System.out.println("Direction: " + filter.getDirection());
-
         if (filter.getId() != null)
             query.append(" AND u.id = :id");
         if (filter.getUsername() != null && !filter.getUsername().isBlank())
@@ -188,7 +180,21 @@ public class AdminController {
         }
     }
 
-   
+    @PostMapping("/user/toggle-ban")
+    @ResponseBody
+    @Transactional
+    public String toggleBan(@RequestBody User user) {
+
+        log.info("Toggling ban for user: " + user.getId());
+        User u = entityManager.find(User.class, user.getId());
+        if (u != null) {
+            u.setBanned(!u.isBanned());
+            entityManager.persist(u);
+            return "{\"success\": true}";
+        } else {
+            return "{\"success\": false}";
+        }
+    }
 
     @GetMapping({ "/spectate", "/spectate/" })
     public String spectate(Model model) {
