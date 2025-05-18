@@ -1,20 +1,48 @@
 package es.ucm.fdi.iw.controller;
 
+import java.util.UUID;
+import java.io.File;
+import java.io.IOException;
+import java.net.http.HttpHeaders;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import es.ucm.fdi.iw.service.PartidaService;
-import jakarta.servlet.http.HttpSession;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import es.ucm.fdi.iw.dto.game.GameConfigDTO;
+import es.ucm.fdi.iw.dto.game.GamePlayerDTO;
+import es.ucm.fdi.iw.dto.game.GameRoundsDTO;
+import es.ucm.fdi.iw.dto.game.RoundInfoDTO;
+import es.ucm.fdi.iw.dto.game.RoundResponseDTO;
+import es.ucm.fdi.iw.model.Game;
+import es.ucm.fdi.iw.model.Playlist;
+import es.ucm.fdi.iw.model.User;
+import es.ucm.fdi.iw.service.PartidaService;
+import es.ucm.fdi.iw.service.PlaylistService;
+import es.ucm.fdi.iw.service.SongService;
+import es.ucm.fdi.iw.util.FileGetter;
+import es.ucm.fdi.iw.util.NoDataException;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class PartidaController {
@@ -22,7 +50,11 @@ public class PartidaController {
     @Autowired
     private PartidaService partidaService;
 
-    private static final Logger log = LogManager.getLogger(PartidaController.class);
+    @Autowired
+    private SongService songService;
+
+    @Autowired
+    private PlaylistService playlistService;
 
     @ModelAttribute
     public void populateModel(HttpSession session, Model model) {
@@ -31,73 +63,339 @@ public class PartidaController {
         }
     }
 
-    @GetMapping("/configuracion-partida")
-    public String configPartida(Model model) {
-        // Playlists disponibles
-        model.addAttribute("playlists", partidaService.getPlaylists());
-
+    @GetMapping("/partida/configuracion-partida/{modo}")
+    public String configPartida(Model model, @PathVariable String modo) {
+        model.addAttribute("playlists", partidaService.getActivePlaylists());
+        model.addAttribute("modo", modo);
         return "configuracion-partida";
     }
 
-    @GetMapping("/sala-espera")
-    public String salaespera(Model model, HttpSession session)
-    {
-        // Configuración de la sesión
-        model.addAttribute("selectedPlaylist", session.getAttribute("selectedPlaylist"));
-        model.addAttribute("rounds", session.getAttribute("rounds"));
-        model.addAttribute("time", session.getAttribute("time"));
-        model.addAttribute("mode", session.getAttribute("mode"));
+    @PostMapping("/partida/crear-partida")
+    public String crearPartida(Model model,
+            @RequestParam Long playlistId,
+            @RequestParam int rondas,
+            @RequestParam int tiempo,
+            @RequestParam String modoJuego,
+            @RequestParam int maxPlayers, // Se añadirá cuando se implemente el modo multijugador
+            RedirectAttributes redirectAttributes,
+            HttpSession session) {
 
-        // Obtener información adicional de la partida
-        Map<String, Object> playlist = partidaService.getPlaylistInfo();
-        List<Map<String, Object>> players = partidaService.getPlayers();
-        Map<String, Object> host = partidaService.getHost();
-        Map<String, Object> game = partidaService.getGameInfo();
-        boolean isHost = true;
-
-        model.addAttribute("playlist", playlist);
-        model.addAttribute("players", players);
-        model.addAttribute("host", host);
-        model.addAttribute("game", game);
-        model.addAttribute("isHost", isHost);
-
-        log.info(
-            "Sala de espera con código: {}, modo: {}",
-            game.get("code"),
-            session.getAttribute("mode") != null ? session.getAttribute("mode") : "options"
-        );
-
-        return "sala-espera";
+        User creator = (User) session.getAttribute("u");
+        GameConfigDTO gameConfig = new GameConfigDTO(playlistId, modoJuego, rondas, tiempo, creator.getId(), maxPlayers,
+                0, maxPlayers > 1);
+        try {
+            UUID gameId = partidaService.createPartida(gameConfig);
+            return "redirect:/partida/sala-espera/" + gameId.toString();
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/error";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al crear la partida.");
+            return "redirect:/error";
+        }
     }
 
-    @GetMapping("/partida")
-    public String partida(Model model) {
-        return "partida";
+    @GetMapping("/partida/sala-espera/{gameId}")
+    public String salaEspera(@PathVariable UUID gameId, Model model, HttpSession session) {
+        try {
+            Game game = partidaService.getGameById(gameId);
+
+            if (game == null || !game.getActive()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
+            }
+
+            if (game.getGameState().equals(Game.GameState.FINISHED)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
+            }
+
+            if (game.getGameState().equals(Game.GameState.ABANDONED)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida fue abandonada.");
+            }
+
+            if (!game.getGameState().equals(Game.GameState.WAITING)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha comenzado.");
+            }
+
+            // Ingresar jugador a la partida
+            User creator = (User) session.getAttribute("u");
+            partidaService.accederPartida(gameId, creator.getId());
+
+            // Obtener Configuracion de la Partida
+            String gameConfigString = game.getConfigJson();
+            GameConfigDTO gameConfig = new GameConfigDTO();
+            gameConfig.parseGameConfigDTO(gameConfigString);
+            
+            // Obtener jugadores de la partida
+            //Set<GamePlayerDTO> players = partidaService.getGamePlayers(gameId);
+
+            // Obtener información de la playlist
+            Playlist playlist = game.getPlaylist();
+
+            // Agregar datos al modelo
+            model.addAttribute("gameId", game.getId().toString());
+            model.addAttribute("players", partidaService.getGamePlayers(gameId));
+            model.addAttribute("gameConfig", gameConfig);
+            model.addAttribute("playlist", playlist);
+            return "sala-espera";
+        } catch (ResponseStatusException e) {
+            model.addAttribute("msg", "Error al acceder a la sala de espera: " + e.getReason());
+            model.addAttribute("status", e.getStatusCode().value());
+            return "error";
+        } catch (Exception e) {
+            model.addAttribute("msg", "Error al acceder a la sala de espera: " + e.getMessage());
+            return "error";
+        }
     }
 
-    @GetMapping("/resultados")
-    public String resultados(Model model) {
-        model.addAttribute("position", "¡Has acabado en 1ª posición!");
-        model.addAttribute("playlist", partidaService.getPlaylist());
-        model.addAttribute("sortedParticipants", partidaService.getSortedParticipants());
-        model.addAttribute("songResults", partidaService.getSongResults());
+    @PostMapping("/partida/abandonar/{gameId}")
+    public ResponseEntity<String> abandonarPartida(@PathVariable UUID gameId, HttpServletResponse response) {
+        try {
+            Game game = partidaService.getGameById(gameId);
+            if (game == null || !game.getActive()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
+            }
+            if (game.getGameState().equals(Game.GameState.FINISHED)
+                    || game.getGameState().equals(Game.GameState.ABANDONED)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no se puede abandonar.");
+            }
+            partidaService.abandonarPartida(game);
+
+            ResponseCookie cookie = ResponseCookie.from("partidaAbandonada" + gameId, "true")
+                    .path("/")
+                    .maxAge(10)
+                    .sameSite("Lax")
+                    .httpOnly(false)
+                    .build();
+
+            response.addHeader("Set-Cookie", cookie.toString());
+            return ResponseEntity.ok("Partida abandonada con éxito.");
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/partida/iniciar/{gameId}")
+    public String iniciarPartida(@PathVariable UUID gameId, RedirectAttributes redirectAttributes) {
+        try {
+
+            Game game = partidaService.getGameById(gameId);
+
+            if (game == null || !game.getActive()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
+            }
+
+            if (game.getGameState().equals(Game.GameState.FINISHED)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
+            }
+
+            if (!game.getGameState().equals(Game.GameState.WAITING)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha comenzado.");
+            }
+
+            partidaService.startGame(game);
+            return "redirect:/partida/" + gameId.toString();
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/error";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al iniciar la partida.");
+            return "redirect:/error";
+        }
+    }
+
+    @GetMapping("/partida/{gameId}")
+    public String partida(@PathVariable UUID gameId, Model model) {
+        try {
+            Game game = partidaService.getGameById(gameId);
+            if (game == null || !game.getActive()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
+            }
+            if (game.getGameState().equals(Game.GameState.FINISHED)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
+            }
+            if (game.getGameState().equals(Game.GameState.WAITING)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha comenzado.");
+            }
+            if (game.getGameState().equals(Game.GameState.ABANDONED)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida fue abandonada.");
+            }
+
+            // Obtener Configuracion de la Partida
+            String gameConfigString = game.getConfigJson();
+            GameConfigDTO gameConfig = new GameConfigDTO();
+            gameConfig.parseGameConfigDTO(gameConfigString);
+            // Obtener jugadores de la partida
+            Set<GamePlayerDTO> players = partidaService.getGamePlayers(gameId);
+            // Agregar datos al modelo
+            model.addAttribute("gameId", game.getId().toString());
+            model.addAttribute("players", players);
+            model.addAttribute("gameConfig", gameConfig);
+
+            return "partida";
+        } catch (ResponseStatusException e) {
+            model.addAttribute("msg", "Error al acceder a la sala de espera: " + e.getReason());
+            model.addAttribute("status", e.getStatusCode().value());
+            return "error";
+        }
+    }
+
+    @GetMapping("/partida/obtenerTitulos")
+    public ResponseEntity<List<String>> obtenerTitulos() {
+        try {
+            List<String> titles = partidaService.getTitles();
+            return ResponseEntity.ok(titles);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/partida/inicioRonda/{gameId}")
+    public ResponseEntity<RoundInfoDTO> inicioRonda(@PathVariable UUID gameId) {
+        try {
+            Game game = partidaService.getGameById(gameId);
+            if (game == null || !game.getActive()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
+            }
+            if (game.getGameState().equals(Game.GameState.FINISHED)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
+            }
+            if (game.getGameState().equals(Game.GameState.WAITING)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha comenzado.");
+            }
+            RoundInfoDTO response = partidaService.iniciarRonda(game);
+            return ResponseEntity.ok(response);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/partida/song/{id}/cover")
+    public ResponseEntity<byte[]> getSongCover(@PathVariable Long id) {
+        return responseEntityFromFileGetter(() -> songService.getSongCover(id));
+    }
+
+    @GetMapping("/partida/song/{id}/audio")
+    public ResponseEntity<byte[]> getSongAudio(@PathVariable Long id) {
+        return responseEntityFromFileGetter(() -> songService.getSongAudio(id));
+    }
+
+    @GetMapping("/partida/playlist/{id}/cover")
+    public ResponseEntity<byte[]> getPlaylistCover(@PathVariable Long id) {
+        return responseEntityFromFileGetter(() -> playlistService.getPlaylistCover(id));
+    }
+
+    @PostMapping("/partida/finRonda/{gameId}")
+    public ResponseEntity<RoundResponseDTO> finRonda(@PathVariable UUID gameId, @RequestBody Map<Long, String> body) {
+        try {
+            Game game = partidaService.getGameById(gameId);
+            if (game == null || !game.getActive()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
+            }
+            if (game.getGameState().equals(Game.GameState.FINISHED)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
+            }
+            if (game.getGameState().equals(Game.GameState.WAITING)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha comenzado.");
+            }
+            RoundResponseDTO response = partidaService.finalizarRonda(game, body);
+            return ResponseEntity.ok(response);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/partida/finalizar/{gameId}")
+    public ResponseEntity<Void> finalizarPartida(@PathVariable UUID gameId) {
+        try {
+            Game game = partidaService.getGameById(gameId);
+            if (game == null || !game.getActive()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
+            }
+            if (game.getGameState().equals(Game.GameState.FINISHED)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
+            }
+            if (game.getGameState().equals(Game.GameState.WAITING)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha comenzado.");
+            }
+            partidaService.finalizarPartida(game);
+            return ResponseEntity.ok().build();
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/partida/resultados/{gameId}")
+    public String resultados(Model model, @PathVariable UUID gameId, HttpSession session) {
+        Game game;
+        try {
+            game = partidaService.getGameById(gameId);
+            if (game == null || !game.getActive()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
+            }
+            if (game.getGameState().equals(Game.GameState.PLAYING)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida se está jugando.");
+            }
+            if (game.getGameState().equals(Game.GameState.WAITING)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha comenzado.");
+            }
+        } catch (ResponseStatusException e) {
+            model.addAttribute("msg", "Error al acceder a la sala de espera: " + e.getReason());
+            model.addAttribute("status", e.getStatusCode().value());
+            return "error";
+        } catch (Exception e) {
+            model.addAttribute("msg", "Error al acceder a la sala de espera: " + e.getMessage());
+            return "error";
+        }
+        User creator = (User) session.getAttribute("u");
+        int position = partidaService.getPosition(game, creator.getId());
+
+        GameConfigDTO gameConfig = new GameConfigDTO();
+        gameConfig.parseGameConfigDTO(game.getConfigJson());
+
+
+        GameRoundsDTO gameRounds = new GameRoundsDTO();
+        gameRounds = gameRounds.parse(game.getRoundJson());
+
+        model.addAttribute("position", position);
+        model.addAttribute("playlist", partidaService.getPlaylist(game));
+        model.addAttribute("sortedParticipants", partidaService.getSortedParticipants(game));
+        model.addAttribute("gameResults", partidaService.getGameResults(gameRounds));
+        model.addAttribute("gameConfig", gameConfig);
 
         return "resultados";
     }
 
-    @PostMapping("/guardar-configuracion")
-    public String guardarConfiguracion(
-        @RequestParam("selectedPlaylist") String selectedPlaylist,
-        @RequestParam("rounds") int rounds,
-        @RequestParam("time") int time,
-        @RequestParam("mode") String mode,
-        HttpSession session)
-    {
-        session.setAttribute("selectedPlaylist", selectedPlaylist);
-        session.setAttribute("rounds", rounds);
-        session.setAttribute("time", time);
-        session.setAttribute("mode", mode);
+    private ResponseEntity<byte[]> responseEntityFromFileGetter(FileGetter fileGetter) {
+        try {
+            File file = fileGetter.get();
 
-        return "redirect:/sala-espera";
+            byte[] fileContent = Files.readAllBytes(file.toPath());
+            String contentType = Files.probeContentType(file.toPath());
+
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.valueOf(contentType))
+                    .body(fileContent);
+
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body(new byte[0]);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(new byte[0]);
+        } catch (NoDataException e) {
+            return ResponseEntity.status(410).body(new byte[0]);
+        }
     }
 }

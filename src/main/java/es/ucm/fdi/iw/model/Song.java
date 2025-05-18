@@ -18,6 +18,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -29,6 +31,11 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Table(name = "song")
+@NamedQueries({
+        @NamedQuery(name = "Song.findByPlaylistId", query = "SELECT s FROM Song s JOIN s.playlists p WHERE p.id = :playlistId"),
+        @NamedQuery(name = "Song.getActiveSongsTitles", query = "SELECT s.name FROM Song s WHERE s.active = true"),
+        @NamedQuery(name = "Song.getSongsOfList", query = "SELECT s FROM Song s WHERE s.id IN :ids"), })
+
 public class Song implements Transferable<Song.Transfer> {
 
     @Id

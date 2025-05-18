@@ -860,8 +860,12 @@ a[disabled] {
     transition: none !important;
 }
 
-.playlist-radio:checked+label img {
-    border: 2px solid black;
+.playlist-radio:checked+label img  {
+    border: 5px solid lightgray;
+}
+
+.playlist-radio:checked+label span{
+    text-decoration: underline;
 }
 
 /* Botones de modo de juego */
