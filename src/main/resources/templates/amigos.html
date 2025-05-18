@@ -40,7 +40,7 @@
                         <!-- Vista de amigos -->
                         <div class="ms-2" th:if="${viewType} == 'solicitudes'">
                             <a
-                                class="btn btn-back d-flex align-items-center justify-content-center"
+                                class="btn d-flex align-items-center justify-content-center border"
                                 th:href="@{/amigos(view='amigos')}"
                                 style="width: 40px; height: 40px;">
                                 <i class="bi bi-people-fill"></i>
@@ -50,7 +50,7 @@
                         <!-- Vista de solicitudes -->
                         <div class="ms-2" th:if="${viewType} == 'amigos'">
                             <a
-                                class="btn btn-back d-flex align-items-center justify-content-center position-relative"
+                                class="btn d-flex align-items-center justify-content-center position-relative border"
                                 th:href="@{/amigos(view='solicitudes')}"
                                 style="width: 40px; height: 40px;">
                                 <i class="bi bi-person-fill"></i>
@@ -71,7 +71,7 @@
 
                         <!-- Añadir amigos -->
                         <div class="d-grid">
-                            <button class="btn btn-light border">
+                            <button class="btn border">
                                 <i class="bi bi-plus"></i> Añadir amigos
                             </button>
                         </div>

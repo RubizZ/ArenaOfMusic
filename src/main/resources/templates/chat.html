@@ -15,16 +15,16 @@
             <div class="row align-items-start d-flex justify-content-center p-2 rounded ">
                 <section style="max-width: 600px;">
                     <h2 class="fw-semibold mb-3">
-                        <a th:href="@{/amigos}" class="me-2 text-decoration-none">
-                            <i class="bi bi-arrow-left-circle text-dark"></i>
+                        <a th:href="@{/amigos}" class="btn me-2 text-decoration-none shadow-none border-0">
+                            <i class="bi bi-arrow-left-circle fs-4"></i>
                         </a>
-                        Chat con <span th:text="${friend.username}"></span>
+                        <span th:text="${friend.username}"></span>
                     </h2>
 
                     <!-- Mensajes -->
                     <div
                         id="chatBox" class="border rounded p-3 mb-2"
-                        style="height: 400px; overflow: auto; background: #FAFAFA;">
+                        style="height: 400px; overflow: auto;">
                     </div>
 
                     <!-- Escribir nuevo mensaje -->
