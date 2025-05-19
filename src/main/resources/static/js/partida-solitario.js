@@ -118,7 +118,7 @@ function finalizarPartida() {
 function obtenerCancion(songId) {
     const csrfToken = config.csrf.value;
 
-    fetch(`/partida/song/${songId}/audio`, {
+    fetch(`/partida/song/${songId}/audio/${gameId}`, {
         method: 'GET',
         headers: {
             'X-CSRF-TOKEN': csrfToken

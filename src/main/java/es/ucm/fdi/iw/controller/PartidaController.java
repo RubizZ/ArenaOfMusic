@@ -124,9 +124,9 @@ public class PartidaController {
             String gameConfigString = game.getConfigJson();
             GameConfigDTO gameConfig = new GameConfigDTO();
             gameConfig.parseGameConfigDTO(gameConfigString);
-            
+
             // Obtener jugadores de la partida
-            //Set<GamePlayerDTO> players = partidaService.getGamePlayers(gameId);
+            // Set<GamePlayerDTO> players = partidaService.getGamePlayers(gameId);
 
             // Obtener información de la playlist
             Playlist playlist = game.getPlaylist();
@@ -280,9 +280,43 @@ public class PartidaController {
         return responseEntityFromFileGetter(() -> songService.getSongCover(id));
     }
 
-    @GetMapping("/partida/song/{id}/audio")
-    public ResponseEntity<byte[]> getSongAudio(@PathVariable Long id) {
-        return responseEntityFromFileGetter(() -> songService.getSongAudio(id));
+    @GetMapping("/partida/song/{id}/audio/{gameId}")
+    public ResponseEntity<byte[]> getSongAudio(@PathVariable Long id, @PathVariable UUID gameId) {
+        try {
+            Game game = partidaService.getGameById(gameId);
+            if (game == null || !game.getActive()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
+            }
+            if (game.getGameState().equals(Game.GameState.FINISHED)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
+            }
+            if (game.getGameState().equals(Game.GameState.WAITING)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha comenzado.");
+            }
+            GameConfigDTO gameConfig = new GameConfigDTO();
+            gameConfig.parseGameConfigDTO(game.getConfigJson());
+            int fragmentDuration = gameConfig.getFragmentDuration();
+
+            File audioFile = songService.getSongAudio(id); // debe devolver File
+            if (audioFile == null || !audioFile.exists()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+
+            File fragment = partidaService.generarFragmento(audioFile, fragmentDuration); // lo escribimos abajo
+
+            byte[] bytes = Files.readAllBytes(fragment.toPath());
+
+            fragment.delete();
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType("audio/mpeg"))
+                    .contentLength(bytes.length)
+                    .body(bytes);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @GetMapping("/partida/playlist/{id}/cover")
@@ -361,7 +395,6 @@ public class PartidaController {
 
         GameConfigDTO gameConfig = new GameConfigDTO();
         gameConfig.parseGameConfigDTO(game.getConfigJson());
-
 
         GameRoundsDTO gameRounds = new GameRoundsDTO();
         gameRounds = gameRounds.parse(game.getRoundJson());

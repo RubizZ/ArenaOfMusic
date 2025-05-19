@@ -1,5 +1,9 @@
 package es.ucm.fdi.iw.service;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -430,7 +434,7 @@ public class PartidaService {
                             + " puntos de EXP.");
                 }
                 playerGame.setPosition(position++);
-                //position++;
+                // position++;
             }
         } catch (IllegalArgumentException e) {
             System.out.println("Argumento invalido: " + e.getMessage());
@@ -479,6 +483,43 @@ public class PartidaService {
         } catch (IllegalStateException e) {
             System.out.println("Invalid state: " + e.getMessage());
         }
+    }
+
+    public File generarFragmento(File audioOriginal, int duracion) throws IOException, InterruptedException {
+        // 1. Obtener duración total del audio
+        ProcessBuilder probeBuilder = new ProcessBuilder(
+                "ffprobe", "-v", "error",
+                "-show_entries", "format=duration",
+                "-of", "default=noprint_wrappers=1:nokey=1",
+                audioOriginal.getAbsolutePath());
+        Process probe = probeBuilder.start();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(probe.getInputStream()));
+        double totalDuration = Double.parseDouble(reader.readLine().trim());
+        probe.waitFor();
+
+        // 2. Si la canción es más corta, devolver el original
+        if (totalDuration <= duracion)
+            return audioOriginal;
+
+        // 3. Calcular inicio aleatorio
+        double start = Math.random() * (totalDuration - duracion);
+
+        // 4. Crear archivo temporal
+        File tempFile = File.createTempFile("fragment_", ".mp3");
+
+        // 5. Ejecutar ffmpeg para recortar
+        ProcessBuilder ffmpegBuilder = new ProcessBuilder(
+                "ffmpeg", "-y",
+                "-ss", String.valueOf(start),
+                "-t", String.valueOf(duracion),
+                "-i", audioOriginal.getAbsolutePath(),
+                "-c:a", "libmp3lame",
+                tempFile.getAbsolutePath());
+        ffmpegBuilder.redirectErrorStream(true);
+        Process ffmpeg = ffmpegBuilder.start();
+        ffmpeg.waitFor();
+
+        return tempFile;
     }
 
 }
