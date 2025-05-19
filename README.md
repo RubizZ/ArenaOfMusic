@@ -26,7 +26,7 @@ AoM es un juego interactivo y competitivo basado en la música, donde los jugado
 **Estadísticas de la app:** Los administradores podrán ver una serie de estadísticas tales como el número de usuarios registrados, de partidas jugadas, etc.
 
 ## Funcionalidades Principales (Version Entrega 8 de abril 2025)
-**Partida Individual:** Modo de juego en solitario donde el jugador seleccionará la playlist sobre la que quiera jugar. Dicha playlist se cargará y el jugador decidirá cuantas canciones se reproducen y el número de estas que sonarán. Se seleccionarán aleatoriamente las canciones de la playlist elegida por el jugador y comenzará la partida. En cada ronda sonará una de las canciones seleccionadas y el jugador escribirá el título de la canción. Una vez acabado el tiempo de reproducción se mostrará el resultado y el jugador recibirá puntos en función de cuántos segundos ha tardado el jugador en acertarlo. Cuando acaben de reproducirse todas las canciones, se mostrarán los resultados de la partida. Actualmente se encuentra desarrollada la totalidad de la configuración y practicamente la sala de espera. Desde la Sala de Espera de la partida se podrá modificar la configuración inicial de la partida antes de comenzar para no tener que abandonar la sala en caso de cambiar de idea a la hora de los requisitos de la partida. La partida se encuentra en un estado de desarrollo avanzado en el que ya se encuentra codificado practicamente la totralidad del backend a falta de desarrollar el frontend con las peticiones ajax necesarias para el correcto desarrollo del game loop. La vista de resultados Falta de desarrollar.
+**Partida Individual:** Modo de juego en solitario donde el jugador seleccionará la playlist sobre la que quiera jugar. Dicha playlist se cargará y el jugador decidirá cuantas canciones se reproducen y el número de estas que sonarán. Se seleccionarán aleatoriamente las canciones de la playlist elegida por el jugador y comenzará la partida. En cada ronda sonará una de las canciones seleccionadas y el jugador escribirá el título de la canción. Una vez acabado el tiempo de reproducción se mostrará el resultado y el jugador recibirá puntos en función de cuántos segundos ha tardado el jugador en acertarlo. Cuando acaben de reproducirse todas las canciones, se mostrarán los resultados de la partida. Actualmente se encuentra desarrollada la totalidad de la configuración y practicamente la sala de espera. Desde la Sala de Espera de la partida se podrá modificar la configuración inicial de la partida antes de comenzar para no tener que abandonar la sala en caso de cambiar de idea a la hora de los requisitos de la partida. La partida se encuentra en un estado de desarrollo avanzado en el que ya se encuentra codificado practicamente la totalidad del backend a falta de desarrollar el frontend con las peticiones ajax necesarias para el correcto desarrollo del game loop. La vista de resultados Falta de desarrollar.
 
 **Duelo 1vs1:** En este modo se conectarán 2 jugadores a competir entre ellos, un anfitrión y un invitado. El anfitrión será quien, al igual que en el modo individual, seleccione la playlist, los segundos de reproducción y cuantas canciones sonarán. La partida transcurrirá del mismo modo, salvo que esta vez los jugadores escribirán los títulos hasta que uno acierte o se termine el tiempo. Aquel jugador que acierte se llevará la ronda y en caso de no acertar ninguno se considerará empate. Al terminar se mostrarán los resultados y al ganador del duelo.
 
@@ -48,6 +48,31 @@ Ambas versiones serán posibles adiciones con la implementación de web sockets 
 **Visualización de partidas:** Mientras las partidas estén en curso los administradores podrán ser espectadores de ellas en caso de que los jugadores reporten conductas inadecuadas. Solo en caso de llegar a tiempo se inclurá la opción de visualizar partidas en directo si se ha recibido un reporte de posibles trampas o conductas inapropiadas en el transcurso de la partida.
 
 **Estadísticas de la app:** Los administradores podrán ver una serie de estadísticas tales como el número de usuarios registrados, de partidas jugadas, etc. Al igual que la anterior, no la consideramos proiritaria y se desarrollará en caso de tener tiempo.
+
+## Funcionalidades Principales (Version Entrega Examen 22 de mayo 2025)
+
+**Credenciales para usuarios iniciales:** //TODO
+
+**Partida Individual:** //TODO
+
+**Duelo 1vs1:** //TODO
+
+**Modo Fiesta:** //TODO
+
+**Personalización de perfil:**  //TODO
+
+**Social y Amistad:** //TODO
+
+### Administradores
+**Gestionar Artistas, Canciones y Playlists:** //TODO
+
+**Gestionar Tienda:** //TODO
+
+**Reportes de Usuarios:** En esta sección, los administradores pueden visualizar los reportes enviados por los usuarios de la aplicación. Cada reporte contiene información detallada sobre de quien a quien va dirigido el reporte así como el hecho que se reporta, como conductas inapropiadas, trampas o cualquier otro problema relevante. Desde aquí, los administradores tienen la capacidad de tomar decisiones en función del contenido reportado: pueden resolver los reportes si el problema ha sido solucionado o, en caso necesario, aplicar sanciones como el baneo de usuarios que hayan incumplido las normas de la comunidad.
+
+**Visualización de partidas:** //TODO
+
+**Estadísticas de la app:** //TODO
 
 ## Vistas (Versión inicial)
 ### Panel de Administrador
@@ -124,4 +149,36 @@ En el panel derecho se presenta la información detallada del usuario selecciona
 Actualmente está la versión estática, pero se encuentra en desarrollo
 
 ###Vistas Login y Registro
+Se encuentran completamente desarrolladas y funcionales.
+
+
+
+## Vistas (Version Entrega Examen 22 de mayo 2025)
+### Panel de Administrador
+El panel de administrador contiene un titulo y 6 botones (hechos con cards) que lleva a las diferentes subpaginas (actualmente no completas) a las que un admin puede acceder para controlar la aplicacion. Estas son las siguiente:
+- **Playlists**: //TODO
+- **Tienda**: //TODO
+- **Administrar usuarios**: //TODO
+- **Reportes**: Accede a una lista de reportes que usuarios hayan hecho a otros usuarios para imponer castigos según el comportamiento del usuario, como banear tramposos. Esta vista ya está completamente desarrollada, siendo dinámica y haciendose efectivas las decisiones del administracion al resolver los reportes. Para resolver un reporte tiene que escoger una de las tres acciones posibles: pendiente, resolver (que no banea al usuario y marca como resuelto ese reporte, guardando quien lo resuelve y cuando) y banear (que banea al usuario reportado y resuelve ese reporte) y posteriormente confirmar las resoluciones, que hacen efectivas esas acciones. También encontramos filtros para la búsqueda de reportes como filtrar por fecha y por el estado del reporte Los iconos de las acciones pertenecen a Bootstrap Icons.
+
+Desde esta vista también se puede llegar a la vista ver-perfil, que muestra información al usuario sobre un usuario distinto, es decir muestra datos como su foto de perfil, correo, nombre de usuario...
+- **Espectar partidas**: //TODO
+- **Estadisticas generales**: //TODO
+
+Los iconos de los botones pertenecen a Bootstrap Icons y estan bajo la licencia MIT
+### Vista Principal
+Como su propio nombre indica, esta es la vista principal de nuestra página web. En esta pantalla se encuentran varios elementos clave: un título, un mensaje de bienvenida y una sección con una imagen donde se explica cómo jugar. Además, hay un botón JUGAR, que llevaría al usuario a escoger el modo de juego, para posteriormente crear la partida para poder empezar a jugar.
+
+Las imágenes utilizadas en esta vista han sido generadas con ChatGPT, bajo la licencia de OpenAI.
+### Vista Perfil
+//TODO
+
+### Vista Tienda (Abandonada por el momento)
+//TODO ?
+
+Todo el contenido ha sido removido en este momento. Se volverá a incluir si llega a desarrollarse.
+### Vista Amigos 
+//TODO
+
+### Vistas Login y Registro
 Se encuentran completamente desarrolladas y funcionales.
