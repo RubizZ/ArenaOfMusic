@@ -98,23 +98,7 @@ public class PartidaController {
     @GetMapping("/partida/sala-espera/{gameId}")
     public String salaEspera(@PathVariable UUID gameId, Model model, HttpSession session) {
         try {
-            Game game = partidaService.getGameById(gameId);
-
-            if (game == null || !game.getActive()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
-            }
-
-            if (game.getGameState().equals(Game.GameState.FINISHED)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
-            }
-
-            if (game.getGameState().equals(Game.GameState.ABANDONED)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida fue abandonada.");
-            }
-
-            if (!game.getGameState().equals(Game.GameState.WAITING)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha comenzado.");
-            }
+            Game game = validarEstadoPartida(gameId, Game.GameState.WAITING);
 
             // Ingresar jugador a la partida
             User creator = (User) session.getAttribute("u");
@@ -179,21 +163,7 @@ public class PartidaController {
     @PostMapping("/partida/iniciar/{gameId}")
     public String iniciarPartida(@PathVariable UUID gameId, RedirectAttributes redirectAttributes) {
         try {
-
-            Game game = partidaService.getGameById(gameId);
-
-            if (game == null || !game.getActive()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
-            }
-
-            if (game.getGameState().equals(Game.GameState.FINISHED)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
-            }
-
-            if (!game.getGameState().equals(Game.GameState.WAITING)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha comenzado.");
-            }
-
+            Game game = validarEstadoPartida(gameId, Game.GameState.WAITING);
             partidaService.startGame(game);
             return "redirect:/partida/" + gameId.toString();
         } catch (IllegalArgumentException e) {
@@ -208,19 +178,7 @@ public class PartidaController {
     @GetMapping("/partida/{gameId}")
     public String partida(@PathVariable UUID gameId, Model model) {
         try {
-            Game game = partidaService.getGameById(gameId);
-            if (game == null || !game.getActive()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
-            }
-            if (game.getGameState().equals(Game.GameState.FINISHED)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
-            }
-            if (game.getGameState().equals(Game.GameState.WAITING)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha comenzado.");
-            }
-            if (game.getGameState().equals(Game.GameState.ABANDONED)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida fue abandonada.");
-            }
+            Game game = validarEstadoPartida(gameId, Game.GameState.PLAYING);
 
             // Obtener Configuracion de la Partida
             String gameConfigString = game.getConfigJson();
@@ -256,16 +214,8 @@ public class PartidaController {
     @PostMapping("/partida/inicioRonda/{gameId}")
     public ResponseEntity<RoundInfoDTO> inicioRonda(@PathVariable UUID gameId) {
         try {
-            Game game = partidaService.getGameById(gameId);
-            if (game == null || !game.getActive()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
-            }
-            if (game.getGameState().equals(Game.GameState.FINISHED)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
-            }
-            if (game.getGameState().equals(Game.GameState.WAITING)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha comenzado.");
-            }
+            Game game = validarEstadoPartida(gameId, Game.GameState.PLAYING);
+
             RoundInfoDTO response = partidaService.iniciarRonda(game);
             return ResponseEntity.ok(response);
         } catch (ResponseStatusException e) {
@@ -283,16 +233,8 @@ public class PartidaController {
     @GetMapping("/partida/song/{id}/audio/{gameId}")
     public ResponseEntity<byte[]> getSongAudio(@PathVariable Long id, @PathVariable UUID gameId) {
         try {
-            Game game = partidaService.getGameById(gameId);
-            if (game == null || !game.getActive()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
-            }
-            if (game.getGameState().equals(Game.GameState.FINISHED)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
-            }
-            if (game.getGameState().equals(Game.GameState.WAITING)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha comenzado.");
-            }
+            Game game = validarEstadoPartida(gameId, Game.GameState.PLAYING);
+
             GameConfigDTO gameConfig = new GameConfigDTO();
             gameConfig.parseGameConfigDTO(game.getConfigJson());
             int fragmentDuration = gameConfig.getFragmentDuration();
@@ -327,16 +269,8 @@ public class PartidaController {
     @PostMapping("/partida/finRonda/{gameId}")
     public ResponseEntity<RoundResponseDTO> finRonda(@PathVariable UUID gameId, @RequestBody Map<Long, String> body) {
         try {
-            Game game = partidaService.getGameById(gameId);
-            if (game == null || !game.getActive()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
-            }
-            if (game.getGameState().equals(Game.GameState.FINISHED)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
-            }
-            if (game.getGameState().equals(Game.GameState.WAITING)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha comenzado.");
-            }
+            Game game = validarEstadoPartida(gameId, Game.GameState.PLAYING);
+
             RoundResponseDTO response = partidaService.finalizarRonda(game, body);
             return ResponseEntity.ok(response);
         } catch (ResponseStatusException e) {
@@ -349,16 +283,8 @@ public class PartidaController {
     @PostMapping("/partida/finalizar/{gameId}")
     public ResponseEntity<Void> finalizarPartida(@PathVariable UUID gameId) {
         try {
-            Game game = partidaService.getGameById(gameId);
-            if (game == null || !game.getActive()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
-            }
-            if (game.getGameState().equals(Game.GameState.FINISHED)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
-            }
-            if (game.getGameState().equals(Game.GameState.WAITING)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha comenzado.");
-            }
+            Game game = validarEstadoPartida(gameId, Game.GameState.PLAYING);
+
             partidaService.finalizarPartida(game);
             return ResponseEntity.ok().build();
         } catch (ResponseStatusException e) {
@@ -372,16 +298,8 @@ public class PartidaController {
     public String resultados(Model model, @PathVariable UUID gameId, HttpSession session) {
         Game game;
         try {
-            game = partidaService.getGameById(gameId);
-            if (game == null || !game.getActive()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
-            }
-            if (game.getGameState().equals(Game.GameState.PLAYING)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida se está jugando.");
-            }
-            if (game.getGameState().equals(Game.GameState.WAITING)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha comenzado.");
-            }
+            game = validarEstadoPartida(gameId, Game.GameState.FINISHED);
+
         } catch (ResponseStatusException e) {
             model.addAttribute("msg", "Error al acceder a la sala de espera: " + e.getReason());
             model.addAttribute("status", e.getStatusCode().value());
@@ -430,5 +348,26 @@ public class PartidaController {
         } catch (NoDataException e) {
             return ResponseEntity.status(410).body(new byte[0]);
         }
+    }
+
+    /**
+     * Método reutilizable para validar una partida según estado y existencia.
+     */
+    private Game validarEstadoPartida(UUID gameId, Game.GameState estadoEsperado) {
+        Game game = partidaService.getGameById(gameId);
+        if (game == null || !game.getActive()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
+        }
+
+        if (!game.getGameState().equals(estadoEsperado)) {
+            switch (game.getGameState()) {
+                case FINISHED ->throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
+                case ABANDONED -> throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida fue abandonada.");
+                case WAITING -> throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha comenzado.");
+                case PLAYING -> throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida está en curso.");
+            }
+        }
+
+        return game;
     }
 }
