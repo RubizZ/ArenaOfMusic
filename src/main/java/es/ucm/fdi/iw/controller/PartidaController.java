@@ -86,17 +86,15 @@ public class PartidaController {
         try {
             UUID gameId = partidaService.createPartida(gameConfig);
             return "redirect:/partida/sala-espera/" + gameId.toString();
-        } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/error";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Error al crear la partida.");
-            return "redirect:/error";
+            String reason = "Error al acceder a la partida: " + e.getMessage();
+            return redireccion(redirectAttributes, reason);
         }
     }
 
     @GetMapping("/partida/sala-espera/{gameId}")
-    public String salaEspera(@PathVariable UUID gameId, Model model, HttpSession session) {
+    public String salaEspera(@PathVariable UUID gameId, Model model, HttpSession session,
+            RedirectAttributes redirectAttributes) {
         try {
             Game game = validarEstadoPartida(gameId, Game.GameState.WAITING);
 
@@ -122,9 +120,8 @@ public class PartidaController {
             model.addAttribute("playlist", playlist);
             return "sala-espera";
         } catch (ResponseStatusException e) {
-            model.addAttribute("msg", "Error al acceder a la sala de espera: " + e.getReason());
-            model.addAttribute("status", e.getStatusCode().value());
-            return "error";
+            String reason = "Error al acceder a la sala de espera: " + e.getReason();
+            return redireccion(redirectAttributes, reason);
         } catch (Exception e) {
             model.addAttribute("msg", "Error al acceder a la sala de espera: " + e.getMessage());
             return "error";
@@ -169,6 +166,9 @@ public class PartidaController {
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/error";
+        } catch (IllegalStateException e) {
+            String reason = "Error al iniciar la partida: " + e.getMessage();
+            return redireccion(redirectAttributes, reason);
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error al iniciar la partida.");
             return "redirect:/error";
@@ -176,7 +176,7 @@ public class PartidaController {
     }
 
     @GetMapping("/partida/{gameId}")
-    public String partida(@PathVariable UUID gameId, Model model) {
+    public String partida(@PathVariable UUID gameId, Model model, RedirectAttributes redirectAttributes) {
         try {
             Game game = validarEstadoPartida(gameId, Game.GameState.PLAYING);
 
@@ -193,9 +193,8 @@ public class PartidaController {
 
             return "partida";
         } catch (ResponseStatusException e) {
-            model.addAttribute("msg", "Error al acceder a la sala de espera: " + e.getReason());
-            model.addAttribute("status", e.getStatusCode().value());
-            return "error";
+            String reason = "Error al acceder a la partida: " + e.getReason();
+            return redireccion(redirectAttributes, reason);
         }
     }
 
@@ -212,7 +211,7 @@ public class PartidaController {
     }
 
     @PostMapping("/partida/inicioRonda/{gameId}")
-    public ResponseEntity<RoundInfoDTO> inicioRonda(@PathVariable UUID gameId) {
+    public ResponseEntity<RoundInfoDTO> inicioRonda(@PathVariable UUID gameId, RedirectAttributes redirectAttributes) {
         try {
             Game game = validarEstadoPartida(gameId, Game.GameState.PLAYING);
 
@@ -267,7 +266,8 @@ public class PartidaController {
     }
 
     @PostMapping("/partida/finRonda/{gameId}")
-    public ResponseEntity<RoundResponseDTO> finRonda(@PathVariable UUID gameId, @RequestBody Map<Long, String> body) {
+    public ResponseEntity<RoundResponseDTO> finRonda(@PathVariable UUID gameId, @RequestBody Map<Long, String> body,
+            RedirectAttributes redirectAttributes) {
         try {
             Game game = validarEstadoPartida(gameId, Game.GameState.PLAYING);
 
@@ -281,7 +281,7 @@ public class PartidaController {
     }
 
     @PostMapping("/partida/finalizar/{gameId}")
-    public ResponseEntity<Void> finalizarPartida(@PathVariable UUID gameId) {
+    public ResponseEntity<Void> finalizarPartida(@PathVariable UUID gameId, RedirectAttributes redirectAttributes) {
         try {
             Game game = validarEstadoPartida(gameId, Game.GameState.PLAYING);
 
@@ -295,15 +295,15 @@ public class PartidaController {
     }
 
     @GetMapping("/partida/resultados/{gameId}")
-    public String resultados(Model model, @PathVariable UUID gameId, HttpSession session) {
+    public String resultados(Model model, @PathVariable UUID gameId, HttpSession session,
+            RedirectAttributes redirectAttributes) {
         Game game;
         try {
             game = validarEstadoPartida(gameId, Game.GameState.FINISHED);
 
         } catch (ResponseStatusException e) {
-            model.addAttribute("msg", "Error al acceder a la sala de espera: " + e.getReason());
-            model.addAttribute("status", e.getStatusCode().value());
-            return "error";
+            String reason = "Error al acceder a los resultados: " + e.getReason();
+            return redireccion(redirectAttributes, reason);
         } catch (Exception e) {
             model.addAttribute("msg", "Error al acceder a la sala de espera: " + e.getMessage());
             return "error";
@@ -324,6 +324,37 @@ public class PartidaController {
         model.addAttribute("gameConfig", gameConfig);
 
         return "resultados";
+    }
+
+    // Métodos auxiliares
+
+    private Game validarEstadoPartida(UUID gameId, Game.GameState estadoEsperado) {
+        Game game;
+        try {
+            game = partidaService.getGameById(gameId);
+        } catch (Exception e) {
+            game = null;
+        }
+        if (game == null || !game.getActive()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
+        }
+
+        if (!game.getGameState().equals(estadoEsperado)) {
+            switch (game.getGameState()) {
+                case FINISHED ->
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
+                case ABANDONED -> throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida fue abandonada.");
+                case WAITING -> throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha comenzado.");
+                case PLAYING -> throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida está en curso.");
+            }
+        }
+
+        return game;
+    }
+
+    public String redireccion(RedirectAttributes redirectAttributes, String reason) {
+        redirectAttributes.addFlashAttribute("error", reason);
+        return "redirect:/";
     }
 
     private ResponseEntity<byte[]> responseEntityFromFileGetter(FileGetter fileGetter) {
@@ -348,26 +379,5 @@ public class PartidaController {
         } catch (NoDataException e) {
             return ResponseEntity.status(410).body(new byte[0]);
         }
-    }
-
-    /**
-     * Método reutilizable para validar una partida según estado y existencia.
-     */
-    private Game validarEstadoPartida(UUID gameId, Game.GameState estadoEsperado) {
-        Game game = partidaService.getGameById(gameId);
-        if (game == null || !game.getActive()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
-        }
-
-        if (!game.getGameState().equals(estadoEsperado)) {
-            switch (game.getGameState()) {
-                case FINISHED ->throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida ya ha finalizado.");
-                case ABANDONED -> throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida fue abandonada.");
-                case WAITING -> throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no ha comenzado.");
-                case PLAYING -> throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida está en curso.");
-            }
-        }
-
-        return game;
     }
 }

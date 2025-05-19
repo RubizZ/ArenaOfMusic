@@ -92,7 +92,8 @@
                             </div>
                             <div class="col">
                                 <div class="card desactivar mb-3 opacity-50" id="modo-multijugador">
-                                    <a th:href="@{configuracion-partida/multiplayer}" class="stretched-link" disabled></a>
+                                    <a th:href="@{configuracion-partida/multiplayer}" class="stretched-link"
+                                        disabled></a>
                                     <img src="/img/iconos/fiesta.png" alt="Modo Multijugador" class="p-2">
                                     <div class="card-body">
                                         <h5 class="card-title">Multijugador</h5>
@@ -109,6 +110,14 @@
 
 
     <th:block th:replace="~{fragments/footer.html :: footer}" />
+    <script th:inline="javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+            const error = /*[[${error}]]*/ null;
+            if (error) {
+                showErrorNotification(error);
+            }
+        });
+    </script>
 
 </body>
 
