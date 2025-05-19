@@ -62,6 +62,8 @@ public class ReportService {
             r.setBanned(false);
             r.setAdmin(currentAdmin);
             r.setResolutionDate(LocalDateTime.now());
+            User u = r.getReported();
+            u.setBanned(false);
             entityManager.merge(r);
         }
     }
