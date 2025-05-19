@@ -51,7 +51,8 @@ Ambas versiones serán posibles adiciones con la implementación de web sockets 
 
 ## Funcionalidades Principales (Version Entrega Examen 22 de mayo 2025)
 
-**Credenciales para usuarios iniciales:** //TODO
+### Credenciales para usuarios iniciales: 
+//TODO
 
 **Partida Individual:** //TODO
 
