@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import es.ucm.fdi.iw.model.Report;
 import es.ucm.fdi.iw.model.User;
 import es.ucm.fdi.iw.service.ReportService;
-import es.ucm.fdi.iw.service.UserService;
 import jakarta.servlet.http.HttpSession;
 
 @Controller

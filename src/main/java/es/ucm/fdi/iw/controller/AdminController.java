@@ -163,11 +163,6 @@ public class AdminController {
         }
     }
 
-    @GetMapping({ "/reports", "/reports/" })
-    public String reports(Model model) {
-        return "admin/reports";
-    }
-
     @GetMapping({ "/spectate", "/spectate/" })
     public String spectate(Model model) {
         return "admin/spectate";
