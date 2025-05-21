@@ -3,7 +3,6 @@ package es.ucm.fdi.iw.controller;
 import java.util.UUID;
 import java.io.File;
 import java.io.IOException;
-import java.net.http.HttpHeaders;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +11,6 @@ import java.util.Set;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -23,7 +21,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -33,8 +30,6 @@ import es.ucm.fdi.iw.dto.game.GameRoundsDTO;
 import es.ucm.fdi.iw.dto.game.RoundInfoDTO;
 import es.ucm.fdi.iw.dto.game.RoundResponseDTO;
 import es.ucm.fdi.iw.model.Game;
-import es.ucm.fdi.iw.model.PlayerGame;
-import es.ucm.fdi.iw.model.PlayerGameId;
 import es.ucm.fdi.iw.model.Playlist;
 import es.ucm.fdi.iw.model.User;
 import es.ucm.fdi.iw.service.PartidaService;
@@ -42,7 +37,6 @@ import es.ucm.fdi.iw.service.PlaylistService;
 import es.ucm.fdi.iw.service.SongService;
 import es.ucm.fdi.iw.util.FileGetter;
 import es.ucm.fdi.iw.util.NoDataException;
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
@@ -91,7 +85,7 @@ public class PartidaController {
         GameConfigDTO gameConfig = new GameConfigDTO(playlistId, modoJuego, rondas, tiempo, creator.getId(), maxPlayers,
                 0, maxPlayers > 1);
         try {
-            UUID gameId = partidaService.createPartida(gameConfig);
+            UUID gameId = partidaService.createGame(gameConfig);
             return "redirect:/partida/sala-espera/" + gameId.toString();
         } catch (RuntimeException rte) {
             String reason = "Error al acceder a la partida: " + rte.getMessage();
@@ -108,7 +102,7 @@ public class PartidaController {
             // Ingresar jugador a la partida
             User creator = (User) session.getAttribute("u");
             if (!partidaService.isPlayerInGame(creator.getId(), gameId)) {
-                partidaService.addPlayerToGame(gameId, creator.getId());
+                partidaService.playerEntersTheGame(gameId, creator.getId());
             }
 
             // Obtener Configuracion de la Partida
@@ -148,7 +142,7 @@ public class PartidaController {
                     || game.getGameState().equals(Game.GameState.ABANDONED)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no se puede abandonar.");
             }
-            partidaService.abandonarPartida(game);
+            partidaService.leaveGame(game);
 
             ResponseCookie cookie = ResponseCookie.from("partidaAbandonada" + gameId, "true")
                     .path("/")
@@ -222,7 +216,7 @@ public class PartidaController {
         try {
             Game game = validarEstadoPartida(gameId, Game.GameState.PLAYING);
 
-            RoundInfoDTO response = partidaService.iniciarRonda(game);
+            RoundInfoDTO response = partidaService.startRound(game);
             return ResponseEntity.ok(response);
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
@@ -250,7 +244,7 @@ public class PartidaController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
             }
 
-            File fragment = partidaService.generarFragmento(audioFile, fragmentDuration); // lo escribimos abajo
+            File fragment = partidaService.generateFragment(audioFile, fragmentDuration); // lo escribimos abajo
 
             byte[] bytes = Files.readAllBytes(fragment.toPath());
 
@@ -276,7 +270,7 @@ public class PartidaController {
         try {
             Game game = validarEstadoPartida(gameId, Game.GameState.PLAYING);
 
-            RoundResponseDTO response = partidaService.finalizarRonda(game, body);
+            RoundResponseDTO response = partidaService.endRound(game, body);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -288,7 +282,7 @@ public class PartidaController {
         try {
             Game game = validarEstadoPartida(gameId, Game.GameState.PLAYING);
 
-            partidaService.finalizarPartida(game);
+            partidaService.endGame(game);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -299,7 +293,7 @@ public class PartidaController {
     public String resultados(Model model, @PathVariable UUID gameId, HttpSession session,
             RedirectAttributes redirectAttributes) {
         try {
-           Game game = validarEstadoPartida(gameId, Game.GameState.FINISHED);
+            Game game = validarEstadoPartida(gameId, Game.GameState.FINISHED);
 
             User creator = (User) session.getAttribute("u");
             int position = partidaService.getPosition(game, creator.getId());
@@ -329,6 +323,8 @@ public class PartidaController {
     // Métodos auxiliares
 
     private Game validarEstadoPartida(UUID gameId, Game.GameState estadoEsperado) throws ResponseStatusException {
+        // Validar el estado de la partida
+        // Si la partida no existe o no está activa, lanzar una excepción
         Game game;
         try {
             game = partidaService.getGameById(gameId);
@@ -338,7 +334,7 @@ public class PartidaController {
         if (game == null || !game.getActive()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
         }
-
+        // Si la partida no está en el estado esperado, lanzar una excepción
         if (!game.getGameState().equals(estadoEsperado)) {
             switch (game.getGameState()) {
                 case FINISHED ->
@@ -353,11 +349,14 @@ public class PartidaController {
     }
 
     public String redireccion(RedirectAttributes redirectAttributes, String reason) {
+        // Guardar el mensaje de error en los atributos de redirección y redirigir a la
+        // página de inicio para que muestre el mensaje de error
         redirectAttributes.addFlashAttribute("error", reason);
         return "redirect:/";
     }
 
     private ResponseEntity<byte[]> responseEntityFromFileGetter(FileGetter fileGetter) {
+        // Devolver un ResponseEntity con el contenido del archivo(imagen o audio)
         try {
             File file = fileGetter.get();
 
