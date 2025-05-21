@@ -137,6 +137,11 @@ public class PartidaService {
         return game;
     }
 
+    public Boolean isPlayerInGame(long userId, UUID gameId) {
+        PlayerGameId checkId = new PlayerGameId(gameId, userId);
+        PlayerGame playerGame = entityManager.find(PlayerGame.class, checkId);
+        return playerGame != null;
+    }
     @Transactional
     public PlayerGame addPlayerIntoGame(long userId, UUID gameId)
             throws IllegalArgumentException, IllegalStateException {
@@ -195,9 +200,7 @@ public class PartidaService {
 
     public Set<GamePlayerDTO> getGamePlayers(UUID gameId) {
         Game game = entityManager.find(Game.class, gameId);
-        if (game == null || !game.getActive()) {
-            throw new IllegalArgumentException("La partida no existe.");
-        }
+
         List<PlayerGame> gamePlayers = game.getParticipants();
         Set<GamePlayerDTO> players = new HashSet<>();
 

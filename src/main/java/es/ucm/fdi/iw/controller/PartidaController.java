@@ -33,6 +33,8 @@ import es.ucm.fdi.iw.dto.game.GameRoundsDTO;
 import es.ucm.fdi.iw.dto.game.RoundInfoDTO;
 import es.ucm.fdi.iw.dto.game.RoundResponseDTO;
 import es.ucm.fdi.iw.model.Game;
+import es.ucm.fdi.iw.model.PlayerGame;
+import es.ucm.fdi.iw.model.PlayerGameId;
 import es.ucm.fdi.iw.model.Playlist;
 import es.ucm.fdi.iw.model.User;
 import es.ucm.fdi.iw.service.PartidaService;
@@ -105,7 +107,9 @@ public class PartidaController {
 
             // Ingresar jugador a la partida
             User creator = (User) session.getAttribute("u");
-            partidaService.addPlayerToGame(gameId, creator.getId());
+            if (!partidaService.isPlayerInGame(creator.getId(), gameId)) {
+                partidaService.addPlayerToGame(gameId, creator.getId());
+            }
 
             // Obtener Configuracion de la Partida
             String gameConfigString = game.getConfigJson();
@@ -169,7 +173,7 @@ public class PartidaController {
             partidaService.startGame(game);
             return "redirect:/partida/" + gameId.toString();
         } catch (IllegalArgumentException e) {
-         String reason = "Error al iniciar la partida: " + e.getMessage();
+            String reason = "Error al iniciar la partida: " + e.getMessage();
             return redireccion(redirectAttributes, reason);
         } catch (ResponseStatusException e) {
             String reason = "Error al iniciar la partida: " + e.getReason();
@@ -199,6 +203,9 @@ public class PartidaController {
             return "partida";
         } catch (ResponseStatusException e) {
             String reason = "Error al acceder a la partida: " + e.getReason();
+            return redireccion(redirectAttributes, reason);
+        } catch (RuntimeException e) {
+            String reason = "Error inesperado al intentar cargar la partida: " + e.getMessage();
             return redireccion(redirectAttributes, reason);
         }
     }
@@ -333,7 +340,7 @@ public class PartidaController {
 
     // Métodos auxiliares
 
-    private Game validarEstadoPartida(UUID gameId, Game.GameState estadoEsperado)throws ResponseStatusException {
+    private Game validarEstadoPartida(UUID gameId, Game.GameState estadoEsperado) throws ResponseStatusException {
         Game game;
         try {
             game = partidaService.getGameById(gameId);
