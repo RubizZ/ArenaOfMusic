@@ -142,19 +142,13 @@ public class PartidaService {
         PlayerGame playerGame = entityManager.find(PlayerGame.class, checkId);
         return playerGame != null;
     }
+
     @Transactional
-    public PlayerGame addPlayerIntoGame(long userId, UUID gameId)
-            throws IllegalArgumentException, IllegalStateException {
+    public PlayerGame addPlayerIntoGame(long userId, UUID gameId) {
         Game game = entityManager.find(Game.class, gameId);
         User user = entityManager.find(User.class, userId);
 
-        PlayerGameId checkId = new PlayerGameId(gameId, userId);
-        if (entityManager.find(PlayerGame.class, checkId) != null) {
-            throw new IllegalStateException("El usuario ya está en esta partida.");
-        }
-
         PlayerGame playerGame = new PlayerGame();
-
         playerGame.setGame(game);
         playerGame.setUser(user);
 
@@ -187,13 +181,13 @@ public class PartidaService {
     }
 
     @Transactional
-    public void addPlayerToGame(UUID gameId, long userId) throws Exception {
+    public void addPlayerToGame(UUID gameId, long userId){
         try {
             PlayerGame pg = addPlayerIntoGame(userId, gameId);
             addPlayerGameToUser(userId, pg);
             addPlayerGameToGame(gameId, pg);
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
 
     }

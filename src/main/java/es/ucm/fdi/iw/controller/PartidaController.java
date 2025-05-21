@@ -131,7 +131,7 @@ public class PartidaController {
         } catch (ResponseStatusException e) {
             String reason = "Error al acceder a la sala de espera: " + e.getReason();
             return redireccion(redirectAttributes, reason);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             String reason = "Error al acceder a la sala de espera: " + e.getMessage();
             return redireccion(redirectAttributes, reason);
         }
