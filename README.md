@@ -159,7 +159,8 @@ Se encuentran completamente desarrolladas y funcionales.
 El panel de administrador contiene un titulo y 6 botones (hechos con cards) que lleva a las diferentes subpaginas (actualmente no completas) a las que un admin puede acceder para controlar la aplicacion. Estas son las siguiente:
 - **Playlists**: //TODO
 - **Tienda**: //TODO
-- **Administrar usuarios**: //TODO
+- **Administrar usuarios**: Permite visualizar todos los usuarios registrados mediante filtros avanzados. Para cada usuario es posible realizar acciones específicas, como banearlo en caso de que haya infringido las normas de la aplicación, o simplemente desactivar su perfil temporalmente.
+
 - **Reportes**: Accede a una lista de reportes que usuarios hayan hecho a otros usuarios para imponer castigos según el comportamiento del usuario, como banear tramposos. Esta vista ya está completamente desarrollada, siendo dinámica y haciendose efectivas las decisiones del administracion al resolver los reportes. Para resolver un reporte tiene que escoger una de las tres acciones posibles: pendiente, resolver (que no banea al usuario y marca como resuelto ese reporte, guardando quien lo resuelve y cuando) y banear (que banea al usuario reportado y resuelve ese reporte) y posteriormente confirmar las resoluciones, que hacen efectivas esas acciones. También encontramos filtros para la búsqueda de reportes como filtrar por fecha y por el estado del reporte Los iconos de las acciones pertenecen a Bootstrap Icons.
 
 Desde esta vista también se puede llegar a la vista ver-perfil, que muestra información al usuario sobre un usuario distinto, es decir muestra datos como su foto de perfil, correo, nombre de usuario...
@@ -171,8 +172,11 @@ Los iconos de los botones pertenecen a Bootstrap Icons y estan bajo la licencia 
 Como su propio nombre indica, esta es la vista principal de nuestra página web. En esta pantalla se encuentran varios elementos clave: un título, un mensaje de bienvenida y una sección con una imagen donde se explica cómo jugar. Además, hay un botón JUGAR, que llevaría al usuario a escoger el modo de juego, para posteriormente crear la partida para poder empezar a jugar.
 
 Las imágenes utilizadas en esta vista han sido generadas con ChatGPT, bajo la licencia de OpenAI.
+
 ### Vista Perfil
-//TODO
+La página de perfil ofrece a los usuarios un espacio completo para gestionar y personalizar su experiencia en el juego. En esta sección, es posible ver y editar la información personal, como el nombre, el correo electrónico y la imagen de perfil.
+
+También se presenta el historial de partidas, que ofrece un registro completo de las partidas jugadas, con detalles sobre los resultados y un enlace directo a los detalles de cada partida.
 
 ### Vista Tienda (Abandonada por el momento)
 //TODO ?
@@ -182,4 +186,5 @@ Todo el contenido ha sido removido en este momento. Se volverá a incluir si lle
 //TODO
 
 ### Vistas Login y Registro
-Se encuentran completamente desarrolladas y funcionales.
+Incluyen las vistas que permiten a los usuarios iniciar sesión o registrarse. Al momento del registro, se verifica si ya existe un usuario con la misma dirección de correo electrónico. Durante el inicio de sesión, se comprueba también si el usuario ha sido baneado: en ese caso, se muestra un aviso y no se permite el acceso a la aplicación.
+(Se encuentran completamente desarrolladas y funcionales.)
