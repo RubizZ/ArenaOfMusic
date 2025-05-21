@@ -64,16 +64,16 @@
     <div class="modal fade" id="modosModal" tabindex="-1" aria-labelledby="modosModalLabel" aria-hidden="true">
         <div class="modal-dialog  modal-dialog-centered modal-lg">
             <div class="modal-content">
-                <div class="modal-header bg-secondary">
-                    <h1 class="modal-title fs-5 text-light" id="modosModalLabel">Seleccione un Modo</h1>
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="modosModalLabel">Seleccione un Modo</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-footer bg-secondary">
+                <div class="modal-footer">
                     <div class="container flex-grow-1 px-3">
                         <div class="row row-cols-3 justify-content-center align-items-center g-3">
 
                             <div class="col">
-                                <div class="card hoverable mb-3" id="modo-solitario">
+                                <div class="card hoverable text-white text-center bg-secondary mb-3" id="modo-solitario">
                                     <a th:href="@{partida/configuracion-partida/solo}" class="stretched-link"></a>
                                     <img src="/img/iconos/solitario.png" alt="Modo Solitario" class="p-2">
                                     <div class="card-body">
@@ -82,7 +82,7 @@
                                 </div>
                             </div>
                             <div class="col">
-                                <div class="card desactivar mb-3 opacity-50" id="modo-duelo">
+                                <div class="card desactivar text-white text-center bg-secondary mb-3 opacity-50" id="modo-duelo">
                                     <a th:href="@{configuracion-partida/duel}" class="stretched-link" disabled></a>
                                     <img src="/img/iconos/duelo.png" alt="Modo Duelo" class="p-2">
                                     <div class="card-body">
@@ -91,7 +91,7 @@
                                 </div>
                             </div>
                             <div class="col">
-                                <div class="card desactivar mb-3 opacity-50" id="modo-multijugador">
+                                <div class="card desactivar text-white text-center bg-secondary mb-3 opacity-50" id="modo-multijugador">
                                     <a th:href="@{configuracion-partida/multiplayer}" class="stretched-link"
                                         disabled></a>
                                     <img src="/img/iconos/fiesta.png" alt="Modo Multijugador" class="p-2">
