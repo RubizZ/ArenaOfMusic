@@ -97,12 +97,17 @@ public class PartidaService {
     }
 
     public List<Playlist> getActivePlaylists() {
-        TypedQuery<Playlist> playlists = entityManager.createNamedQuery("Playlist.active", Playlist.class);
+        TypedQuery<Playlist> playlists;
+        try {
+            playlists = entityManager.createNamedQuery("Playlist.active", Playlist.class);
+        } catch (Exception e) {
+            throw new RuntimeException("No se pudieron obtener las playlist.");
+        }
         return playlists.getResultList();
     }
 
     @Transactional
-    public UUID createPartida(GameConfigDTO gameConfig) {
+    public UUID createPartida(GameConfigDTO gameConfig) throws RuntimeException, IllegalArgumentException {
         try {
             Playlist playlist = entityManager.find(Playlist.class, gameConfig.getPlaylistId());
             if (playlist == null || !playlist.isActive()) {
@@ -120,8 +125,7 @@ public class PartidaService {
 
             return game.getId();
         } catch (Exception e) {
-            System.err.println("Error al crear la partida: " + e.getMessage());
-            throw new RuntimeException("No se pudo crear la partida, intenta nuevamente.");
+            throw new RuntimeException("No se pudo crear la partida.");
         }
     }
 
@@ -134,98 +138,59 @@ public class PartidaService {
     }
 
     @Transactional
-    public PlayerGame addPlayerIntoGame(long userId, UUID gameId) {
-        try {
-            Game game = entityManager.find(Game.class, gameId);
-            if (game == null || !game.getActive()) {
-                throw new IllegalArgumentException("La partida con ID " + gameId + " no existe.");
-            }
+    public PlayerGame addPlayerIntoGame(long userId, UUID gameId)
+            throws IllegalArgumentException, IllegalStateException {
+        Game game = entityManager.find(Game.class, gameId);
+        User user = entityManager.find(User.class, userId);
 
-            User user = entityManager.find(User.class, userId);
-            if (user == null || !user.isEnabled() || user.isBanned()) {
-                throw new IllegalArgumentException("El usuario con ID " + userId + " no existe.");
-            }
-
-            PlayerGameId checkId = new PlayerGameId(gameId, userId);
-            if (entityManager.find(PlayerGame.class, checkId) != null) {
-                System.out.println("El usuario " + userId + " ya está en la partida " + gameId);
-                throw new IllegalStateException("El usuario ya está en esta partida.");
-            }
-
-            PlayerGame playerGame = new PlayerGame();
-
-            playerGame.setGame(game);
-            playerGame.setUser(user);
-
-            PlayerGameId playerGameId = new PlayerGameId(game.getId(), user.getId());
-            playerGame.setId(playerGameId);
-
-            playerGame.setScore(0);
-            playerGame.setPosition(0);
-
-            entityManager.persist(playerGame);
-
-            GameConfigDTO gameConfig = new GameConfigDTO();
-            gameConfig.parseGameConfigDTO(game.getConfigJson());
-            gameConfig.setNumPlayers(gameConfig.getNumPlayers() + 1);
-            game.setConfigJson(gameConfig.toString());
-
-            return playerGame;
-
-        } catch (Exception e) {
-            throw new RuntimeException("Error inesperado en el servidor al agregar el jugador al juego.", e);
+        PlayerGameId checkId = new PlayerGameId(gameId, userId);
+        if (entityManager.find(PlayerGame.class, checkId) != null) {
+            throw new IllegalStateException("El usuario ya está en esta partida.");
         }
 
+        PlayerGame playerGame = new PlayerGame();
+
+        playerGame.setGame(game);
+        playerGame.setUser(user);
+
+        PlayerGameId playerGameId = new PlayerGameId(game.getId(), user.getId());
+        playerGame.setId(playerGameId);
+
+        playerGame.setScore(0);
+        playerGame.setPosition(0);
+
+        entityManager.persist(playerGame);
+
+        GameConfigDTO gameConfig = new GameConfigDTO();
+        gameConfig.parseGameConfigDTO(game.getConfigJson());
+        gameConfig.setNumPlayers(gameConfig.getNumPlayers() + 1);
+        game.setConfigJson(gameConfig.toString());
+
+        return playerGame;
     }
 
     @Transactional
     public void addPlayerGameToUser(long userId, PlayerGame pg) {
         User user = entityManager.find(User.class, userId);
-        if (user == null || !user.isEnabled() || user.isBanned()) {
-            throw new IllegalArgumentException("El usuario con ID " + userId + " no existe.");
-        }
         user.addPlayerGame(pg);
     }
 
     @Transactional
     public void addPlayerGameToGame(UUID gameId, PlayerGame pg) {
         Game game = entityManager.find(Game.class, gameId);
-        if (game == null || !game.getActive()) {
-            throw new IllegalArgumentException("La partida con ID " + gameId + " no existe.");
-        }
         game.addPlayerGame(pg);
     }
 
     @Transactional
-    public void accederPartida(UUID gameId, long playerId) {
+    public void addPlayerToGame(UUID gameId, long userId) throws Exception {
         try {
-            addPlayerToGame(gameId, playerId);
-        } catch (Exception e) {
-            throw new RuntimeException("No se pudo crear partida o vincular host a partida, intenta nuevamente.");
-        }
-    }
-
-    @Transactional
-    public void addPlayerToGame(UUID gameId, long userId) {
-        try {
-            Game game = entityManager.find(Game.class, gameId);
-            if (game == null) {
-                throw new IllegalArgumentException("La partida con ID " + gameId + " no existe.");
-            }
-
-            User user = entityManager.find(User.class, userId);
-            if (user == null) {
-                throw new IllegalArgumentException("El usuario con ID " + userId + " no existe.");
-            }
-
             PlayerGame pg = addPlayerIntoGame(userId, gameId);
             addPlayerGameToUser(userId, pg);
             addPlayerGameToGame(gameId, pg);
-        } catch (IllegalArgumentException e) {
-            System.out.println("Argumento invalido: " + e.getMessage());
         } catch (Exception e) {
-            System.out.println("Error inesperado al agregar jugador a la partida: " + e.getMessage());
+            throw new Exception(e.getMessage());
         }
+
     }
 
     public Set<GamePlayerDTO> getGamePlayers(UUID gameId) {
@@ -268,9 +233,6 @@ public class PartidaService {
         gameConfigDTO.parseGameConfigDTO(game.getConfigJson());
 
         Playlist playlist = game.getPlaylist();
-        if (playlist == null || !playlist.isActive()) {
-            throw new IllegalArgumentException("La playlist no existe o no está activa.");
-        }
 
         List<Song> cancionesAleatorias = getSongsByPlaylistId(playlist.getId());
 

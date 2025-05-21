@@ -64,10 +64,15 @@ public class PartidaController {
     }
 
     @GetMapping("/partida/configuracion-partida/{modo}")
-    public String configPartida(Model model, @PathVariable String modo) {
-        model.addAttribute("playlists", partidaService.getActivePlaylists());
-        model.addAttribute("modo", modo);
-        return "configuracion-partida";
+    public String configPartida(Model model, @PathVariable String modo, RedirectAttributes redirectAttributes) {
+        try {
+            model.addAttribute("playlists", partidaService.getActivePlaylists());
+            model.addAttribute("modo", modo);
+            return "configuracion-partida";
+        } catch (RuntimeException e) {
+            String reason = "Error al acceder a la configuración de partida: " + e.getMessage();
+            return redireccion(redirectAttributes, reason);
+        }
     }
 
     @PostMapping("/partida/crear-partida")
@@ -86,8 +91,8 @@ public class PartidaController {
         try {
             UUID gameId = partidaService.createPartida(gameConfig);
             return "redirect:/partida/sala-espera/" + gameId.toString();
-        } catch (Exception e) {
-            String reason = "Error al acceder a la partida: " + e.getMessage();
+        } catch (RuntimeException rte) {
+            String reason = "Error al acceder a la partida: " + rte.getMessage();
             return redireccion(redirectAttributes, reason);
         }
     }
@@ -100,7 +105,7 @@ public class PartidaController {
 
             // Ingresar jugador a la partida
             User creator = (User) session.getAttribute("u");
-            partidaService.accederPartida(gameId, creator.getId());
+            partidaService.addPlayerToGame(gameId, creator.getId());
 
             // Obtener Configuracion de la Partida
             String gameConfigString = game.getConfigJson();
@@ -108,14 +113,14 @@ public class PartidaController {
             gameConfig.parseGameConfigDTO(gameConfigString);
 
             // Obtener jugadores de la partida
-            // Set<GamePlayerDTO> players = partidaService.getGamePlayers(gameId);
+            Set<GamePlayerDTO> players = partidaService.getGamePlayers(gameId);
 
             // Obtener información de la playlist
             Playlist playlist = game.getPlaylist();
 
             // Agregar datos al modelo
             model.addAttribute("gameId", game.getId().toString());
-            model.addAttribute("players", partidaService.getGamePlayers(gameId));
+            model.addAttribute("players", players);
             model.addAttribute("gameConfig", gameConfig);
             model.addAttribute("playlist", playlist);
             return "sala-espera";
@@ -123,8 +128,8 @@ public class PartidaController {
             String reason = "Error al acceder a la sala de espera: " + e.getReason();
             return redireccion(redirectAttributes, reason);
         } catch (Exception e) {
-            model.addAttribute("msg", "Error al acceder a la sala de espera: " + e.getMessage());
-            return "error";
+            String reason = "Error al acceder a la sala de espera: " + e.getMessage();
+            return redireccion(redirectAttributes, reason);
         }
     }
 
@@ -164,14 +169,14 @@ public class PartidaController {
             partidaService.startGame(game);
             return "redirect:/partida/" + gameId.toString();
         } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/error";
-        } catch (IllegalStateException e) {
-            String reason = "Error al iniciar la partida: " + e.getMessage();
+         String reason = "Error al iniciar la partida: " + e.getMessage();
+            return redireccion(redirectAttributes, reason);
+        } catch (ResponseStatusException e) {
+            String reason = "Error al iniciar la partida: " + e.getReason();
             return redireccion(redirectAttributes, reason);
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Error al iniciar la partida.");
-            return "redirect:/error";
+            String reason = "Error al iniciar la partida: " + e.getMessage();
+            return redireccion(redirectAttributes, reason);
         }
     }
 
@@ -328,7 +333,7 @@ public class PartidaController {
 
     // Métodos auxiliares
 
-    private Game validarEstadoPartida(UUID gameId, Game.GameState estadoEsperado) {
+    private Game validarEstadoPartida(UUID gameId, Game.GameState estadoEsperado)throws ResponseStatusException {
         Game game;
         try {
             game = partidaService.getGameById(gameId);
