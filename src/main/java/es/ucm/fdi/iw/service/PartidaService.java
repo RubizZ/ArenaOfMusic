@@ -273,7 +273,6 @@ public class PartidaService {
 
         roundInfo.setRoundNumber(gameRoundsDTO.getRoundNumber() + 1);
         roundInfo.setSongId(song.getId());
-        // roundInfo.setSongName(song.getName());
         gameRoundsDTO.addRound(roundInfo);
         game.setRoundJson(gameRoundsDTO.toString());
         entityManager.persist(game);
@@ -345,12 +344,11 @@ public class PartidaService {
                         + " puntos de EXP.");
             }
             playerGame.setPosition(position++);
-            // position++;
         }
 
     }
 
-    public List<String> getTitles() {
+    public List<String> getTitles() throws RuntimeException {
         List<String> titulos = new ArrayList<>();
         try {
             titulos = entityManager.createNamedQuery("Song.getActiveSongsTitles", String.class)

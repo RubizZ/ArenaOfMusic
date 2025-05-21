@@ -172,9 +172,6 @@ public class PartidaController {
             Game game = validarEstadoPartida(gameId, Game.GameState.WAITING);
             partidaService.startGame(game);
             return "redirect:/partida/" + gameId.toString();
-        } catch (IllegalArgumentException e) {
-            String reason = "Error al iniciar la partida: " + e.getMessage();
-            return redireccion(redirectAttributes, reason);
         } catch (ResponseStatusException e) {
             String reason = "Error al iniciar la partida: " + e.getReason();
             return redireccion(redirectAttributes, reason);
@@ -215,9 +212,7 @@ public class PartidaController {
         try {
             List<String> titles = partidaService.getTitles();
             return ResponseEntity.ok(titles);
-        } catch (ResponseStatusException e) {
-            return ResponseEntity.status(e.getStatusCode()).build();
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -265,8 +260,6 @@ public class PartidaController {
                     .contentType(MediaType.parseMediaType("audio/mpeg"))
                     .contentLength(bytes.length)
                     .body(bytes);
-        } catch (ResponseStatusException e) {
-            return ResponseEntity.status(e.getStatusCode()).build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -285,8 +278,6 @@ public class PartidaController {
 
             RoundResponseDTO response = partidaService.finalizarRonda(game, body);
             return ResponseEntity.ok(response);
-        } catch (ResponseStatusException e) {
-            return ResponseEntity.status(e.getStatusCode()).build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -299,8 +290,6 @@ public class PartidaController {
 
             partidaService.finalizarPartida(game);
             return ResponseEntity.ok().build();
-        } catch (ResponseStatusException e) {
-            return ResponseEntity.status(e.getStatusCode()).build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -309,33 +298,32 @@ public class PartidaController {
     @GetMapping("/partida/resultados/{gameId}")
     public String resultados(Model model, @PathVariable UUID gameId, HttpSession session,
             RedirectAttributes redirectAttributes) {
-        Game game;
         try {
-            game = validarEstadoPartida(gameId, Game.GameState.FINISHED);
+           Game game = validarEstadoPartida(gameId, Game.GameState.FINISHED);
 
+            User creator = (User) session.getAttribute("u");
+            int position = partidaService.getPosition(game, creator.getId());
+
+            GameConfigDTO gameConfig = new GameConfigDTO();
+            gameConfig.parseGameConfigDTO(game.getConfigJson());
+
+            GameRoundsDTO gameRounds = new GameRoundsDTO();
+            gameRounds = gameRounds.parse(game.getRoundJson());
+
+            model.addAttribute("position", position);
+            model.addAttribute("playlist", partidaService.getPlaylist(game));
+            model.addAttribute("sortedParticipants", partidaService.getSortedParticipants(game));
+            model.addAttribute("gameResults", partidaService.getGameResults(gameRounds));
+            model.addAttribute("gameConfig", gameConfig);
+
+            return "resultados";
         } catch (ResponseStatusException e) {
             String reason = "Error al acceder a los resultados: " + e.getReason();
             return redireccion(redirectAttributes, reason);
-        } catch (Exception e) {
-            model.addAttribute("msg", "Error al acceder a la sala de espera: " + e.getMessage());
-            return "error";
+        } catch (RuntimeException e) {
+            String reason = "Error inesperado al intentar cargar los resultados: " + e.getMessage();
+            return redireccion(redirectAttributes, reason);
         }
-        User creator = (User) session.getAttribute("u");
-        int position = partidaService.getPosition(game, creator.getId());
-
-        GameConfigDTO gameConfig = new GameConfigDTO();
-        gameConfig.parseGameConfigDTO(game.getConfigJson());
-
-        GameRoundsDTO gameRounds = new GameRoundsDTO();
-        gameRounds = gameRounds.parse(game.getRoundJson());
-
-        model.addAttribute("position", position);
-        model.addAttribute("playlist", partidaService.getPlaylist(game));
-        model.addAttribute("sortedParticipants", partidaService.getSortedParticipants(game));
-        model.addAttribute("gameResults", partidaService.getGameResults(gameRounds));
-        model.addAttribute("gameConfig", gameConfig);
-
-        return "resultados";
     }
 
     // Métodos auxiliares
