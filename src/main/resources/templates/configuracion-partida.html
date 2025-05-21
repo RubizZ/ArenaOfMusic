@@ -203,7 +203,7 @@
 
                 // Validaciones
                 if (!playlistId || !maxPlayers || !rondas || !tiempo || !modoJuego) {
-                    alert('Por favor, complete todos los campos del formulario.');
+                    showErrorNotification('Por favor, completa todos los campos.', 'warning');
                     return;
                 }
 
