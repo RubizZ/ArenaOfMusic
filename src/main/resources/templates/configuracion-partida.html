@@ -48,7 +48,8 @@
                                 </label>
 
                                 <input type="text" class="form-text" id="maxPlayers" name="maxPlayers"
-                                    th:value="${modo} == 'solo' ? 1 : (${modo} == 'duel' ? 2 : 4)" style="display: none;"/>
+                                    th:value="${modo} == 'solo' ? 1 : (${modo} == 'duel' ? 2 : 4)"
+                                    style="display: none;" />
                             </div>
 
                         </div>
@@ -66,7 +67,7 @@
                                     <span>Número de rondas</span>
                                     <span class="fw-bold fs-5" id="roundsValue">5</span>
                                 </label>
-                                <input type="range" class="form-range" id="rounds" name="rounds" min="5" max="25"
+                                <input type="range" class="form-range" id="rounds" name="rounds" min="1" max="25"
                                     step="1" value="5" />
                             </div>
                             <div class="mb-3">
@@ -74,7 +75,7 @@
                                     <span>Duración del fragmento (segundos)</span>
                                     <span class="fw-bold fs-5" id="timeValue">5</span>
                                 </label>
-                                <input type="range" class="form-range" id="time" name="time" min="5" max="30" step="1"
+                                <input type="range" class="form-range" id="time" name="time" min="1" max="30" step="1"
                                     value="5" />
                             </div>
                         </div>
@@ -135,12 +136,9 @@
 
                     <!-- Iniciar partida -->
                     <div class="col-6 d-flex justify-content-end">
-                        <a>
-                            <button class="btn btn-accept fw-bold rounded-4 text-dark"
-                                style="width: 220px;" type="submit">
-                                Iniciar
-                            </button>
-                        </a>
+                        <button id="buttonCrear" class="btn btn-accept fw-bold rounded-4 text-dark" style="width: 220px;" type="submit">
+                            Iniciar
+                        </button>
                     </div>
                 </div>
             </form>
