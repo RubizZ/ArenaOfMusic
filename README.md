@@ -63,10 +63,19 @@ Modo de juego en solitario donde el jugador seleccionará la playlist sobre la q
 **Personalización de perfil:**  
 La página de perfil ofrece a los usuarios un espacio completo para gestionar y personalizar su experiencia en el juego. En esta sección, es posible ver y editar la información personal, como el nombre, el correo electrónico y la imagen de perfil.
 
-**Social y Amistad:** //TODO
+**Social y Amistad:**
+La aplicación cuenta con un sistema social que permite a los usuarios interactuar y gestionar sus red de amistades de forma sencilla y dinámica.
+
+Los usuarios pueden ver a todos sus amigos agregados, consultar su nivel, estado de conexión y acceder a su perfil o iniciar una conversación privada mediante el chat integrado. 
+
+Desde la vista de solicitudes se gestionan todas las solicitudes de amistad recibidas, con la posibilidad de aceptarlas o rechazarlas. Además, existe una función para enviar solicitudes a otros usuarios buscando por nombre de usuario.
+
+El sistema informa automáticamente sobre nuevas solicitudes de amistad o mensajes pendientes y actualiza en tiempo real la lista de amigos y su estado. Se pueden eliminar amigos, bloquear usuarios y reportar conductas inapropiadas desde los menús de acción de cada usuario.
+
+Los usuarios pueden conversar en tiempo real con sus amigos mediante un sistema de chat privado actualizado al instante mediante WebSockets. La conversación muestra el historial completo de mensajes y permite enviar y recibir sin recargar la página.
 
 ### Administradores
-**Gestionar Canciones y Playlists:** Los administradores pueden modificar el nucleo sobre el que funciona la aplicacion según las necesidades en cada momento. Este nucleo son las canciones de la aplicacion, y las playlists de la aplicacion. Para poder jugar una partida, hace falta que en el sistema (en la base de datos y almacenamiento persistente) se encuentre una playlist con canciones sobre la que se va a jugar. En esta seccion se incluyen todas las herramientas necesarias para crear, modificar o eliminar canciones y playlists, y relacionar canciones a playlists, ademas de la validacion de datos necesaria para mantener la integridad de los datos. Además, hace uso de dos librerias para la transformacion de formato de audio e imagen, javacv con ffmpeg y webp-imageio respectivamente para permitir la subida de archivos al servidor de todo tipo, y transformarlos a mp3 con el mismo bitrate, un formato ampliamente soportado y mayormente libiano, y webp, un buen formato para imagenes en webs
+**Gestionar Canciones y Playlists:** Los administradores pueden modificar el núcleo sobre el que funciona la aplicacion según las necesidades en cada momento. Este núcleo son las canciones de la aplicacion, y las playlists de la aplicacion. Para poder jugar una partida, hace falta que en el sistema (en la base de datos y almacenamiento persistente) se encuentre una playlist con canciones sobre la que se va a jugar. En esta seccion se incluyen todas las herramientas necesarias para crear, modificar o eliminar canciones y playlists, y relacionar canciones a playlists, ademas de la validacion de datos necesaria para mantener la integridad de los datos. Además, hace uso de dos librerías para la transformación de formato de audio e imagen, javacv con ffmpeg y webp-imageio respectivamente para permitir la subida de archivos al servidor de todo tipo, y transformarlos a mp3 con el mismo bitrate, un formato ampliamente soportado y mayormente libiano, y webp, un buen formato para imagenes en webs
 
 **Reportes de Usuarios:** En esta sección, los administradores pueden visualizar los reportes enviados por los usuarios de la aplicación. Cada reporte contiene información detallada sobre de quien a quien va dirigido el reporte así como el hecho que se reporta, como conductas inapropiadas, trampas o cualquier otro problema relevante. Desde aquí, los administradores tienen la capacidad de tomar decisiones en función del contenido reportado: pueden resolver los reportes si el problema ha sido solucionado o, en caso necesario, aplicar sanciones como el baneo de usuarios que hayan incumplido las normas de la comunidad.
 
@@ -167,7 +176,8 @@ El panel de administrador contiene un titulo y 6 botones (hechos con cards) que 
 - **Reportes**: Accede a una lista de reportes que usuarios hayan hecho a otros usuarios para imponer castigos según el comportamiento del usuario, como banear tramposos. Esta vista ya está completamente desarrollada, siendo dinámica y haciendose efectivas las decisiones del administracion al resolver los reportes. Para resolver un reporte tiene que escoger una de las tres acciones posibles: pendiente, resolver (que no banea al usuario y marca como resuelto ese reporte, guardando quien lo resuelve y cuando) y banear (que banea al usuario reportado y resuelve ese reporte) y posteriormente confirmar las resoluciones, que hacen efectivas esas acciones. También encontramos filtros para la búsqueda de reportes como filtrar por fecha y por el estado del reporte Los iconos de las acciones pertenecen a Bootstrap Icons.
 
 Desde esta vista también se puede llegar a la vista ver-perfil, que muestra información al usuario sobre un usuario distinto, es decir muestra datos como su foto de perfil, correo, nombre de usuario...
-**Espectar partidas** y **Estadisticas generales** son dos vistas menos importantes que se han quedado en el tintero debido a la gran ambicion del proyecto y por ello los botones correspondientes a ellas aparecen desactivados en el panel del administrados, ademas del boton de **Tienda** que aunque esta se ha eliminado de la arquitectura, se ha mantenido el boton por cuestiones de diseño y simetría 
+
+**Espectar partidas** y **Estadisticas generales** son dos vistas menos importantes que se han quedado en el tintero debido a la gran ambicion del proyecto y por ello los botones correspondientes a ellas aparecen desactivados en el panel del administrados, ademas del boton de **Tienda**, que aunque esta se ha eliminado de la arquitectura, se ha mantenido el boton por cuestiones de diseño y simetría 
 
 Los iconos de los botones pertenecen a Bootstrap Icons y estan bajo la licencia MIT
 ### Vista Principal
@@ -181,7 +191,6 @@ A continuación, se presenta una lista con el historial de partidas del usuario,
 El modal de edición de perfil permite actualizar el nombre de usuario, la descripción, el correo electrónico, la contraseña y la imagen de perfil.
 
 ### Vista Tienda (Abandonada por el momento)
-//TODO ?
 
 Todo el contenido ha sido removido en este momento. Se volverá a incluir si llega a desarrollarse.
 ### Vista Amigos
@@ -272,6 +281,6 @@ Una vez terminada la partida, los jugadores se erán redirigidos automáticament
 
 - Debajo de la información se observará un tabla en la que la primera columna se pondrán ordenados los **títulos** las canciones que se reprodujeron y los **nombres** de los **artistas** a los que pertenecen en orden de ronda y después, tantas columnas como jugadoresdisputaron la partida, colocandose un punto rojo en caso de fallado o un punto verde en caso de haber acertar la canción o el artista que sonaba en esa ronda
 
-- Por último, hay 2 botonoes. Uno para **Volver a Jugar**, que redirije al jugador de nuevo a la **Configuración de la Partida** con el modo de juego (Solo, Duelo o Multijugador) que se habí ajugado en esta partida y un botón de **Continuar** que te redirige de nuevo a la vista **Principal** de **Arena of Music**.
+- Por último, hay 2 botones. Uno para **Volver a Jugar**, que redirije al jugador de nuevo a la **Configuración de la Partida** con el modo de juego (Solo, Duelo o Multijugador) que se habí ajugado en esta partida y un botón de **Continuar** que te redirige de nuevo a la vista **Principal** de **Arena of Music**.
 
 
