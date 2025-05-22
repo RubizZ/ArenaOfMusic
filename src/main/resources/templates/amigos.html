@@ -104,7 +104,7 @@
                     photoUrl: li.getAttribute("data-photourl") || "/img/default-profile.png",
                 };
                 //loadFriendProfile(friendData);
-                window.location.href = `/amigos/ver-perfil/${friendData.username}`;
+                window.location.href = `/amigos/ver-perfil/${encodeURIComponent(friendData.username)}`;
             }
         }
 
