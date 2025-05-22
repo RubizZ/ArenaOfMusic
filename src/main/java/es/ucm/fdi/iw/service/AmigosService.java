@@ -32,11 +32,16 @@ public class AmigosService {
     @Autowired
     private BlockService blockService;
 
+    @Autowired
+    private MessageService messageService;
+
     // Devuelve la lista de amigos
     public List<Map<String, Object>> getFriends(String username, String search)
     {
         User me = userService.findByUsername(username);
         Long id = me.getId();
+
+        Map<Long, Long> unreadMessages = messageService.countUnreadMessages(me);
 
         // Obtener amigos aceptados
         List<Friendship> friendShips = entityManager.createQuery(
@@ -55,14 +60,14 @@ public class AmigosService {
                         return null;
                     }
 
-                    String status = getLastLogin(friend.getLastLogin());
                     String photoUrl = friend.getProfileImage() != null ? friend.getProfileImage() : "/img/default-profile.png";
+                    long unread = unreadMessages.getOrDefault(friend.getId(), 0L);
 
                     return Map.<String, Object> of(
                         "username", friend.getUsername(),
                         "photoUrl", photoUrl,
                         "level", friend.getEXP_total(),
-                        "status", status
+                        "unread", unread
                     );
                 })
                 .filter(Objects::nonNull)

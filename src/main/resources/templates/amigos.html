@@ -32,7 +32,7 @@
                             </span>
                             <input
                                 type="text"
-                                class="form-control border-start-0"
+                                class="form-control border-start-0 shadow-none"
                                 placeholder="Buscar amigos"
                                 id="friendSearch"
                             />
@@ -101,8 +101,7 @@
             if(li) {
                 const friendData = {
                     username: li.getAttribute("data-username"),
-                    photoUrl: li.getAttribute("data-photourl") || "",
-                    status: li.getAttribute("data-status") || ""
+                    photoUrl: li.getAttribute("data-photourl") || "/img/default-profile.png",
                 };
                 loadFriendProfile(friendData);
             }
@@ -111,6 +110,7 @@
         // Cargar lista de amigos o solicitudes
         function loadList(viewType) {
             const filters = { view: viewType, search: document.getElementById("friendSearch").value };
+
             go(config.rootUrl + "/amigos/list", "POST", filters)
             .then(data => {
                 let html = "";
@@ -120,14 +120,19 @@
                             <li class="list-group-item d-flex align-items-center border-0"
                                 data-username="${item.username}"
                                 data-photourl="${item.photoUrl}"
-                                data-status="${item.status}"
+                                data-unread="${item.unread}"
                                 onclick="handleUser(event)">
 
                                 <!-- Foto de perfil -->
                                 <img src="${item.photoUrl}" class="rounded-circle me-3" style="width: 55px; height: 55px; object-fit: cover;"/>
                                 <div class="flex-grow-1">
                                     <div class="fw-semibold">${item.username}</div>
-                                    <small class="text-muted">${item.level} EXP · ${item.status}</small>
+                                    <small class="text-muted">
+                                        ${item.level} EXP
+                                    </small>
+                                    <small class="unread-badge fw-bold text-muted">
+                                        ${item.unread > 0 ? '&middot; ' + item.unread + ' mensajes nuevos' : '&nbsp;'}
+                                    </small>
                                 </div>
 
                                 <!-- Botón de acciones -->
@@ -173,7 +178,6 @@
                             <li class="list-group-item d-flex align-items-center border-0"
                                 data-username="${item.username}"
                                 data-photourl="${item.photoUrl}"
-                                data-status="${item.status}"
                             >
                                 <img src="${item.photoUrl}" class="rounded-circle me-3" style="width: 55px; height: 55px; object-fit: cover;"/>
 
@@ -207,6 +211,21 @@
             })
             .catch(error => console.error(error));
         }
+
+        const myName = /*[[${u.username}]]*/ "me";
+
+        ws.receive = (m) => {
+            if(m.to !== myName) {
+                return;
+            }
+
+            const li = document.querySelector(`li[data-username="${m.from}"]`);
+            if(li) {
+                const count = (parseInt(li.dataset.unread || "0", 10) + 1);
+                li.dataset.unread = count;
+                li.querySelector('.unread-badge').textContent = ` · ${count} mensajes nuevos`;
+            }
+        };
 
         // Cargar el perfil de un amigo
         function loadFriendProfile(friendData)
@@ -316,6 +335,12 @@
 
         // Abrir el panel de chat
         function openChat(username) {
+            const li = document.querySelector(`li[data-username="${username}"]`);
+            if(li) {
+                li.dataset.unread = 0;
+                li.querySelector(".unread-badge").textContent = "";
+            }
+
             window.location.href = `${config.rootUrl}/chat/${username}`;
         }
 
@@ -436,6 +461,9 @@
             })
             .catch(error => console.error(error));
         });
+
+        // Actualizar la lista de amigos al volver a la página
+        window.addEventListener('pageshow', () => refresh('amigos'));
     </script>
 </body>
 

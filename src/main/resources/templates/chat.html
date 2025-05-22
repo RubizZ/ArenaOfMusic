@@ -23,13 +23,13 @@
 
                     <!-- Mensajes -->
                     <div
-                        id="chatBox" class="border rounded p-3 mb-2"
+                        id="chatBox" class="border rounded p-3 mb-2 d-flex flex-column gap-2"
                         style="height: 400px; overflow: auto;">
                     </div>
 
                     <!-- Escribir nuevo mensaje -->
                     <div class="input-group">
-                        <textarea id="message" class="form-control" rows="1" placeholder="Escribe un mensaje..."></textarea>
+                        <textarea id="message" class="form-control shadow-none" rows="1" placeholder="Escribe un mensaje..."></textarea>
                         <button class="btn btn-primary" onclick="sendMessage()">Enviar</button>
                     </div>
                 </section>
@@ -43,9 +43,25 @@
         const friendName = /*[[${friend.username}]]*/ "friend";
         const myName = /*[[${u.username}]]*/ "me";
 
+        function markRead() {
+            fetch(`${config.rootUrl}/chat/${friendName}/messages`, {
+                method: "GET",
+                credentials: "same-origin"
+            })
+            .catch(error => console.error(error));
+        }
+
         ws.receive = (m) => {
             const involved = (m.from === friendName || m.to === friendName);
-            if (involved) appendMessage(m);
+            if(!involved) {
+                return;
+            }
+
+            appendMessage(m);
+
+            if (m.to === myName) {
+                markRead();
+            }
         }
 
         function appendMessage({from, text, sent}) {

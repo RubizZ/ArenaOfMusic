@@ -2,6 +2,8 @@ package es.ucm.fdi.iw.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -38,16 +40,43 @@ public class MessageService {
         return m;
     }
 
-    @Transactional(readOnly = true)
-    public List<Message> getConversation(User a, User b)
+    @Transactional
+    public List<Message> getConversation(User me, User friend)
+    {
+        List<Message> messages = entityManager.createQuery(
+            "SELECT m FROM Message m "
+            + "WHERE (m.sender = :me AND m.recipient = :friend) "
+            + "OR (m.sender = :friend AND m.recipient = :me) "
+            + "ORDER BY m.dateSent", Message.class)
+            .setParameter("me", me)
+            .setParameter("friend", friend)
+            .getResultList();
+
+        messages.stream()
+        .filter(m -> m.getDateRead() == null && m.getRecipient().getId() == me.getId())
+        .forEach(m -> {
+            m.setDateRead(LocalDateTime.now());
+            entityManager.merge(m);
+        });
+
+        entityManager.flush();
+
+        return messages;
+    }
+
+    @Transactional
+    public Map<Long, Long> countUnreadMessages(User me)
     {
         return entityManager.createQuery(
-                "SELECT m FROM Message m "
-                + "WHERE (m.sender = :a AND m.recipient = :b) "
-                + "OR (m.sender = :b AND m.recipient = :a) "
-                + "ORDER BY m.dateSent", Message.class)
-                .setParameter("a", a)
-                .setParameter("b", b)
-                .getResultList();
+            "SELECT m.sender.id, COUNT(m) FROM Message m "
+            + "WHERE m.recipient = :me AND m.dateRead IS NULL "
+            + "GROUP BY m.sender.id", Object[].class)
+            .setParameter("me", me)
+            .getResultList()
+            .stream()
+            .collect(Collectors.toMap(
+                r -> (Long) r[0], // id del amigo
+                r -> (Long) r[1]  // número de mensajes no leídos
+            ));
     }
 }
