@@ -535,7 +535,6 @@
 
                         const img = playlistCard.querySelector('#cover-image');
 
-
                         const cover = await fetch(`/admin/playlists/playlist/${playlist.id}/cover`, {
                             method: 'GET',
                             headers: {
@@ -544,14 +543,19 @@
                             credentials: 'same-origin'
                         });
 
+                        let coverURL = null;
+
                         if (cover.status == 410) { // La playlist no tiene imagen
-                            img.src = '/img/admin/music-note-list.svg';
+                            const response = await fetch('/img/admin/music-note-list.svg');
+                            const blob = await response.blob();
+                            coverURL = URL.createObjectURL(blob);
+                            img.src = coverURL;
                         } else if (!cover.ok) {
                             throw new Error("Error al obtener la portada de la playlist: " + cover.statusText);
                         } else {
                             const blob = await cover.blob();
-                            const url = URL.createObjectURL(blob);
-                            img.src = url;
+                            coverURL = URL.createObjectURL(blob);
+                            img.src = coverURL;
                         }
 
                         // Modal playlist
@@ -588,7 +592,7 @@
                                             </div>
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <div class="form-check form-switch mb-3" id="new-song-activate">
-                                                    <input class="form-check-input" type="checkbox" id="active" name="active">
+                                                    <input class="form-check-input" type="checkbox" id="active" name="active" ${playlist.active ? 'checked' : ''}>
                                                     <label class="form-check-label" for="active">Playlist activa</label>
                                                 </div>
                                                 <button type="button" id="save" class="btn btn-success align-self-end">
@@ -599,7 +603,7 @@
                                         <hr class="my-4">
                                         <div class="container d-flex justify-content-between align-items-center mb-2">
                                             <h4>Canciones</h4>
-                                            <button id="add" class="btn btn-primary align-self-end" type="button">
+                                            <button id="add" class="btn btn-primary align-self-end" type="button" data-bs-dismiss="modal">
                                                 <img src="/img/admin/plus.svg" alt="Añadir canción"></img>
                                             </button>
                                         </div>
@@ -629,7 +633,14 @@
                         `;
                         modalContainer.appendChild(modalElement);
 
-                        modalElement.querySelector('#active').checked = playlist.active;
+                        modalElement.addEventListener('hidden.bs.modal', () => {
+                            modalElement.querySelector('#songs-container').querySelectorAll('#player').forEach(player => player.pause());
+                        });
+
+                        const modal = new bootstrap.Modal(modalElement.querySelector(`#modal${playlist.id}`), {
+                            backdrop: true,
+                            keyboard: true
+                        });
 
                         const songsContainer = modalElement.querySelector('#songs-container');
 
@@ -638,7 +649,7 @@
 
                         imagePreview(coverImage, coverInput);
 
-                        coverImage.src = img.src;
+                        coverImage.src = coverURL;
 
                         const saveButton = modalElement.querySelector('#save');
                         const deleteButton = modalElement.querySelector('#delete');
@@ -761,57 +772,417 @@
                         });
 
                         addButton.addEventListener('click', async function (event) {
-                            event.preventDefault();
 
-                            this.blur();
-                            tooltipAdd.hide();
+                            const songSearchModal = document.createElement('div');
+                            songSearchModal.className = 'modal fade';
+                            songSearchModal.id = `songSearchModal${playlist.id}`;
+                            songSearchModal.tabIndex = -1;
+                            songSearchModal.setAttribute('aria-labelledby', `songSearchModalLabel${playlist.id}`);
+                            songSearchModal.setAttribute('aria-hidden', 'true');
+                            songSearchModal.innerHTML = `
+                                <div class="modal-dialog modal-xl">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="songSearchModalLabel${playlist.id}">Añadir canciones existentes</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="container sticky-filters" id="song-search-filters-${playlist.id}">
+                                                <div class="row d-flex g-3">
+                                                    <div class="col-12 col-xl-9 d-flex flex-column">
+                                                        <div class="card text-center flex-grow-1 px-3 justify-content-center">
+                                                            <div class="row align-items-center justify-content-center">
+                                                                <div class="col-12 col-xl-2 mt-4 mt-xl-0">
+                                                                    <h4>Filtros</h4>
+                                                                </div>
+                                                                <div class="col-12 col-xl-2">
+                                                                    <div class="form-floating my-3">
+                                                                        <input type="number" class="form-control" id="song-filter-id-${playlist.id}">
+                                                                        <label for="song-filter-id-${playlist.id}">ID</label>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-12 col-xl-3">
+                                                                    <div class="form-floating my-3">
+                                                                        <input type="text" class="form-control" id="song-filter-name-${playlist.id}">
+                                                                        <label for="song-filter-name-${playlist.id}">Nombre</label>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-12 col-xl-3">
+                                                                    <div class="form-floating my-3">
+                                                                        <input type="text" class="form-control" id="song-filter-artists-${playlist.id}">
+                                                                        <label for="song-filter-artists-${playlist.id}">Artistas</label>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-12 col-xl-2">
+                                                                    <div class="form-floating mb-3 mt-3">
+                                                                        <input type="text" class="form-control" id="song-filter-album-${playlist.id}">
+                                                                        <label for="song-filter-album-${playlist.id}">Album</label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12 col-xl-3 d-flex flex-column">
+                                                        <div class="card flex-grow-1 align-items-center justify-content-center py-3">
+                                                            <div class="row justify-content-center align-items-center text-center px-3 px-xl-0">
+                                                                <h5 class="col-auto">Ordenar por</h5>
+                                                                <div class="col-auto">
+                                                                    <div class="input-group">
+                                                                        <select class="form-select" id="song-order-select-${playlist.id}">
+                                                                            <option value="id">ID</option>
+                                                                            <option value="name">Nombre</option>
+                                                                            <option value="artists">Artista</option>
+                                                                            <option value="album">Album</option>
+                                                                        </select>
+                                                                        <button id="song-sort-order-button-${playlist.id}" class="btn" type="button">
+                                                                            <img id="song-sort-order-img-${playlist.id}" src="/img/admin/sort-down.svg">
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="songs-container-${playlist.id}"></div>
+                                            <div class="audio-loader-container" id="songSearchLoader-${playlist.id}" style="display:none;">
+                                                <div class="audio-loader">
+                                                    <div class="audio-bar"></div>
+                                                    <div class="audio-bar"></div>
+                                                    <div class="audio-bar"></div>
+                                                    <div class="audio-bar"></div>
+                                                    <div class="audio-bar"></div>
+                                                </div>
+                                            </div>
+                                            <div class="pagination-controls d-flex justify-content-center align-items-center my-3">
+                                                <button id="songPrevPageBtn-${playlist.id}" class="btn btn-secondary mx-1">Anterior</button>
+                                                <div class="input-group mx-2" style="width: 100px;">
+                                                    <input id="songCurrentPageInput-${playlist.id}" type="number" class="form-control text-center" min="1" value="1">
+                                                </div>
+                                                <button id="songNextPageBtn-${playlist.id}" class="btn btn-secondary mx-1">Siguiente</button>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Volver atrás</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            document.body.appendChild(songSearchModal);
 
-                            const songId = prompt("Introduce el ID de la canción que quieres añadir a la playlist:");
+                            // Variables para paginación y orden
+                            let songPage = 0;
+                            let oldSongPage = 0;
+                            let songOrderState = 0;
 
-                            if (songId) {
-                                const response = await fetch(`/admin/playlists/addSongToPlaylist?playlistId=${playlist.id}&songId=${songId}`, {
-                                    method: 'POST',
-                                    headers: {
-                                        'X-CSRF-TOKEN': config.csrf.value
-                                    },
-                                    credentials: 'same-origin'
-                                });
+                            // Elementos
+                            const songSortOrderImage = songSearchModal.querySelector(`#song-sort-order-img-${playlist.id}`);
+                            const songSortOrderButton = songSearchModal.querySelector(`#song-sort-order-button-${playlist.id}`);
+                            const songSortSelect = songSearchModal.querySelector(`#song-order-select-${playlist.id}`);
+                            const songIdFilter = songSearchModal.querySelector(`#song-filter-id-${playlist.id}`);
+                            const songNameFilter = songSearchModal.querySelector(`#song-filter-name-${playlist.id}`);
+                            const songArtistsFilter = songSearchModal.querySelector(`#song-filter-artists-${playlist.id}`);
+                            const songAlbumFilter = songSearchModal.querySelector(`#song-filter-album-${playlist.id}`);
+                            const songPagePrev = songSearchModal.querySelector(`#songPrevPageBtn-${playlist.id}`);
+                            const songPageNext = songSearchModal.querySelector(`#songNextPageBtn-${playlist.id}`);
+                            const songCurrentPageInput = songSearchModal.querySelector(`#songCurrentPageInput-${playlist.id}`);
+                            const innerSongsContainer = songSearchModal.querySelector(`#songs-container-${playlist.id}`);
+                            const songSearchLoader = songSearchModal.querySelector(`#songSearchLoader-${playlist.id}`);
 
-                                if (response.ok) {
-                                    const song = await fetch(`/admin/playlists/searchSongs?id=${songId}`, {
+                            // Evento de orden
+                            songSortOrderButton.addEventListener('click', () => {
+                                songOrderState = 1 - songOrderState;
+                                songSortOrderImage.src = songOrderState === 0 ? '/img/admin/sort-down.svg' : '/img/admin/sort-up.svg';
+                                handlePlaylistEditSongFilterInput();
+                            });
+
+                            // Paginación
+                            songPagePrev.addEventListener('click', () => {
+                                if (songPage > 0) {
+                                    songPage--;
+                                    handlePlaylistEditSongFilterInput();
+                                } else {
+                                    if (songPage == 0) {
+                                        showErrorNotification("La pagina 1 es la primera, recargando canciones...", "info");
+                                        handlePlaylistEditSongFilterInput();
+                                    }
+                                }
+                            });
+                            songPageNext.addEventListener('click', () => {
+                                songPage++;
+                                handlePlaylistEditSongFilterInput();
+                            });
+                            songCurrentPageInput.addEventListener('input', () => {
+                                const page = parseInt(songCurrentPageInput.value) - 1;
+                                if (page >= 0) {
+                                    songPage = page;
+                                    handlePlaylistEditSongFilterInput();
+                                } else {
+                                    songCurrentPageInput.value = songPage + 1;
+                                }
+                            });
+
+                            // Filtros
+                            songIdFilter.addEventListener('input', handlePlaylistEditSongFilterInput);
+                            songNameFilter.addEventListener('input', handlePlaylistEditSongFilterInput);
+                            songArtistsFilter.addEventListener('input', handlePlaylistEditSongFilterInput);
+                            songAlbumFilter.addEventListener('input', handlePlaylistEditSongFilterInput);
+                            songSortSelect.addEventListener('change', handlePlaylistEditSongFilterInput);
+
+                            let filterInputTimeout;
+                            async function handlePlaylistEditSongFilterInput() {
+                                clearTimeout(filterInputTimeout);
+                                filterInputTimeout = setTimeout(async () => {
+
+                                    songSearchLoader.style.display = 'flex';
+
+                                    // Busca las canciones que estan en la playlist
+                                    const inPlaylistSongs = await fetch(`/admin/playlists/searchSongs?playlists=${playlist.id}&all=true`, {
                                         method: 'GET',
                                         headers: {
                                             'X-CSRF-TOKEN': config.csrf.value
                                         },
                                         credentials: 'same-origin'
                                     });
-                                    const songData = await song.json();
-                                    const songCard = await inPlaylistSongCard(songData.content[0], playlist.id, songsContainer);
-                                    showErrorNotification("Canción añadida correctamente", "success");
-                                } else {
-                                    const errorText = await response.text();
-                                    showErrorNotification("Error " + response.status + " al añadir la canción: " + errorText, "error");
-                                }
+
+                                    if (!inPlaylistSongs.ok) {
+                                        throw new Error("Error al obtener las canciones de la playlist: " + inPlaylistSongs.statusText);
+                                    }
+
+                                    const inPlaylistSongsData = await inPlaylistSongs.json();
+                                    const inPlaylistSongsIds = inPlaylistSongsData.content.map(song => song.id);
+
+                                    if (oldSongPage == songPage) {
+                                        songPage = 0;
+                                        oldSongPage = 0;
+                                        songCurrentPageInput.value = 1;
+                                    }
+
+
+                                    let filters = {
+                                        id: songIdFilter.value.trim(),
+                                        name: songNameFilter.value.trim(),
+                                        artists: songArtistsFilter.value.trim(),
+                                        album: songAlbumFilter.value.trim(),
+                                        sort: songSortSelect.value + (songOrderState == 0 ? ",DESC" : ",ASC"),
+                                        page: songPage
+                                    };
+
+                                    let queryParams = new URLSearchParams();
+                                    for (const key in filters) {
+                                        if (filters[key] !== "") {
+                                            queryParams.append(key, filters[key]);
+                                        }
+                                    }
+
+                                    try {
+                                        const response = await fetch(`/admin/playlists/searchSongs?${queryParams.toString()}`, {
+                                            method: 'GET',
+                                            headers: {
+                                                'X-CSRF-TOKEN': config.csrf.value
+                                            },
+                                            credentials: 'same-origin'
+                                        });
+
+                                        //songSearchLoader.style.display = 'none';
+
+                                        if (!response.ok) throw new Error("No se ha podido obtener las canciones del servidor");
+
+                                        const data = await response.json();
+
+                                        if (data.totalPages == 0) {
+                                            songPage = 0;
+                                            oldSongPage = 0;
+                                            songCurrentPageInput.value = 1;
+
+                                            innerSongsContainer.innerHTML = '';
+                                            const noSongs = document.createElement('div');
+                                            noSongs.className = 'alert alert-info text-center my-3';
+                                            noSongs.textContent = 'No se han encontrado resultados';
+                                            innerSongsContainer.appendChild(noSongs);
+                                            return;
+                                        }
+
+                                        if (songPage + 1 > data.totalPages) {
+                                            if (oldSongPage == data.totalPages - 1) {
+                                                songPage = data.totalPages - 1;
+                                                songCurrentPageInput.value = songPage + 1;
+                                                showErrorNotification("No hay más resultados", "warning");
+                                                return;
+                                            } else {
+                                                songPage = data.totalPages - 1;
+                                                songCurrentPageInput.value = songPage + 1;
+                                                showErrorNotification("La página " + (songPage + 1) + " es la última, recargando canciones...", "info");
+                                                handlePlaylistEditSongFilterInput();
+                                                return;
+                                            }
+                                        }
+
+                                        oldSongPage = songPage;
+                                        songPage = data.number;
+                                        songCurrentPageInput.value = songPage + 1;
+
+                                        innerSongsContainer.innerHTML = '';
+
+                                        let songPromises = [];
+
+                                        async function inPlaylistSearchSongCard(song) {
+                                            const id = song.id;
+                                            const active = song.active;
+                                            const name = song.name;
+                                            const artists = song.artists;
+                                            const album = song.album;
+
+                                            const songCard = document.createElement('div');
+                                            songCard.className = 'card existing-song-card p-3 my-2 d-none';
+                                            songCard.style.backgroundColor = `var(--bs-${active ? 'success' : 'danger'}-bg-subtle)`;
+                                            songCard.innerHTML = `
+                                            <div class="row align-items-center justify-content-center g-3">
+                                                <div class="col-12 col-xl-1 d-flex flex-column align-items-center align-content-center justify-content-center text-center">
+                                                    <div class="form-text mb-2">ID ${id}</div>
+                                                </div>
+                                                <div class="col-12 col-xl-1">
+                                                    <input id="cover-image" type="image" class="form-control img-fluid" src="/img/preview-song-img.jpeg"
+                                                        alt="Imagen de la canción" style="height: 80px; width: 80px; object-fit: contain;" disabled>
+                                                </div>
+                                                <div class="col-12 col-xl-2">
+                                                    <div class="form-floating">
+                                                        <input name="name" type="text" class="form-control" value="${name}" disabled>
+                                                        <label>Nombre</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 col-xl-2">
+                                                    <div class="form-floating">
+                                                        <input name="artists" type="text" class="form-control" value="${artists.join('/')}" disabled>
+                                                        <label>Artistas</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 col-xl-2">
+                                                    <div class="form-floating">
+                                                        <input name="album" type="text" class="form-control" value="${album}" disabled>
+                                                        <label>Album</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 col-xl-3 d-flex flex-column text-center">
+                                                    <audio class="flex-grow-1 w-100" controls src=""></audio>
+                                                </div>
+                                                <div class="col-12 col-xl-1 d-flex justify-content-center">
+                                                    <span id="tooltip-container">
+                                                        <button type="button" class="btn ${inPlaylistSongsIds.includes(id) ? 'btn-info' : 'btn-success'} mx-1" id="add-to-playlist-btn-${id}" ${inPlaylistSongsIds.includes(id) ? 'disabled' : ''}>
+                                                            <img src=${inPlaylistSongsIds.includes(id) ? '/img/admin/check-lg.svg' : '/img/admin/plus.svg'} alt="Añadir a playlist">
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            `;
+
+                                            const addSongButton = songCard.querySelector(`#add-to-playlist-btn-${id}`);
+                                            const spanForTooltip = songCard.querySelector('#tooltip-container');
+
+                                            let tooltip = new bootstrap.Tooltip(spanForTooltip, {
+                                                title: inPlaylistSongsIds.includes(id) ? "La canción ya está en la playlist" : "Añadir a la playlist",
+                                                placement: "top"
+                                            });
+
+                                            // Cargar audio
+                                            const audio = songCard.querySelector('audio');
+                                            await fetch(`/admin/playlists/song/${id}/audio`, {
+                                                method: 'GET',
+                                                headers: {
+                                                    'X-CSRF-TOKEN': config.csrf.value
+                                                },
+                                                credentials: 'same-origin'
+                                            }).then(r => r.ok ? r.blob() : null)
+                                                .then(blob => { if (blob) audio.src = URL.createObjectURL(blob); songCard.classList.remove('d-none'); });
+
+                                            // Cargar imagen
+                                            const img = songCard.querySelector('#cover-image');
+                                            await fetch(`/admin/playlists/song/${id}/cover`, {
+                                                method: 'GET',
+                                                headers: {
+                                                    'X-CSRF-TOKEN': config.csrf.value
+                                                },
+                                                credentials: 'same-origin'
+                                            }).then(r => r.ok ? r.blob() : null)
+                                                .then(blob => { if (blob) img.src = URL.createObjectURL(blob); });
+
+                                            // Añadir a playlist
+                                            addSongButton.addEventListener('click', async function () {
+                                                const resp = await fetch(`/admin/playlists/addSongToPlaylist?playlistId=${playlist.id}&songId=${id}`, {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'X-CSRF-TOKEN': config.csrf.value
+                                                    },
+                                                    credentials: 'same-origin'
+                                                });
+                                                if (resp.ok) {
+                                                    tooltip.dispose();
+                                                    tooltip = new bootstrap.Tooltip(spanForTooltip, {
+                                                        title: "La canción ya está en la playlist",
+                                                        placement: "top"
+                                                    });
+
+                                                    addSongButton.disabled = true;
+                                                    addSongButton.querySelector('img').src = '/img/admin/check-lg.svg';
+                                                    addSongButton.classList.remove('btn-success');
+                                                    addSongButton.classList.add('btn-info');
+
+                                                    inPlaylistSongCard(song, playlist.id, songsContainer);
+                                                    showErrorNotification("Canción añadida correctamente", "success");
+                                                } else {
+                                                    const errorText = await resp.text();
+                                                    showErrorNotification("Error " + resp.status + " al añadir la canción: " + errorText, "error");
+                                                }
+                                            });
+
+                                            innerSongsContainer.appendChild(songCard);
+                                        }
+
+                                        for (const song of data.content) {
+                                            songPromises.push(inPlaylistSearchSongCard(song));
+                                        }
+
+                                        if (songPromises.length > 0) {
+                                            const results = await Promise.allSettled(songPromises);
+                                            if (results.status === 'rejected') {
+                                                throw new Error("Error al cargar las canciones");
+                                            }
+                                        }
+                                    } catch (error) {
+                                        innerSongsContainer.innerHTML = `<div class="alert alert-danger text-center my-3">Error al obtener las canciones. Por favor, inténtalo de nuevo más tarde.</div>`;
+                                    } finally {
+                                        songSearchLoader.style.display = 'none';
+                                    }
+                                }, 250);
                             }
 
-                        });
+                            // Inicializar búsqueda
+                            handlePlaylistEditSongFilterInput();
 
-                        modalElement.addEventListener('hidden.bs.modal', () => {
-                            modalElement.querySelector('#songs-container').querySelectorAll('#player').forEach(player => player.pause());
-                        });
+                            // Pausar audio al cerrar modal
+                            songSearchModal.addEventListener('hidden.bs.modal', () => {
+                                songSearchModal.querySelectorAll('audio').forEach(player => player.pause());
+                            });
 
-                        const modal = new bootstrap.Modal(modalElement.querySelector(`#modal${playlist.id}`), {
-                            backdrop: true,
-                            keyboard: true
+                            // Mostrar modal
+                            const songSearchModalInstance = new bootstrap.Modal(songSearchModal);
+                            songSearchModalInstance.show();
+
+                            // Si se cierra songSearchModal, se abre el modal general
+                            songSearchModalInstance._element.addEventListener('hidden.bs.modal', () => {
+                                modal.show();
+                            });
+
                         });
 
                         playlistCard.addEventListener('click', async function (event) {
 
                             songsContainer.innerHTML = '';
 
-                            playlistsGeneralLoader.style.display = 'flex';
                             const songsLoader = modalElement.querySelector('#playlistSongsLoader');
                             songsLoader.style.display = 'flex';
+
+                            modal.show();
 
                             try {
 
@@ -860,8 +1231,6 @@
                                 console.error(error);
                             } finally {
                                 songsLoader.style.display = 'none';
-                                playlistsGeneralLoader.style.display = 'none';
-                                modal.show();
                             }
 
                         });
@@ -884,7 +1253,7 @@
                     playlistSearchLoader.style.display = 'none';
                 }
 
-            }, 500);
+            }, 250);
         }
 
         document.addEventListener('playlistFilter', handlePlaylistFilterInput);
@@ -968,12 +1337,16 @@
 
                 imagePreview(coverImage, coverInput);
 
+                if (songsContainer.querySelector('.alert-info')) {
+                    songsContainer.querySelector('.alert-info').remove();
+                }
+
                 songsContainer.appendChild(songCard);
 
                 const removeButton = songCard.querySelector('#remove');
 
                 const tooltipRemove = new bootstrap.Tooltip(removeButton, {
-                    title: "Eliminar canción",
+                    title: "Eliminar canción de la playlist",
                     placement: "top"
                 });
 
@@ -991,6 +1364,12 @@
                         if (response.ok) {
                             tooltipRemove.dispose();
                             songsContainer.removeChild(songCard);
+                            if (songsContainer.childElementCount == 0) {
+                                const noSongs = document.createElement('div');
+                                noSongs.className = 'alert alert-info text-center my-3';
+                                noSongs.textContent = 'La playlist no tiene canciones';
+                                songsContainer.appendChild(noSongs);
+                            }
                             showErrorNotification("Canción eliminada correctamente", "success");
                         } else {
                             showErrorNotification("Error al eliminar la canción: " + response.statusText, "error");
