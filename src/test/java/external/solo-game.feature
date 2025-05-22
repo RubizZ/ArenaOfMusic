@@ -11,7 +11,7 @@ Scenario: solo-game completo
     # El usuario 'b' llega a la página de inicio de sesión y accede con sus credenciales.
     Given driver baseUrl + '/login'
     And input('#username', 'b')
-    And input('#password', 'aa')
+    And input('#password', 'aom_user')
     When submit().click(".form-signin button")
     Then waitForUrl(baseUrl)
 
@@ -28,9 +28,9 @@ Scenario: solo-game completo
     Then waitForUrl(baseUrl + '/partida/configuracion-partida')
 
     # Llega a la sala de configuración y elige su playlist favorita.
-    Given waitFor('#playlist976')
-    When click('#playlist976')
-    Then match script("document.querySelector('#playlist976').checked") == true
+    Given waitFor('#playlist975')
+    When click('#playlist975')
+    Then match script("document.querySelector('#playlist975').checked") == true
 
     # Ajusta el reto: solo una ronda para calentar motores.
     Given waitFor('#rounds')
@@ -59,7 +59,7 @@ Scenario: solo-game completo
 
     # Se enfrenta al reto e intenta adivinar la canción escribiendo "1".
     Given waitFor('#songInput')
-    And input('#songInput', '1')
+    And input('#songInput', 'Uno más uno son 7')
 
     # Tras la ronda, revisa los resultados y decide volver al inicio.
     Then waitForUrl(baseUrl + '/partida/resultados')

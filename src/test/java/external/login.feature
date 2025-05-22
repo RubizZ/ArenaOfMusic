@@ -21,7 +21,7 @@ Scenario: login malo en plantilla
 Scenario: login correcto como b
     Given driver baseUrl + '/login'
     And input('#username', 'b')
-    And input('#password', 'aa')
+    And input('#password', 'aom_user')
     When submit().click(".form-signin button")
     Then waitForUrl(baseUrl)
 
@@ -29,14 +29,14 @@ Scenario: login correcto como b
 Scenario: login correcto como a
     Given driver baseUrl + '/login'
     And input('#username', 'a')
-    And input('#password', 'aa')
+    And input('#password', 'aom_admin')
     When submit().click(".form-signin button")
     Then waitForUrl(baseUrl + '/admin')
 
 Scenario: logout after login
     Given driver baseUrl + '/login'
     And input('#username', 'a')
-    And input('#password', 'aa')
+    And input('#password', 'aom_admin')
     When submit().click(".form-signin button")
     Then waitForUrl(baseUrl + '/admin')
     Given waitFor('#logout')
