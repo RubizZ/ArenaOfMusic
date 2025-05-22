@@ -60,7 +60,8 @@ Modo de juego en solitario donde el jugador seleccionará la playlist sobre la q
 
 - Actualmente se encuentra desarrollada la totalidad de la partida en solitario: configuración, sala de espera, partida y resultados, pero no se han añadido nuevos modos de juego ni se ha implementado las partidas de **Duelo 1vs1** ni **Modo Multijugador**.
 
-**Personalización de perfil:**  //TODO
+**Personalización de perfil:**  
+La página de perfil ofrece a los usuarios un espacio completo para gestionar y personalizar su experiencia en el juego. En esta sección, es posible ver y editar la información personal, como el nombre, el correo electrónico y la imagen de perfil.
 
 **Social y Amistad:** //TODO
 
@@ -174,9 +175,9 @@ Como su propio nombre indica, esta es la vista principal de nuestra página web.
 Las imágenes utilizadas en esta vista han sido generadas con ChatGPT, bajo la licencia de OpenAI.
 
 ### Vista Perfil
-La página de perfil ofrece a los usuarios un espacio completo para gestionar y personalizar su experiencia en el juego. En esta sección, es posible ver y editar la información personal, como el nombre, el correo electrónico y la imagen de perfil.
-
-También se presenta el historial de partidas, que ofrece un registro completo de las partidas jugadas, con detalles sobre los resultados y un enlace directo a los detalles de cada partida.
+En esta pantalla se muestra una tarjeta con la información del usuario (foto de perfil, nombre de usuario, correo electrónico y descripción), acompañada de un botón que abre un modal para editar dichos datos.
+A continuación, se presenta una lista con el historial de partidas del usuario, donde se detalla el nombre de la playlist, la posición obtenida, el número de aciertos y un botón para acceder a los detalles de cada partida.
+El modal de edición de perfil permite actualizar el nombre de usuario, la descripción, el correo electrónico, la contraseña y la imagen de perfil.
 
 ### Vista Tienda (Abandonada por el momento)
 //TODO ?
