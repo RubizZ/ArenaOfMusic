@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 public class Inventory implements Transferable<Inventory.Transfer> {
 
     @EmbeddedId
-    private InventarioId id;
+    private InventoryId id;
 
     @ManyToOne
     @MapsId("userId")

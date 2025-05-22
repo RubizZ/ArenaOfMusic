@@ -52,8 +52,9 @@ Ambas versiones serán posibles adiciones con la implementación de web sockets 
 ## Funcionalidades Principales (Version Entrega Examen 22 de mayo 2025)
 
 ### Credenciales para usuarios iniciales:
-//TODO
-
+Usuarios:
+Usuario a (User, Admin):  username: a, password: aom_admin
+Usuario b (User):         username: b, password: aom_user
 ### Partida
 - **Partida Individual:** 
 Modo de juego en solitario donde el jugador seleccionará la playlist sobre la que quiera jugar. Dicha playlist se cargará y el jugador decidirá cuantas canciones se reproducen y el número segundos que se reproducirán. Se seleccionarán aleatoriamente las canciones de la playlist elegida por el jugador y comenzará la partida. En cada ronda sonará un fragmento aleatorio de la cancion seleccionad y el jugador escribir el título de la canción. Una vez acabado el tiempo de reproducción se mostrará la información de la canción que sonó, volverá a reproducirse el fragmento y el jugador recibirá 10 puntos si acertó la canción o 0 puntos si no. Cuando acaben de reproducirse todas las canciones, se mostrarán los resultados de la partida. 
