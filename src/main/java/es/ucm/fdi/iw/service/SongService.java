@@ -282,11 +282,10 @@ public class SongService {
     public Page<Song.Transfer> searchSongs(SongSearchFiltersDTO filters, Pageable pageable) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
+        // Consulta principal paginada
         CriteriaQuery<Song> select = cb.createQuery(Song.class);
         Root<Song> selectRoot = select.from(Song.class);
-
         List<Predicate> predicates = buildPredicates(cb, selectRoot, filters);
-
         select.where(predicates.toArray(new Predicate[0]));
 
         if (pageable.isPaged() && pageable.getSort().isSorted()) {
@@ -302,11 +301,19 @@ public class SongService {
             query.setFirstResult((int) pageable.getOffset());
             query.setMaxResults(pageable.getPageSize());
         }
+
         List<Song> resultList = query.getResultList();
 
-        Page<Song> page = new PageImpl<>(resultList, pageable, resultList.size());
+        // Consulta para contar el total de resultados
+        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        Root<Song> countRoot = countQuery.from(Song.class);
+        countQuery.select(cb.count(countRoot));
+        List<Predicate> countPredicates = buildPredicates(cb, countRoot, filters);
+        countQuery.where(countPredicates.toArray(new Predicate[0]));
 
-        return page.map(Song::toTransfer);
+        Long total = entityManager.createQuery(countQuery).getSingleResult();
+
+        return new PageImpl<>(resultList.stream().map(Song::toTransfer).toList(), pageable, total);
     }
 
     public Page<Song.Transfer> searchSongs(SongSearchFiltersDTO filters) {
