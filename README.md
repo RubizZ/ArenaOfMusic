@@ -188,3 +188,89 @@ Todo el contenido ha sido removido en este momento. Se volverá a incluir si lle
 ### Vistas Login y Registro
 Incluyen las vistas que permiten a los usuarios iniciar sesión o registrarse. Al momento del registro, se verifica si ya existe un usuario con la misma dirección de correo electrónico. Durante el inicio de sesión, se comprueba también si el usuario ha sido baneado: en ese caso, se muestra un aviso y no se permite el acceso a la aplicación.
 (Se encuentran completamente desarrolladas y funcionales.)
+
+### Vistas Partida
+Desde el Home, una vez decidido a jugar la partida, al pulsar en el botón "Jugar" se abrirá un modal para hacer la selección del tipo de partida que se desee jugar "Solitario", "Duelo" o "Multijugador" y pasar a configurar la partida.
+
+#### Configuración inicial de la partida
+Una vez acccedemos a la configuración podemos ver los distintos campos para personalizar la partida:
+1. Selección de playlist: El jugador elige entre las distintas listas de canciones disponibles.
+
+2. Número máximo de jugadores: En función de la opción que seleccionaste será de 1 siescogiste "Solitario", 2 si decidiste por un "Duelo" o 4 si optaste por una partida "Multijugador".
+
+3. Ajustes de juego: Puedes configurar el número de rondas que deseas jugar, entre 1 y 5 y la duración de cada fragmento que se reproducirá por ronda, comprendido entre 1 y 30 segundos.
+
+4. Existen distintas modalidades de juego, de las cuales algunas están disponibles y otras se encuentran en desarrollo:
+
+    - Adivina la canción (activo): El jugador debe escribir el nombre exacto de la canción.
+
+    - Opciones múltiples (próximamente): El jugador elige la respuesta correcta entre varias opciones.
+
+    - Adivina el artista (próximamente): El jugador debe escribir el nombre del artista que interpreta la canción.
+
+5. Controles
+    - Volver: Retorna a la pantalla anterior.
+
+    - Iniciar: Se creala partida con la configuración seleccionada y se accede a la Sala de Espera para comenzar la partida.
+
+#### Sala de Espera
+Una vez que se accede a la Sala de Espera se puede ver una serie de información antes de comenzar la Partida.
+
+- **Configuración de la partida:**
+  - El nombre y la caratula de la playlist ue se creó.
+  - El número de rondas y duración que tendrá cada fragmento que se va a reproducir.
+  - El modo de juego que se seleccionó.
+
+- **Código de sala:** 
+  - Un UUID único que podrá ser copiado y compartido con otros jugadores para unirse a la partida.
+
+- **Lista de jugadores conectados:**
+  - Se muestra el nombre del jugador, su imagen de perfil (si posee una), experiencia total (EXP) y número de victorias.
+  - El jugador que creó la sala aparece marcado como **ANFITRIÓN**.
+
+- **Controles:**
+  - **Botón "Comenzar partida":** Inicia la partida cuando todos los jugadores estén listos.
+  - **Botón "Salir":** Permite abandonar la sala en cualquier momento.
+
+  #### Partida
+
+Durante una partida, los jugadores se enfrentan a rondas sucesivas donde deben adivinar el título de canciones en un tiempo limitado. En la vista se encuentran:
+
+- **Encabezado de ronda:**
+  - Indica la ronda actual sobre el total que se haya marcado.
+
+- **Contador** 
+  - En el lado izquierdo se muestra un contador que marcará el inicio de cada ronda **"Preparados...", "Listos...", "YA!"** y comenzará la reproducción del fragmento. Durante la reproducción se mostrará una cuenta atrás desde el tiempo seleccionado hasta llegar a 0, que marcará el fin del tiempo de respuesta y de la reproducción del fragmento.
+
+- **Imagen de la canción:** 
+  - En el centro se muestra una imagen genérica con un signo de interrogación mientras la fase de responder está sucediendo. Una vez el tiempo se agota la imagen cambia por la caratula y el nombre de la canción a la que correspondía el fragmento que estuvo sonando, mientras se vuelve a reproducir.
+
+- **Campo de respuesta:**
+  - Debajo del la imagen se encuentra el campo de donde el jugador deberá dar su respuesta, que será un input de texto que facilitará opciones similares a la que se habrá introducido para poder seleccionarlas rápido o varias opciones a seleccionar en función del modo de juego que se seleccionara.
+  - En caso de ser un modo de juego de escritura, pulsando en el botón verde **"Marcar"** o presionando la tecla 'Enter' se confirmará la respuesta.
+
+- **Información del jugador:**
+  - En el lado derecho, se muestran las tarjetas de los jugadores, incluyendo:
+    - Imagen de perfil (genérica si no se ha configurado).
+    - Nombre de usuario.
+    - Puntos acumulados durante la partida.
+
+- **Botón de "Salir":**
+  - Posicionado en la esquina superior derecha, permite abandonar la partida en cualquier momento.
+
+Esta vista está diseñada para centrarse en la interacción rápida del jugador, reduciendo distracciones y destacando los elementos clave para la respuesta en tiempo real.
+
+
+#### Resultados
+
+Una vez terminada la partida, los jugadores se erán redirigidos automáticamente a la vista final de resultados. En ella podrán ver:
+
+- **El podio o los vencedores** de la partida junto con un **Ranking** ordenado de los jugadores en función de sus aciertos sobre las rondas jugadas.
+
+- **Información de la Partida** tal como la playlist jugada y el número de canciones reproducidas de la lista. 
+
+- Debajo de la información se observará un tabla en la que la primera columna se pondrán ordenados los **títulos** las canciones que se reprodujeron y los **nombres** de los **artistas** a los que pertenecen en orden de ronda y después, tantas columnas como jugadoresdisputaron la partida, colocandose un punto rojo en caso de fallado o un punto verde en caso de haber acertar la canción o el artista que sonaba en esa ronda
+
+- Por último, hay 2 botonoes. Uno para **Volver a Jugar**, que redirije al jugador de nuevo a la **Configuración de la Partida** con el modo de juego (Solo, Duelo o Multijugador) que se habí ajugado en esta partida y un botón de **Continuar** que te redirige de nuevo a la vista **Principal** de **Arena of Music**.
+
+
