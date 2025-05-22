@@ -79,7 +79,7 @@ Los usuarios pueden conversar en tiempo real con sus amigos mediante un sistema 
 
 **Reportes de Usuarios:** En esta sección, los administradores pueden visualizar los reportes enviados por los usuarios de la aplicación. Cada reporte contiene información detallada sobre de quien a quien va dirigido el reporte así como el hecho que se reporta, como conductas inapropiadas, trampas o cualquier otro problema relevante. Desde aquí, los administradores tienen la capacidad de tomar decisiones en función del contenido reportado: pueden resolver los reportes si el problema ha sido solucionado o, en caso necesario, aplicar sanciones como el baneo de usuarios que hayan incumplido las normas de la comunidad.
 
-**Visualización de partidas** y **Estadísticas de la app** inicialmente se propusieron pero no se han realizado debido al gran tamaño del proyecto, y **Gestionar Tienda** se ha descontinuado debido a la eliminacion de la tienda de la estructura de la aplicacion
+**Visualización de partidas** y **Estadísticas de la app** inicialmente se propusieron pero no se han realizado debido al gran tamaño del proyecto, y **Gestionar Tienda** se ha descontinuado debido a la eliminacion de la tienda de los planes de la aplicacion, aunque todavia sigue en la estructura de la misma para no romper la cohesion
 
 ## Vistas (Versión inicial)
 ### Panel de Administrador
@@ -177,7 +177,7 @@ El panel de administrador contiene un titulo y 6 botones (hechos con cards) que 
 
 Desde esta vista también se puede llegar a la vista ver-perfil, que muestra información al usuario sobre un usuario distinto, es decir muestra datos como su foto de perfil, correo, nombre de usuario...
 
-**Espectar partidas** y **Estadisticas generales** son dos vistas menos importantes que se han quedado en el tintero debido a la gran ambicion del proyecto y por ello los botones correspondientes a ellas aparecen desactivados en el panel del administrados, ademas del boton de **Tienda**, que aunque esta se ha eliminado de la arquitectura, se ha mantenido el boton por cuestiones de diseño y simetría 
+**Espectar partidas** y **Estadisticas generales** son dos vistas menos importantes que se han quedado en el tintero debido a la gran ambicion del proyecto y por ello los botones correspondientes a ellas aparecen desactivados en el panel del administrador, ademas del boton de **Tienda**, que aunque esta se ha descontinuado, se ha mantenido el boton por cuestiones de diseño y simetría 
 
 Los iconos de los botones pertenecen a Bootstrap Icons y estan bajo la licencia MIT
 ### Vista Principal
@@ -191,8 +191,8 @@ A continuación, se presenta una lista con el historial de partidas del usuario,
 El modal de edición de perfil permite actualizar el nombre de usuario, la descripción, el correo electrónico, la contraseña y la imagen de perfil.
 
 ### Vista Tienda (Abandonada por el momento)
+Todo el contenido ha sido removido en este momento. Se volverá a incluir si llega a desarrollarse aunque no hay planes para ello y queda fuera de nuestras metas de diseño para ingenieria web debido al gran tamaño del proyecto.
 
-Todo el contenido ha sido removido en este momento. Se volverá a incluir si llega a desarrollarse.
 ### Vista Amigos
 La vista de amigos permite a los usuarios gestionar su lista de amistades y solicitudes, así como consultar el perfil de un usuario concreto. El diseño está centrado en pantalla, desplazando el contenido al seleccionar un usuario para acceder a los detalles de este. Estos detalles incluyen la foto de perfil, el nombre de usuario, su estado de conexión, playlists recientes jugadas y estadísticas generales, como victorias totales, puntuación media y máxima puntuación. El usuario puede cerrar esta ventana de detalles y volver a la disposición anterior en cualquier momento.
 
