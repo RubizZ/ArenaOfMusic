@@ -479,7 +479,6 @@ a[disabled] {
 /*--- ADMIN DASHBOARD ---*/
 
 .hoverable {
-    border-radius: 15px;
     transition: transform 0.2s, box-shadow 0.2s;
     cursor: pointer;
 }
@@ -499,6 +498,7 @@ a[disabled] {
     background-color: var(--bs-secondary-bg);
     color: var(--bs-secondary-color);
     border: 2px solid var(--bs-border-color);
+    border-radius: 15px;
 }
 
 .admin-card>svg,
@@ -517,6 +517,29 @@ a[disabled] {
     overflow: hidden;
     text-overflow: ellipsis;
     text-align: center;
+    user-select: none;
+}
+
+.disabled-admin-card {
+    background-color: var(--bs-light);
+    color: var(--bs-secondary);
+    border: 2px dashed var(--bs-border-color);
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.disabled-admin-card>svg,
+.disabled-admin-card>img {
+    filter: grayscale(100%);
+}
+
+.disabled-admin-card .card-body .card-title {
+    color: var(--bs-secondary);
+    text-decoration: line-through;
+}
+
+.disabled-admin-card a.stretched-link {
+    pointer-events: none;
 }
 
 .capitalize {
