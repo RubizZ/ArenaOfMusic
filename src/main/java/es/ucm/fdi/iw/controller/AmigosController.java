@@ -1,5 +1,7 @@
 package es.ucm.fdi.iw.controller;
 
+import java.security.Principal;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -8,10 +10,18 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import es.ucm.fdi.iw.model.User;
 import es.ucm.fdi.iw.service.AmigosService;
+import es.ucm.fdi.iw.service.BlockService;
+import es.ucm.fdi.iw.service.ReportService;
+import es.ucm.fdi.iw.service.UserService;
+import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -23,7 +33,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class AmigosController {
 
     @Autowired
+    private EntityManager entityManager;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
     private AmigosService amigosService;
+
+    @Autowired
+    private BlockService blockService;
+
+    @Autowired
+    private ReportService reportService;
 
     @ModelAttribute
     public void populateModel(HttpSession session, Model model) {
@@ -33,14 +55,16 @@ public class AmigosController {
     }
 
     @GetMapping()
-    public String amigos(@RequestParam(name = "view", required = false) String viewType, Model model) {
+    public String amigos(@RequestParam(name = "view", required = false) String viewType, Model model, Principal principal) {
         if (viewType == null || viewType.isBlank()) {
             viewType = "amigos";
         }
 
-        model.addAttribute("friends", amigosService.getFriends());
-        model.addAttribute("requests", amigosService.getRequests());
-        model.addAttribute("selectedUser", amigosService.getSelectedUser());
+        String me = principal.getName();
+
+        model.addAttribute("friends", amigosService.getFriends(me, null));
+        model.addAttribute("requests", amigosService.getRequests(me, null));
+        model.addAttribute("selectedUser", null);
         model.addAttribute("viewType", viewType);
 
         return "amigos";
@@ -49,52 +73,98 @@ public class AmigosController {
     // Obtener la lista de amigos o solicitudes
     @PostMapping("/list")
     @ResponseBody
-    public List<Map<String, Object>> list(@RequestBody Map<String, String> filters) {
+    public List<Map<String, Object>> list(@RequestBody Map<String, String> filters, Principal principal)
+    {
+        String me = principal.getName();
         String view = filters.get("view");
         String search = filters.get("search");
-        List<Map<String, Object>> list;
 
         // Obtener la lista según la vista
         if("solicitudes".equalsIgnoreCase(view)) {
-            list = amigosService.getRequests();
+            return amigosService.getRequests(me, search);
         }
         else {
-            list = amigosService.getFriends();
+            return amigosService.getFriends(me, search);
         }
-
-        // Filtrar la lista por búsqueda
-        if(search != null && !search.trim().isEmpty()) {
-            String searchLower = search.toLowerCase();
-            list = list.stream()
-            .filter(item -> item.get("username")
-            .toString().toLowerCase()
-            .contains(searchLower))
-            .toList();
-        }
-
-        return list;
     }
 
     // Obtener detalles del perfil de un amigo
     @PostMapping("/profile")
     @ResponseBody
-    public Map<String, Object> profile(@RequestBody Map<String, Object> friendData) {
-        return amigosService.getFriendProfile(friendData);
+    public Map<String, Object> profile(@RequestBody Map<String, Object> friendData, Principal principal) {
+        String friend = friendData.get("username").toString();
+        return amigosService.getFriendProfile(principal.getName(), friend);
     }
 
     // Aceptar solicitud de amistad
     @PostMapping("/request/accept")
     @ResponseBody
-    public Map<String, Object> acceptRequest(@RequestBody Map<String, Object> requestData) {
-        boolean result = amigosService.acceptRequest(requestData);
+    public Map<String, Boolean> acceptRequest(@RequestBody Map<String, String> requestData, Principal principal) {
+        boolean result = amigosService.acceptRequest(principal.getName(), requestData.get("username"));
         return Map.of("success", result);
     }
 
     // Rechazar solicitud de amistad
     @PostMapping("/request/reject")
     @ResponseBody
-    public Map<String, Object> rejectRequest(@RequestBody Map<String, Object> requestData) {
-        boolean result = amigosService.rejectRequest(requestData);
+    public Map<String, Boolean> rejectRequest(@RequestBody Map<String, String> requestData, Principal principal) {
+        boolean result = amigosService.rejectRequest(principal.getName(), requestData.get("username"));
         return Map.of("success", result);
+    }
+
+    // Eliminar usuario de la lista de amigos
+    @PostMapping("/delete")
+    @ResponseBody
+    public Map<String, Boolean> deleteFriend(@RequestBody Map<String, String> friendData, Principal principal) {
+        boolean result = amigosService.deleteFriend(principal.getName(), friendData.get("username"));
+        return Map.of("success", result);
+    }
+
+    // Bloquear usuario
+    @PostMapping("/block")
+    @ResponseBody
+    public Map<String, Boolean> blockUser(@RequestBody Map<String, String> blockData, Principal principal) {
+        boolean result = blockService.blockUser(principal.getName(), blockData.get("username"));
+        return Map.of("success", result);
+    }
+
+    // Desbloquear usuario
+    @PostMapping("/unblock")
+    @ResponseBody
+    public Map<String, Boolean> unblockUser(@RequestBody Map<String, String> unblockData, Principal principal) {
+        boolean result = blockService.unblockUser(principal.getName(), unblockData.get("username"));
+        return Map.of("success", result);
+    }
+
+    // Enviar solicitud de amistad
+    @PostMapping("/request/send")
+    @ResponseBody
+    public Map<String, Boolean> sendRequest(@RequestBody Map<String, String> requestData, Principal principal) {
+        boolean result = amigosService.sendRequest(principal.getName(), requestData.get("username"));
+        return Map.of("success", result);
+    }
+
+    // Actualizar el estado de conexión del usuario
+    @PostMapping("/updateStatus")
+    @ResponseBody
+    @Transactional
+    public void updateStatus(Principal principal) {
+        User user = userService.findByUsername(principal.getName());
+        user.setLastLogin(new Date());
+        entityManager.merge(user);
+    }
+
+    // Reportar usuario
+    @PostMapping("/report")
+    @ResponseBody
+    public Map<String, Boolean> reportUser(@RequestBody Map<String, String> reportData, Principal principal) {
+        reportService.createReport(principal.getName(), reportData.get("reportedUsername"), Integer.parseInt(reportData.get("reason")));
+        return Map.of("success", true);
+    }
+
+    @GetMapping("/ver-perfil/{name}")
+    public String verPerfilUsuario(@PathVariable String name, Model model) {
+        model.addAttribute("user", amigosService.findUser(name));
+        return "ver-perfil";
     }
 }
