@@ -15,9 +15,12 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class ReportService {
-    
+
     @Autowired
     private EntityManager entityManager;
+
+    @Autowired
+    private UserService userService;
 
     public List<Report> getReports() {
         return entityManager.createQuery("SELECT r FROM Report r", Report.class).getResultList();
@@ -123,23 +126,33 @@ public class ReportService {
 
 
     @Transactional
-public void reopenReport(long id) {
-    Report r = entityManager.find(Report.class, id);
-    if (r != null) {
-        // Si estaba baneado, desbanear al usuario reportado
-        if (r.isBanned() && r.getReported() != null) {
-            User u = r.getReported();
-            u.setBanned(false);
-            entityManager.merge(u);
+    public void reopenReport(long id) {
+        Report r = entityManager.find(Report.class, id);
+        if (r != null) {
+            // Si estaba baneado, desbanear al usuario reportado
+            if (r.isBanned() && r.getReported() != null) {
+                User u = r.getReported();
+                u.setBanned(false);
+                entityManager.merge(u);
+            }
+            // Revertir campos del reporte
+            r.setSolved(false);
+            r.setBanned(false);
+            r.setAdmin(null);
+            r.setResolutionDate(null);
+            entityManager.merge(r);
         }
-        // Revertir campos del reporte
-        r.setSolved(false);
-        r.setBanned(false);
-        r.setAdmin(null);
-        r.setResolutionDate(null);
-        entityManager.merge(r);
     }
-}
 
+    @Transactional
+    public void createReport(String reporterUsername, String reportedUsername, int reason)
+    {
+        Report report = new Report();
+        report.setReporter(userService.findByUsername(reporterUsername));
+        report.setReported(userService.findByUsername(reportedUsername));
+        report.setReason(reason);
+        report.setCreationDate(LocalDateTime.now());
 
+        entityManager.persist(report);
+    }
 }

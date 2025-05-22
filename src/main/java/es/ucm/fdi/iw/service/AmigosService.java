@@ -56,7 +56,7 @@ public class AmigosService {
                     }
 
                     String status = getLastLogin(friend.getLastLogin());
-                    String photoUrl = friend.getProfileImage() != null ? friend.getProfileImage() : "";
+                    String photoUrl = friend.getProfileImage() != null ? friend.getProfileImage() : "/img/default-profile.png";
 
                     return Map.<String, Object> of(
                         "username", friend.getUsername(),
@@ -98,7 +98,7 @@ public class AmigosService {
                     }
 
                     String status = getLastLogin(requestUser.getLastLogin());
-                    String photoUrl = requestUser.getProfileImage() != null ? requestUser.getProfileImage() : "";
+                    String photoUrl = requestUser.getProfileImage() != null ? requestUser.getProfileImage() : "/img/default-profile.png";
 
                     return Map.<String, Object> of(
                         "username", requestUser.getUsername(),
@@ -201,7 +201,7 @@ public class AmigosService {
             .orElse(0);
 
         String status = getLastLogin(friend.getLastLogin());
-        String photoUrl = friend.getProfileImage() != null ? friend.getProfileImage() : "";
+        String photoUrl = friend.getProfileImage() != null ? friend.getProfileImage() : "/img/default-profile.png";
         String description = friend.getDescription() != null ? friend.getDescription() : "";
 
         List<Map<String, Object>> recentPlaylists = friend.getPartidas().stream()

@@ -29,3 +29,46 @@
         </svg>
     </label>
 </div>
+
+<div th:fragment="report-modal">
+    <div
+        class="modal fade" id="reportModal" tabindex="-1"
+        aria-labelledby="reportModalLabel" aria-hidden="true"
+    >
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="reportForm">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="reportModalLabel">
+                            Reportar a <span id="reportUserText"></span>
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <input type="hidden" id="reportUsername" name="reportedUsername"/>
+                        <p class="mb-3">Motivo del reporte:</p>
+
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="reason" id="reason1" value="1" checked>
+                            <label class="form-check-label" for="reason1">Trampas</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="reason" id="reason2" value="2" checked>
+                            <label class="form-check-label" for="reason2">Contenido inapropiado</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="reason" id="reason3" value="3" checked>
+                            <label class="form-check-label" for="reason3">Spam</label>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Enviar reporte</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

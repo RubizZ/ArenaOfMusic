@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import es.ucm.fdi.iw.model.User;
 import es.ucm.fdi.iw.service.AmigosService;
 import es.ucm.fdi.iw.service.BlockService;
+import es.ucm.fdi.iw.service.ReportService;
 import es.ucm.fdi.iw.service.UserService;
 import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpSession;
@@ -41,6 +42,9 @@ public class AmigosController {
 
     @Autowired
     private BlockService blockService;
+
+    @Autowired
+    private ReportService reportService;
 
     @ModelAttribute
     public void populateModel(HttpSession session, Model model) {
@@ -147,5 +151,13 @@ public class AmigosController {
         User user = userService.findByUsername(principal.getName());
         user.setLastLogin(new Date());
         entityManager.merge(user);
+    }
+
+    // Reportar usuario
+    @PostMapping("/report")
+    @ResponseBody
+    public Map<String, Boolean> reportUser(@RequestBody Map<String, String> reportData, Principal principal) {
+        reportService.createReport(principal.getName(), reportData.get("reportedUsername"), Integer.parseInt(reportData.get("reason")));
+        return Map.of("success", true);
     }
 }
