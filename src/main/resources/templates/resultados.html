@@ -75,8 +75,8 @@
                     <div class="container mt-5">
                         <div th:each="participant : ${sortedParticipants}"
                             class="d-flex align-items-center justify-content-between rounded-4 mb-2 p-1 px-3 mx-5"
-                            style="width: 30%; max-width: 400px;"
-                            th:style="${'background-color: rgba(142, 210, 105, ' + (1 - participant.position * 0.15) + ');'}">
+                            style="width: auto; max-width: 400px;"
+                            th:style="${'background-color: rgba(25, 175, 84 , ' + (1 - participant.position * 0.15) + ');'}">
 
                             <!-- Información del jugador -->
                             <div class="d-flex align-items-center">
@@ -94,7 +94,7 @@
                     </div>
 
                     <!-- Botones de acción -->
-                    <div class="d-flex justify-content-center gap-4 mt-5">
+                    <div class="d-flex justify-content-center gap-4 my-5">
                         <a th:if="${gameConfig.maxPlayers == 1}" th:href="@{/partida/configuracion-partida/solo}"
                             class="btn btn-light rounded-3 btn-sm px-5 py-1"
                             style="background-color: #F0F0F0; color: black;">Volver a jugar</a>
@@ -108,7 +108,7 @@
                             style="background-color: #F0F0F0; color: black;">Volver a jugar</a>
 
                         <a th:href="@{/}" class="btn btn-success rounded-3 btn-sm px-5 py-1" id="btn-continue"
-                            style="background-color: #8ED269; border-color: #8ED269; color: black;">Continuar
+                            >Continuar
                         </a>
                     </div>
                 </div>
@@ -152,12 +152,10 @@
 
                                 <!-- Para cada jugador, mostrar si acertó (● verde) o falló (● rojo) -->
                                 <td class="border-0 py-2" th:each="playerId : ${sortedParticipants}">
-                                    <span class="d-flex justify-content-center"
-                                        th:if="${result.responses[playerId.user.id]}"
-                                        style="color: green;">&#x25CF;</span>
-                                    <span class="d-flex justify-content-center"
-                                        th:if="${result.responses[playerId.user.id] == false}"
-                                        style="color: red;">&#x25CF;</span>
+                                    <span class="d-flex justify-content-center text-success"
+                                        th:if="${result.responses[playerId.user.id]}">&#x25CF;</span>
+                                    <span class="d-flex justify-content-center text-danger"
+                                        th:if="${result.responses[playerId.user.id] == false}">&#x25CF;</span>
                                     <span class="d-flex justify-content-center"
                                         th:if="${result.responses[playerId.user.id] == null}">–</span>
                                 </td>

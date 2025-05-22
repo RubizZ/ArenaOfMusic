@@ -11,14 +11,14 @@
         Nav goes here
     </nav>
 
-    <div class="container bg-light">
+    <div class="container my-2 p-2 d-flex justify-content-center text-center">
         <div class="main">
 
             <h4>Error <span th:text="${status}"></span></h4>
 
             <div th:unless="${application.debug}">
                 <img th:src="|https://http.cat/${status}|" alt="gato ilustrando problema" />
-                <p>Los administradores están informados. Puedes volver a intentar hacer lo que estabas haciendo de otra forma, o esperar a que solucionen el problema.</p>
+                <p class="m-1">Los administradores están informados. Puedes volver a intentar hacer lo que estabas haciendo de otra forma, o esperar a que solucionen el problema.</p>
             </div>
             <div th:if="${application.debug}">
                 <p>Ha pasado algo feo. Mira el log del servidor para saber más detalles.</p>
@@ -51,7 +51,7 @@
                     </tr>
                     <tr>
                         <td>Traza</td>
-                        <td><pre th:text="${trace}" /></td>
+                        <td><pre th:text="${trace}" ></td>
                     </tr>
                 </table>
 
