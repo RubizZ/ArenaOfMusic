@@ -54,11 +54,11 @@ Ambas versiones serán posibles adiciones con la implementación de web sockets 
 ### Credenciales para usuarios iniciales: 
 //TODO
 
-**Partida Individual:** //TODO
+### Partida
+- **Partida Individual:** 
+Modo de juego en solitario donde el jugador seleccionará la playlist sobre la que quiera jugar. Dicha playlist se cargará y el jugador decidirá cuantas canciones se reproducen y el número segundos que se reproducirán. Se seleccionarán aleatoriamente las canciones de la playlist elegida por el jugador y comenzará la partida. En cada ronda sonará un fragmento aleatorio de la cancion seleccionad y el jugador escribir el título de la canción. Una vez acabado el tiempo de reproducción se mostrará la información de la canción que sonó, volverá a reproducirse el fragmento y el jugador recibirá 10 puntos si acertó la canción o 0 puntos si no. Cuando acaben de reproducirse todas las canciones, se mostrarán los resultados de la partida. 
 
-**Duelo 1vs1:** //TODO
-
-**Modo Fiesta:** //TODO
+- Actualmente se encuentra desarrollada la totalidad de la partida en solitario: configuración, sala de espera, partida y resultados, pero no se han añadido nuevos modos de juego ni se ha implementado las partidas de **Duelo 1vs1** ni **Modo Multijugador**.
 
 **Personalización de perfil:**  //TODO
 
@@ -201,11 +201,8 @@ Una vez acccedemos a la configuración podemos ver los distintos campos para per
 3. Ajustes de juego: Puedes configurar el número de rondas que deseas jugar, entre 1 y 5 y la duración de cada fragmento que se reproducirá por ronda, comprendido entre 1 y 30 segundos.
 
 4. Existen distintas modalidades de juego, de las cuales algunas están disponibles y otras se encuentran en desarrollo:
-
     - Adivina la canción (activo): El jugador debe escribir el nombre exacto de la canción.
-
     - Opciones múltiples (próximamente): El jugador elige la respuesta correcta entre varias opciones.
-
     - Adivina el artista (próximamente): El jugador debe escribir el nombre del artista que interpreta la canción.
 
 5. Controles
@@ -232,8 +229,7 @@ Una vez que se accede a la Sala de Espera se puede ver una serie de información
   - **Botón "Comenzar partida":** Inicia la partida cuando todos los jugadores estén listos.
   - **Botón "Salir":** Permite abandonar la sala en cualquier momento.
 
-  #### Partida
-
+#### Partida
 Durante una partida, los jugadores se enfrentan a rondas sucesivas donde deben adivinar el título de canciones en un tiempo limitado. En la vista se encuentran:
 
 - **Encabezado de ronda:**
@@ -262,7 +258,6 @@ Esta vista está diseñada para centrarse en la interacción rápida del jugador
 
 
 #### Resultados
-
 Una vez terminada la partida, los jugadores se erán redirigidos automáticamente a la vista final de resultados. En ella podrán ver:
 
 - **El podio o los vencedores** de la partida junto con un **Ranking** ordenado de los jugadores en función de sus aciertos sobre las rondas jugadas.
