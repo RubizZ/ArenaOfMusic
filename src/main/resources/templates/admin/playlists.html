@@ -135,12 +135,13 @@
         function validateNewSong(songCard) {
             const audioFile = songCard.querySelector('#audio');
             const name = songCard.querySelector('#name');
-            const artists = songCard.querySelector('#artists');
+            const artists = songCard.querySelector('#artists-input-container');
+            const artistsContainer = songCard.querySelector('#tagsContainer');
             const coverFile = songCard.querySelector('#cover-input');
             const coverImg = songCard.querySelector('#cover-image');
             const album = songCard.querySelector('#album');
 
-            // Reset any previous error outlines
+
             [name, artists, album, audioFile].forEach(field => {
                 if (field) {
                     field.addEventListener('change', function () {
@@ -153,7 +154,7 @@
                 coverImg.classList.remove('is-invalid');
             });
 
-            // Collect missing fields
+
             const missingFields = [];
 
             if (!name.value.trim()) {
@@ -166,7 +167,7 @@
                 missingFields.push('Archivo de audio');
             }
 
-            if (!artists.value.trim()) {
+            if (artistsContainer.children.length === 0) {
                 artists.classList.add('is-invalid');
                 missingFields.push('Artista(s)');
             }
@@ -181,7 +182,7 @@
                 missingFields.push('Imagen de portada');
             }
 
-            // If there are missing fields, show a consolidated error
+
             if (missingFields.length > 0) {
                 const errorMessage = `Los siguientes campos son obligatorios: ${missingFields.join(', ')}`;
                 showErrorNotification(errorMessage, 'error');
@@ -205,9 +206,9 @@
             formData.set("audio", document.getElementById("audio").files[0]);
             formData.set("cover", document.getElementById("cover-input").files[0]);
             formData.set("name", document.getElementById("name").value);
-            formData.set("artists", document.getElementById("artists").value.split("/"));
+            formData.set("artists", Array.from(document.getElementById('tagsContainer').children).map(tag => tag.textContent.trim()));
             formData.set("album", document.getElementById("album").value);
-            formData.set("active", true); //TODO implementar
+            formData.set("active", document.getElementById("active").checked);
 
             fetch('/admin/playlists/submitSong', {
                 method: 'POST',

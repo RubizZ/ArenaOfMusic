@@ -203,7 +203,13 @@
 
                 newSongsContainer.appendChild(card);
 
+                const tooltip = new bootstrap.Tooltip(card.querySelector('#delete'), {
+                    title: "No subir canción",
+                    placement: "top"
+                });
+
                 card.querySelector('#delete').addEventListener('click', function () {
+                    tooltip.dispose();
                     newSongsContainer.removeChild(card);
                 });
             }
@@ -380,18 +386,35 @@
         </div>
     </div>
 
+    <div class="pagination-controls d-flex justify-content-center align-items-center my-3">
+        <button id="playlistPrevPageBtn" class="btn btn-secondary mx-1">Anterior</button>
+        <div class="input-group mx-2" style="width: 100px;">
+            <input id="playlistCurrentPageInput" type="number" class="form-control text-center" min="1" value="1">
+        </div>
+        <button id="playlistNextPageBtn" class="btn btn-secondary mx-1">Siguiente</button>
+    </div>
+
     <script th:src="@{/js/image-preview.js}"></script>
     <script type="module" th:src="@{/js/util.js}"></script>
     <script type="module">
         import { quoteattr } from '/js/util.js';
 
         //Fetch de playlists
+
+        let oldPlaylistPage = 0;
+        let playlistPage = 0;
+
+        const playlistsGeneralLoader = document.querySelector('.loader');
+
         const playlistsContainer = document.getElementById("playlists-container");
 
         const playlistIdFilter = document.getElementById("playlist-filter-id");
         const playlistNameFilter = document.getElementById("playlist-filter-name");
         const playlistOrderSelect = document.getElementById("playlist-order-select");
         const playlistOrderButton = document.getElementById("playlist-order-change");
+        const playlistPagePrev = document.getElementById("playlistPrevPageBtn");
+        const playlistPageNext = document.getElementById("playlistNextPageBtn");
+        const playlistCurrentPageInput = document.getElementById("playlistCurrentPageInput");
 
         const playlistSearchLoader = document.getElementById('playlistSearchLoader');
 
@@ -400,8 +423,8 @@
         let filterTimeoutPlaylistSearch;
         function handlePlaylistFilterInput() {
             clearTimeout(filterTimeoutPlaylistSearch);
-            setTimeout(async function () {
-                playlistsContainer.innerHTML = '';
+            filterTimeoutPlaylistSearch = setTimeout(async function () {
+
                 let modalContainer = document.getElementById('modalContainer');
                 if (!modalContainer) {
                     modalContainer = document.createElement('div');
@@ -411,12 +434,19 @@
                     //modalContainer.innerHTML = '';
                 }
 
-                playlistSearchLoader.style.display = 'flex';
+                if (oldPlaylistPage == playlistPage) {
+                    playlistPage = 0;
+                    oldPlaylistPage = 0;
+                    playlistCurrentPageInput.value = 1;
+                }
+
+                playlistsGeneralLoader.style.display = 'flex';
 
                 let filters = {
                     id: encodeURIComponent(playlistIdFilter.value.trim()),
                     name: encodeURIComponent(playlistNameFilter.value.trim()),
-                    sort: playlistOrderSelect.value + (playlistOrderState == 0 ? ",DESC" : ",ASC")
+                    sort: playlistOrderSelect.value + (playlistOrderState == 0 ? ",DESC" : ",ASC"),
+                    page: playlistPage
                 };
 
                 let queryParams = new URLSearchParams();
@@ -436,18 +466,48 @@
                         credentials: 'same-origin'
                     });
 
+                    playlistsGeneralLoader.style.display = 'none';
+
                     if (!playlists.ok)
                         throw new Error("Error al obtener las playlists: " + playlists.statusText);
 
                     const playlistsData = await playlists.json();
 
-                    if (playlistsData.content.length == 0) {
+                    if (playlistsData.totalPages == 0) {
+                        playlistPage = 0;
+                        oldPlaylistPage = 0;
+                        playlistCurrentPageInput.value = 1;
+
+                        playlistsContainer.innerHTML = '';
                         const noPlaylists = document.createElement('div');
                         noPlaylists.className = 'alert alert-info text-center my-3';
                         noPlaylists.textContent = 'No se han encontrado resultados';
                         playlistsContainer.appendChild(noPlaylists);
                         return;
                     }
+
+                    if (playlistPage + 1 > playlistsData.totalPages) {
+                        if (oldPlaylistPage == playlistsData.totalPages - 1) {
+                            playlistPage = playlistsData.totalPages - 1;
+                            playlistCurrentPageInput.value = playlistPage + 1;
+                            showErrorNotification("No hay más resultados", "warning");
+                            return;
+                        } else {
+                            playlistPage = playlistsData.totalPages - 1;
+                            playlistCurrentPageInput.value = playlistPage + 1;
+                            showErrorNotification("La página " + (playlistPage + 1) + " es la última, recargando playlists...", "info");
+                            handlePlaylistFilterInput();
+                            return;
+                        }
+                    }
+
+                    playlistSearchLoader.style.display = 'flex';
+
+                    oldPlaylistPage = playlistPage;
+                    playlistPage = playlistsData.number;
+                    playlistCurrentPageInput.value = playlistPage + 1;
+
+                    playlistsContainer.innerHTML = '';
 
                     for (let playlist of playlistsData.content) {
                         const playlistCard = document.createElement('div');
@@ -496,8 +556,6 @@
 
                         // Modal playlist
 
-                        //TODO Añadir switch para activar/desactivar playlist y añadir tooltips a botones con imagenes
-
                         const modalElement = document.createElement('div');
                         modalElement.innerHTML = `
                         <!-- Modal playlist ${playlist.id} -->
@@ -528,9 +586,15 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <button type="button" id="save" class="btn btn-success align-self-end">
-                                                <img src="/img/admin/check-lg.svg" alt="Aceptar cambios">
-                                            </button>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div class="form-check form-switch mb-3" id="new-song-activate">
+                                                    <input class="form-check-input" type="checkbox" id="active" name="active">
+                                                    <label class="form-check-label" for="active">Playlist activa</label>
+                                                </div>
+                                                <button type="button" id="save" class="btn btn-success align-self-end">
+                                                    <img src="/img/admin/check-lg.svg" alt="Aceptar cambios">
+                                                </button>
+                                            </div>
                                         </div>
                                         <hr class="my-4">
                                         <div class="container d-flex justify-content-between align-items-center mb-2">
@@ -565,6 +629,8 @@
                         `;
                         modalContainer.appendChild(modalElement);
 
+                        modalElement.querySelector('#active').checked = playlist.active;
+
                         const songsContainer = modalElement.querySelector('#songs-container');
 
                         const coverImage = modalElement.querySelector(`#cover-image`);
@@ -576,10 +642,25 @@
 
                         const saveButton = modalElement.querySelector('#save');
                         const deleteButton = modalElement.querySelector('#delete');
-
                         const addButton = modalElement.querySelector('#add');
 
+                        const tooltipSave = new bootstrap.Tooltip(saveButton, {
+                            title: "Guardar cambios",
+                            placement: "top"
+                        });
+
+                        const tooltipDelete = new bootstrap.Tooltip(deleteButton, {
+                            title: "Eliminar playlist",
+                            placement: "top"
+                        });
+
+                        const tooltipAdd = new bootstrap.Tooltip(addButton, {
+                            title: "Añadir canción",
+                            placement: "top"
+                        });
+
                         deleteButton.addEventListener('click', async function (event) {
+                            tooltipDelete.hide();
                             const confirmDeleteModal = document.createElement('div');
                             confirmDeleteModal.className = 'modal fade';
                             confirmDeleteModal.id = `confirmDeleteModal${playlist.id}`;
@@ -641,7 +722,7 @@
                         saveButton.addEventListener('click', async function (event) {
                             event.preventDefault();
 
-                            //TODO Mejorar experiencia de usuario
+                            tooltipSave.hide();
 
                             const name = modalElement.querySelector('#playlist-name').value;
                             const description = modalElement.querySelector('#playlist-description').value;
@@ -658,6 +739,8 @@
                             if (cover) {
                                 formData.append('cover', cover);
                             }
+
+                            formData.append('active', modalElement.querySelector('#active').checked);
 
                             fetch(`/admin/playlists/modifyPlaylist?id=${playlist.id}`, {
                                 method: 'POST',
@@ -679,7 +762,12 @@
 
                         addButton.addEventListener('click', async function (event) {
                             event.preventDefault();
+
+                            this.blur();
+                            tooltipAdd.hide();
+
                             const songId = prompt("Introduce el ID de la canción que quieres añadir a la playlist:");
+
                             if (songId) {
                                 const response = await fetch(`/admin/playlists/addSongToPlaylist?playlistId=${playlist.id}&songId=${songId}`, {
                                     method: 'POST',
@@ -702,9 +790,10 @@
                                     showErrorNotification("Canción añadida correctamente", "success");
                                 } else {
                                     const errorText = await response.text();
-                                    showErrorNotification("Error " + await response.status + " al añadir la canción: " + errorText, "error");
+                                    showErrorNotification("Error " + response.status + " al añadir la canción: " + errorText, "error");
                                 }
                             }
+
                         });
 
                         modalElement.addEventListener('hidden.bs.modal', () => {
@@ -720,8 +809,7 @@
 
                             songsContainer.innerHTML = '';
 
-                            const generalLoader = document.getElementsByClassName('loader')[0];
-                            generalLoader.style.display = 'flex';
+                            playlistsGeneralLoader.style.display = 'flex';
                             const songsLoader = modalElement.querySelector('#playlistSongsLoader');
                             songsLoader.style.display = 'flex';
 
@@ -772,7 +860,7 @@
                                 console.error(error);
                             } finally {
                                 songsLoader.style.display = 'none';
-                                generalLoader.style.display = 'none';
+                                playlistsGeneralLoader.style.display = 'none';
                                 modal.show();
                             }
 
@@ -796,7 +884,7 @@
                     playlistSearchLoader.style.display = 'none';
                 }
 
-            }, 250);
+            }, 500);
         }
 
         document.addEventListener('playlistFilter', handlePlaylistFilterInput);
@@ -805,6 +893,30 @@
         playlistNameFilter.addEventListener('input', handlePlaylistFilterInput);
         playlistOrderSelect.addEventListener('change', handlePlaylistFilterInput);
         playlistOrderButton.addEventListener('click', handlePlaylistFilterInput);
+        playlistPagePrev.addEventListener('click', () => {
+            if (playlistPage > 0) {
+                playlistPage--;
+                handlePlaylistFilterInput();
+            } else if (playlistPage == 0) {
+                showErrorNotification("La pagina 1 es la primera, recargando playlists...", "info");
+                handlePlaylistFilterInput();
+            }
+        });
+        playlistPageNext.addEventListener('click', () => {
+            playlistPage++;
+            handlePlaylistFilterInput();
+        });
+        playlistCurrentPageInput.addEventListener('input',
+            () => {
+                const page = parseInt(playlistCurrentPageInput.value) - 1;
+                if (page >= 0) {
+                    playlistPage = page;
+                    handlePlaylistFilterInput();
+                } else {
+                    playlistCurrentPageInput.value = playlistPage + 1;
+                }
+            }
+        );
 
         async function inPlaylistSongCard(song, playlistId, songsContainer) {
             const songId = song.id;
@@ -859,7 +971,15 @@
                 songsContainer.appendChild(songCard);
 
                 const removeButton = songCard.querySelector('#remove');
+
+                const tooltipRemove = new bootstrap.Tooltip(removeButton, {
+                    title: "Eliminar canción",
+                    placement: "top"
+                });
+
                 removeButton.addEventListener('click', () => {
+
+                    tooltipRemove.hide();
 
                     fetch(`/admin/playlists/removeSongFromPlaylist?playlistId=${playlistId}&songId=${songId}`, {
                         method: 'POST',
@@ -869,6 +989,7 @@
                         credentials: 'same-origin'
                     }).then(response => {
                         if (response.ok) {
+                            tooltipRemove.dispose();
                             songsContainer.removeChild(songCard);
                             showErrorNotification("Canción eliminada correctamente", "success");
                         } else {
@@ -911,11 +1032,16 @@
                     </div>
                     <div class="col-12 col-xl-4">
                         <div class="form-floating">
-                            <input name="artists" id="artists" type="text" class="form-control"
-                                aria-describedby="artists-help">
-                            <label th:text="'Artistas'"></label>
-                            <div class="form-text" id="artists-help"
-                                th:text="'Separa varios artistas con \'/\'. Diferencia entre mayúsculas y minúsculas'">
+                            <div id="artists-input-container" class="input-container form-control"
+                                onclick="document.getElementById('artists').focus()">
+                                <div id="tagsWrapper">
+                                    <div id="tagsContainer"></div>
+                                    <input type="text" class="border-0 flex-grow-1 bg-transparent" id="artists">
+                                </div>
+                            </div>
+                            <label>Artistas</label>
+                            <div class="form-text" id="artists-help">
+                                Pulsa enter para añadir un artista, y backspace para eliminar el último
                             </div>
                         </div>
                     </div>
@@ -960,6 +1086,11 @@
         correctamente y
         cambialos a mano si fuera necesario</div>
 
+    <div class="form-check form-switch mb-3" id="new-song-activate" hidden>
+        <input class="form-check-input" type="checkbox" id="active" name="active" checked>
+        <label class="form-check-label" for="active">Activar al subir la cancion</label>
+    </div>
+
     <button id="new-song-submit" type="submit" class="btn btn-primary w-100" hidden>Subir</button>
 
     <script th:src="@{/js/jsmediatags.min.js}"></script>
@@ -985,10 +1116,14 @@
             const songPlayer = document.getElementById('player');
             const songFileName = document.getElementById('file-name');
             const songName = document.getElementById('name');
-            const songArtists = document.getElementById('artists');
+            const songArtistsInput = document.getElementById('artists');
             const songAlbum = document.getElementById('album');
+            const tagsContainer = document.getElementById('tagsContainer');
+            const songActive = document.getElementById('active');
 
             if (file) {
+
+                songActive.checked = true;
 
                 songFileName.textContent = file.name;
                 songPlayer.src = URL.createObjectURL(file);
@@ -999,6 +1134,33 @@
                         const title = tags.tags.title;
                         const artist = tags.tags.artist;
                         const album = tags.tags.album;
+
+                        if (artist) {
+
+                            tagsContainer.innerHTML = '';
+
+                            // Dividir artistas por / o ;
+                            const artists = artist.split(/[\/;]/).map(a => a.trim()).filter(a => a !== "");
+
+                            artists.forEach(artistName => {
+                                const tag = document.createElement("span");
+                                tag.className = "badge bg-primary d-flex align-items-center me-1";
+                                tag.textContent = artistName;
+
+                                const removeBtn = document.createElement("button");
+                                removeBtn.className = "btn-close btn-close-white ms-2";
+                                removeBtn.style.fontSize = "10px";
+                                removeBtn.onclick = () => {
+                                    tag.remove();
+                                    updateScroll();
+                                };
+                                tag.appendChild(removeBtn);
+
+                                tagsContainer.appendChild(tag);
+                            });
+
+                            updateScroll();
+                        }
 
                         // Si hay una imagen en los metadatos
                         if (img) {
@@ -1017,12 +1179,11 @@
                             songImg.src = imageBase64;
                         } else {
                             songImg.src = '/img/upload.svg';
-                            songImgInput = '';
+                            songImgInput.value = '';
                         }
 
                         // Asignar los metadatos de la canción
                         songName.value = title || "";
-                        songArtists.value = artist || "";
                         songAlbum.value = album || "";
                     },
                     onError: function (error) {
@@ -1030,27 +1191,31 @@
                         songImg.src = '/img/upload.svg';
                         songImgInput.value = '';
                         songName.value = "";
-                        songArtists.value = "";
+                        songArtistsInput.value = "";
                         songAlbum.value = "";
+                        tagsContainer.innerHTML = '';
                     }
                 });
 
                 document.getElementById('new-song-card-container').removeAttribute("hidden");
                 document.getElementById('new-song-submit').removeAttribute("hidden");
+                document.getElementById('new-song-activate').removeAttribute("hidden");
                 document.getElementById('new-song-metadata-warning').removeAttribute("hidden");
 
             } else {
                 songImg.src = '/img/upload.svg';
                 songImgInput.value = '';
                 songName.value = "";
-                songArtists.value = "";
+                songArtistsInput.value = "";
                 songAlbum.value = "";
+                tagsContainer.innerHTML = '';
 
                 songFileName.textContent = '';
                 songPlayer.src = '';
 
                 document.getElementById('new-song-card-container').setAttribute("hidden", true);
                 document.getElementById('new-song-submit').setAttribute("hidden", true);
+                document.getElementById('new-song-activate').setAttribute("hidden", true);
                 document.getElementById('new-song-metadata-warning').setAttribute("hidden", true);
             }
         });
@@ -1065,6 +1230,60 @@
             }
             return window.btoa(binary);
         }
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const input = document.querySelector("#new-song-card #artists");
+            const container = document.querySelector("#new-song-card #tagsContainer");
+            const wrapper = document.querySelector("#new-song-card #tagsWrapper");
+
+            input.addEventListener("keydown", function (event) {
+                if (event.key === "Enter" && input.value.trim() !== "") {
+                    event.preventDefault();
+
+                    // Crear etiqueta tipo "pill"
+                    const tag = document.createElement("span");
+                    tag.className = "badge bg-primary d-flex align-items-center me-1";
+                    tag.textContent = input.value;
+
+                    // Botón para eliminar
+                    const removeBtn = document.createElement("button");
+                    removeBtn.className = "btn-close btn-close-white ms-2";
+                    removeBtn.style.fontSize = "10px";
+                    removeBtn.onclick = () => {
+                        tag.remove();
+                        updateScroll();  // Actualizar el scroll después de eliminar
+                    };
+                    tag.appendChild(removeBtn);
+
+                    // Insertar la pill antes del input
+                    container.appendChild(tag);
+                    input.value = "";
+                    updateScroll();  // Actualizar el scroll después de agregar
+                }
+            });
+
+            input.addEventListener("keydown", function (event) {
+                if (event.key === "Backspace" && input.value === "" && container.lastChild) {
+                    container.lastChild.remove();
+                    updateScroll();  // Actualizar el scroll después de eliminar
+                }
+            });
+
+            // Función para desplazar automáticamente al final cuando se agregan nuevas pills
+            function updateScroll() {
+                // Comprobar si el contenido se desborda horizontalmente
+                if (wrapper.scrollWidth > wrapper.clientWidth) {
+                    wrapper.style.overflowX = "auto";  // Activar scroll si es necesario
+                } else {
+                    wrapper.style.overflowX = "hidden"; // Desactivar scroll si no es necesario
+                }
+            }
+
+            // Exponer updateScroll
+            window.updateScroll = updateScroll;
+        });
     </script>
 
 </div>
@@ -1205,12 +1424,26 @@
         </div>
     </div>
 
+    <div class="pagination-controls d-flex justify-content-center align-items-center my-3">
+        <button id="songPrevPageBtn" class="btn btn-secondary mx-1">Anterior</button>
+        <div class="input-group mx-2" style="width: 100px;">
+            <input id="songCurrentPageInput" type="number" class="form-control text-center" min="1" value="1">
+        </div>
+        <button id="songNextPageBtn" class="btn btn-secondary mx-1">Siguiente</button>
+    </div>
+
+
     <script th:src="@{/js/image-preview.js}"></script>
     <script th:src="@{/js/song-utils.js}"></script>
     <script type="module" th:src="@{/js/util.js}"></script>
     <script type="module">
 
         import { quoteattr } from '/js/util.js';
+
+        let songPage = 0;
+        let oldSongPage = 0;
+
+        const songsGeneralLoader = document.querySelector('.loader');
 
         //Sort dir (0 des, 1 asc)
         let songOrderState = 0;
@@ -1226,6 +1459,11 @@
         const songArtistsFilter = document.getElementById("tagsContainer");
         const songAlbumFilter = document.getElementById("song-filter-album");
 
+        //Pagination
+        const songPagePrev = document.getElementById('songPrevPageBtn');
+        const songPageNext = document.getElementById('songNextPageBtn');
+        const songCurrentPageInput = document.getElementById('songCurrentPageInput');
+
         //Song container
         const songsContainer = document.getElementById("songs-container");
 
@@ -1238,16 +1476,21 @@
             clearTimeout(filterTimeoutSongSearch);
             filterTimeoutSongSearch = setTimeout(function () {
 
-                songsContainer.innerHTML = '';
+                if (oldSongPage == songPage) {
+                    songPage = 0;
+                    oldSongPage = 0;
+                    songCurrentPageInput.value = 1;
+                }
 
-                document.getElementById('songSearchLoader').style.display = 'flex';
+                songsGeneralLoader.style.display = 'flex';
 
                 let filters = {
                     id: songIdFilter.value.trim(),
                     name: songNameFilter.value.trim(),
                     artists: Array.from(songArtistsFilter.children).map(tag => tag.textContent.trim()),
                     album: songAlbumFilter.value.trim(),
-                    sort: songSortSelect.value + (songOrderState == 0 ? ",DESC" : ",ASC")
+                    sort: songSortSelect.value + (songOrderState == 0 ? ",DESC" : ",ASC"),
+                    page: songPage
                 };
 
                 let queryParams = new URLSearchParams();
@@ -1265,6 +1508,9 @@
                     },
                     credentials: 'same-origin'
                 }).then(response => {
+
+                    songsGeneralLoader.style.display = 'none';
+
                     if (response.ok) {
                         return response.json();
                     } else {
@@ -1272,13 +1518,41 @@
                     }
                 }).then(async data => {
 
-                    if (data.content.length == 0) {
+                    if (data.totalPages == 0) {
+                        songPage = 0;
+                        oldSongPage = 0;
+                        songCurrentPageInput.value = 1;
+
+                        songsContainer.innerHTML = '';
                         const noSongs = document.createElement('div');
                         noSongs.className = 'alert alert-info text-center my-3';
                         noSongs.textContent = 'No se han encontrado resultados';
                         songsContainer.appendChild(noSongs);
                         return;
                     }
+
+                    if (songPage + 1 > data.totalPages) {
+                        if (oldSongPage == data.totalPages - 1) {
+                            songPage = data.totalPages - 1;
+                            songCurrentPageInput.value = songPage + 1;
+                            showErrorNotification("No hay más resultados", "warning");
+                            return;
+                        } else {
+                            songPage = data.totalPages - 1;
+                            songCurrentPageInput.value = songPage + 1;
+                            showErrorNotification("La página " + (songPage + 1) + " es la última, recargando canciones...", "info");
+                            handleSongFilterInput();
+                            return;
+                        }
+                    }
+
+                    document.getElementById('songSearchLoader').style.display = 'flex';
+
+                    oldSongPage = songPage;
+                    songPage = data.number;
+                    songCurrentPageInput.value = songPage + 1;
+
+                    songsContainer.innerHTML = '';
 
                     const promises = data.content.map(async song => {
                         const id = song.id;
@@ -1292,14 +1566,19 @@
                         songCard.innerHTML = `<div id="${id}" class="card existing-song-card p-3 my-2" style = "background-color: var(--bs-${active ? 'success' : 'danger'}-bg-subtle);">
                                                 <div class="row align-items-center justify-content-center g-3">
 
-                                                    <div class="col-12 col-xl-1 text-center">
-                                                        <div id="id" class="form-text">ID ${id}</div>
+                                                    <div class="col-12 col-xl-1 d-flex flex-column align-items-center align-content-center justify-content-center text-center">
+                                                        <div id="id" class="form-text mb-2">ID ${id}</div>
+
+                                                        <div class="form-check form-switch d-flex flex-column align-items-center justify-content-center text-center gap-1 d-none" id="active-checkbox">
+                                                            <input class="form-check-input" type="checkbox" id="active" name="active" ${active ? 'checked' : ''} disabled>
+                                                        </div>
                                                     </div>
 
                                                     <div class="col-12 col-xl-1 d-flex flex-column align-items-center justify-content-center text-center">
                                                         <input id="cover-image" type="image" class="form-control img-fluid" src="/img/preview-song-img.jpeg"
                                                             alt="Imagen de la canción" style="height: 80px; width: 80px; object-fit: contain;" disabled>
                                                         <input name="cover" id="cover-input" type="file" style="display:none" accept="image/*" disabled>
+
                                                     </div>
 
                                                     <div class="col-12 col-xl-2">
@@ -1362,6 +1641,15 @@
                         const songName = songCard.querySelector('#name');
                         const songArtists = songCard.querySelector('#artists');
                         const songAlbum = songCard.querySelector('#album');
+                        const songActive = songCard.querySelector('#active');
+                        const songActiveCheckbox = songCard.querySelector('#active-checkbox');
+
+                        new bootstrap.Tooltip(songActiveCheckbox, {
+                            trigger: 'hover',
+                            container: 'body',
+                            title: 'Activa o desactiva la canción',
+                            placement: 'bottom'
+                        });
 
                         const songFileContainer = songCard.querySelector('#audio-file-container');
                         const audioInput = songCard.querySelector('#audio');
@@ -1391,8 +1679,33 @@
                         const confirmButton = songCard.querySelector('#confirm');
                         const discardButton = songCard.querySelector(`#discard`);
 
+                        new bootstrap.Tooltip(editButton, {
+                            trigger: 'hover',
+                            container: 'body',
+                            title: 'Editar canción'
+                        });
+
+                        new bootstrap.Tooltip(deleteButton, {
+                            trigger: 'hover',
+                            container: 'body',
+                            title: 'Eliminar canción'
+                        });
+
+                        new bootstrap.Tooltip(confirmButton, {
+                            trigger: 'hover',
+                            container: 'body',
+                            title: 'Confirmar cambios'
+                        });
+
+                        new bootstrap.Tooltip(discardButton, {
+                            trigger: 'hover',
+                            container: 'body',
+                            title: 'Descartar cambios'
+                        });
+
                         editButton.addEventListener('click', function () {
                             songCard.querySelectorAll('input').forEach(input => input.removeAttribute('disabled'));
+                            songActiveCheckbox.classList.remove('d-none');
 
                             editButton.classList.add('d-none');
                             deleteButton.classList.add('d-none');
@@ -1492,6 +1805,8 @@
                                 formData.set("artists", songArtists.value.split("/"));
                             if (songAlbum.value !== album)
                                 formData.set("album", songAlbum.value);
+                            if (songActive.checked !== active)
+                                formData.set("active", songActive.checked);
 
                             fetch('/admin/playlists/modifySong', {
                                 method: 'POST',
@@ -1523,6 +1838,9 @@
                                     }
 
                                     showErrorNotification(`Se ha modificado la canción ${id}`, "success");
+
+                                    songCard.children[0].style.backgroundColor = `var(--bs-${songActive.checked ? 'success' : 'danger'}-bg-subtle)`;
+
                                     audioUrl = await getSongAudio(id);
                                     coverUrl = await getSongCover(id);
 
@@ -1535,6 +1853,7 @@
                                     songCard.querySelector('.audio-loader-container').style.display = 'none';
 
                                     songFileContainer.classList.add('d-none');
+                                    songActiveCheckbox.classList.add('d-none');
                                     editButton.classList.remove('d-none');
                                     deleteButton.classList.remove('d-none');
                                 });
@@ -1542,6 +1861,7 @@
 
                         discardButton.addEventListener('click', function () {
                             songCard.querySelectorAll('input').forEach(input => input.setAttribute('disabled', true));
+                            songActiveCheckbox.classList.add('d-none');
 
                             editButton.classList.remove('d-none');
                             deleteButton.classList.remove('d-none');
@@ -1593,6 +1913,32 @@
             songOrderState = 1 - songOrderState;
             songSortOrderImage.src = songOrderState === 0 ? /*[[${'/img/admin/sort-down.svg'}]]*/ '/img/admin/sort-down.svg' : /*[[${'/img/admin/sort-up.svg'}]]*/ '/img/admin/sort-up.svg';
         });
+
+        //Pagination
+        songPagePrev.addEventListener('click', () => {
+            if (songPage > 0) {
+                songPage--;
+                handleSongFilterInput();
+            } else if (songPage == 0) {
+                showErrorNotification("La pagina 1 es la primera, recargando playlists...", "info");
+                handleSongFilterInput();
+            }
+        });
+        songPageNext.addEventListener('click', () => {
+            songPage++;
+            handleSongFilterInput();
+        });
+        songCurrentPageInput.addEventListener('input',
+            () => {
+                const page = parseInt(songCurrentPageInput.value) - 1;
+                if (page >= 0) {
+                    songPage = page;
+                    handleSongFilterInput();
+                } else {
+                    songCurrentPageInput.value = songPage + 1;
+                }
+            }
+        );
 
     </script>
 

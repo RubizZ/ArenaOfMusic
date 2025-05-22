@@ -781,6 +781,27 @@ a[disabled] {
     border-radius: 0 0 10px 10px;
 }
 
+/* Botones de paginación */
+.pagination-controls {
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.pagination-controls .btn {
+    min-width: 100px;
+}
+
+.pagination-controls input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.pagination-controls input::-webkit-outer-spin-button,
+.pagination-controls input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
 /*---FIN ADMIN DASHBOARD---*/
 
 /* TIENDA */
