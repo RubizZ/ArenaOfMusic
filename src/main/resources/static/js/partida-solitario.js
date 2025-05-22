@@ -1,19 +1,31 @@
-let gameId = null;            // UUID de la partida, lo asignas cuando cargues la vista.
-let playerId = null;           // ID del jugador, lo asignas cuando cargues la vista.
-let isHost = false;            // host, lo asignas cuando cargues la vista.
-let currentSongId = null;     // ID de la canción que se va a reproducir.
-let currentRound = 0;         // Ronda actual.
-let totalRounds = 0;           // Total de rondas, lo puedes leer desde el backend en la carga de la vista.
+// Partida Solitario
+// Este archivo contiene la lógica para manejar la partida de un jugador en solitario.
+
+// VARIABLES 
+// VARIABLES DE CONFIGURACIÓN
+let gameId = null;            
+let playerId = null;           
+let isHost = false;    
+let totalRounds = 0;          
 let timePerRound = 0;
-let countdownTimer = null;    // Controlador para el temporizador.
-let selectedAnswer = "";      // Última respuesta confirmada por el jugador.
-let rondaFinalizada = false;
+
+// VARIABLES DE CANCIONES
+let currentSongId = null;     
+let currentRound = 0;         
 let audioURL;
 let audio;
 let imageURL;
+
+//LISTA DE TITULOS DE CANCIONES PARA SUGERENCIAS
 let availableSongs = [];
 
+// VARIABLES DE JUEGO
+let countdownTimer = null;    
+let selectedAnswer = "";      
+let rondaFinalizada = false;
 
+
+//METODOS
 //LÓGICA PARTIDA
 function iniciarJuego(id, player, hostId, rondas, fragmentDuration) {
     gameId = id;
@@ -118,7 +130,7 @@ function finalizarPartida() {
 function obtenerCancion(songId) {
     const csrfToken = config.csrf.value;
 
-    fetch(`/partida/song/${songId}/audio`, {
+    fetch(`/partida/song/${songId}/audio/${gameId}`, {
         method: 'GET',
         headers: {
             'X-CSRF-TOKEN': csrfToken
