@@ -49,7 +49,8 @@
                     enctype="multipart/form-data">
                     <th:block th:replace="~{fragments/playlist-utils :: playlist-creator}"></th:block>
                 </form>
-                <div class="audio-loader-container" id="general-loader" style="display:none;">
+                <div class="audio-loader-container" id="general-loader"
+                    style="display:none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
                     <div class="audio-loader">
                         <div class="audio-bar"></div>
                         <div class="audio-bar"></div>
@@ -68,7 +69,7 @@
                     enctype="multipart/form-data">
                     <th:block th:replace="~{fragments/playlist-utils :: song-creator}"></th:block>
                 </form>
-                <div class="audio-loader-container" id="general-loader" style="display:none;">
+                <div class="audio-loader-container mb-3" id="general-loader" style="display:none;">
                     <div class="audio-loader">
                         <div class="audio-bar"></div>
                         <div class="audio-bar"></div>
@@ -266,15 +267,15 @@
         function validateNewSong(songCard) {
             const audioFile = songCard.querySelector('#audio');
             const name = songCard.querySelector('#name');
-            const artists = songCard.querySelector('#artists');
+            const artists = songCard.querySelector('#artists-input-container');
+            const artistsContainer = songCard.querySelector('#tagsContainer');
             const coverFile = songCard.querySelector('#cover-input');
             const coverImg = songCard.querySelector('#cover-image');
             const album = songCard.querySelector('#album');
 
-            // Reset any previous error outlines
             [name, artists, album, audioFile].forEach(field => {
                 if (field) {
-                    field.addEventListener('input', function () {
+                    field.addEventListener('change', function () {
                         this.classList.remove('is-invalid');
                     });
                 }
@@ -284,7 +285,6 @@
                 coverImg.classList.remove('is-invalid');
             });
 
-            // Collect missing fields
             const missingFields = [];
 
             if (!name.value.trim()) {
@@ -297,7 +297,7 @@
                 missingFields.push('Archivo de audio');
             }
 
-            if (!artists.value.trim()) {
+            if (!artistsContainer || artistsContainer.children.length === 0) {
                 artists.classList.add('is-invalid');
                 missingFields.push('Artista(s)');
             }
@@ -312,7 +312,6 @@
                 missingFields.push('Imagen de portada');
             }
 
-            // If there are missing fields, show a consolidated error
             if (missingFields.length > 0) {
                 const errorMessage = `Los siguientes campos son obligatorios: ${missingFields.join(', ')}`;
                 showErrorNotification(errorMessage, 'error');
@@ -455,6 +454,7 @@
                 const playlistWindow = form.querySelector('#new-playlist-1');
                 const newSongsWindow = form.querySelector('#new-playlist-2');
                 const newSongs = newSongsWindow.querySelectorAll('#newSongsContainer .new-song-card');
+                const newSongsActive = newSongsWindow.querySelector('#playlist-song-active');
                 const loading = document.getElementById('general-loader');
 
                 try {
@@ -490,11 +490,11 @@
                     for (const song of newSongs) {
                         const songData = new FormData();
                         songData.append('name', song.querySelector('#name').value);
-                        songData.append('artists', song.querySelector('#artists').value);
+                        songData.append('artists', Array.from(song.querySelector('#tagsContainer').children).map(tag => tag.textContent.trim()));
                         songData.append('album', song.querySelector('#album').value);
                         songData.append('audio', song.querySelector('#audio').files[0]);
                         songData.append('cover', song.querySelector('#cover-input').files[0]);
-                        songData.append('active', true); //TODO implementar
+                        songData.append('active', newSongsActive.checked);
 
                         //showErrorNotification(`Subiendo cancion "${song.querySelector('#name').value}"`, 'info');
                         newSongIds.push(submitSong(songData));

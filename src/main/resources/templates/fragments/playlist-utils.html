@@ -30,11 +30,10 @@
             </div>
             <div class="col-12">
                 <div class="form-check">
-                    <label class="form-check-label" for="playlist-active">Activar al crear</label>
-                    <input type="checkbox" class="form-check-input" id="playlist-active">
+                    <label class="form-check-label" for="playlist-active">Activar playlist al crear</label>
+                    <input type="checkbox" class="form-check-input" id="playlist-active" checked>
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -54,7 +53,11 @@
                 document.getElementById('new-playlist-3').classList.remove('d-none');">
                     Omitir</button>
             </div>
-            <input id="adminPlaylistNewSongs" type="file" class="form-control" accept="audio/*" multiple>
+            <input id="adminPlaylistNewSongs" type="file" class="form-control mb-3" accept="audio/*" multiple>
+            <div class="form-check">
+                <label class="form-check-label" for="playlist-song-active">Activar canciones nuevas al crear</label>
+                <input type="checkbox" class="form-check-input" id="playlist-song-active" checked>
+            </div>
         </div>
 
         <div id="newSongsContainer" class="container mt-3">
@@ -69,7 +72,7 @@
                         document.getElementById('new-playlist-3').classList.add('d-none');
                         document.getElementById('new-playlist-2').classList.remove('d-none');">
                 Atrás</button>
-            <h2>Añadir canciones ya existentes</h2>
+            <h2>Añadir canciones existentes</h2>
             <button id="adminPlaylistNewNext3" class="btn btn-primary" type="submit"
                 onclick="document.getElementById('new-playlist-3').classList.add('d-none');">Terminar</button>
         </div>
@@ -88,7 +91,6 @@
             const newSongsContainer = document.getElementById('newSongsContainer');
 
             for (const file of this.files) {
-
                 const card = document.createElement('div');
                 card.innerHTML =
                     `<div class="card new-song-card bg-body-secondary p-3 my-2">
@@ -109,9 +111,17 @@
                                 </div>
                                 <div class="col-12 col-xl-4">
                                     <div class="form-floating">
-                                        <input name="artists" id="artists" type="text" class="form-control" aria-describedby="artists-help">
+                                        <div id="artists-input-container" class="input-container form-control"
+                                            onclick="this.querySelector('input').focus()">
+                                            <div id="tagsWrapper">
+                                                <div id="tagsContainer"></div>
+                                                <input type="text" class="border-0 flex-grow-1 bg-transparent" id="artists">
+                                            </div>
+                                        </div>
                                         <label>Artistas</label>
-                                        <div class="form-text" id="artists-help">Separa varios artistas con \'/\'. Diferencia entre mayúsculas y minúsculas</div>
+                                        <div class="form-text" id="artists-help">
+                                            Pulsa enter para añadir un artista, y backspace para eliminar el último
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-12 col-xl-4">
@@ -137,27 +147,67 @@
                         <input id="audio" name="audio" type="file" style="display:none;"></input>
                     </div>
                 `;
+
                 const coverImage = card.querySelector(`#cover-image`);
                 const coverInput = card.querySelector(`#cover-input`);
-
                 imagePreview(coverImage, coverInput);
 
-                const player = card.querySelector(`#player`)
+                const player = card.querySelector(`#player`);
                 const audioFile = card.querySelector(`#audio`);
-
                 player.volume = 0.25;
                 player.src = URL.createObjectURL(file);
 
                 const dataTransfer = new DataTransfer();
-                dataTransfer.items.add(new File([file], file.name, { type: file.format }));
+                dataTransfer.items.add(new File([file], file.name, { type: file.type }));
                 audioFile.files = dataTransfer.files;
 
                 const fileName = card.querySelector('#file-name');
                 fileName.textContent = file.name;
 
                 const songName = card.querySelector('#name');
-                const songArtists = card.querySelector('#artists');
                 const songAlbum = card.querySelector('#album');
+
+                // Pills/tag input for artists
+                const artistsInput = card.querySelector('#artists');
+                const tagsContainer = card.querySelector('#tagsContainer');
+                const tagsWrapper = card.querySelector('#tagsWrapper');
+
+                artistsInput.addEventListener("keydown", function (event) {
+                    if (event.key === "Enter" && artistsInput.value.trim() !== "") {
+                        event.preventDefault();
+                        const tag = document.createElement("span");
+                        tag.className = "badge bg-primary d-flex align-items-center me-1";
+                        tag.textContent = artistsInput.value;
+
+                        const removeBtn = document.createElement("button");
+                        removeBtn.className = "btn-close btn-close-white ms-2";
+                        removeBtn.style.fontSize = "10px";
+                        removeBtn.onclick = () => {
+                            tag.remove();
+                            updateScroll();
+                        };
+                        tag.appendChild(removeBtn);
+
+                        tagsContainer.appendChild(tag);
+                        artistsInput.value = "";
+                        updateScroll();
+                    }
+                });
+
+                artistsInput.addEventListener("keydown", function (event) {
+                    if (event.key === "Backspace" && artistsInput.value === "" && tagsContainer.lastChild) {
+                        tagsContainer.lastChild.remove();
+                        updateScroll();
+                    }
+                });
+
+                function updateScroll() {
+                    if (tagsWrapper.scrollWidth > tagsWrapper.clientWidth) {
+                        tagsWrapper.style.overflowX = "auto";
+                    } else {
+                        tagsWrapper.style.overflowX = "hidden";
+                    }
+                }
 
                 jsmediatags.read(file, {
                     onSuccess: function (tags) {
@@ -174,7 +224,6 @@
                             const blob = new Blob([new Uint8Array(img.data)], { type: img.format });
                             const extractedFile = new File([blob], fileName, { type: img.format });
 
-                            // Usar DataTransfer para asignar el archivo al input file
                             const dataTransfer = new DataTransfer();
                             dataTransfer.items.add(extractedFile);
                             coverInput.files = dataTransfer.files;
@@ -183,21 +232,43 @@
                             coverImage.src = imageBase64;
                         } else {
                             coverImage.src = '/img/upload.svg';
-                            coverInput = '';
+                            coverInput.value = '';
                         }
 
                         // Asignar los metadatos de la canción
                         songName.value = title || "";
-                        songArtists.value = artist || "";
                         songAlbum.value = album || "";
+
+                        // Artistas como pills
+                        tagsContainer.innerHTML = '';
+                        if (artist) {
+                            const artistsArr = artist.split(/[\/;]/).map(a => a.trim()).filter(a => a !== "");
+                            artistsArr.forEach(artistName => {
+                                const tag = document.createElement("span");
+                                tag.className = "badge bg-primary d-flex align-items-center me-1";
+                                tag.textContent = artistName;
+
+                                const removeBtn = document.createElement("button");
+                                removeBtn.className = "btn-close btn-close-white ms-2";
+                                removeBtn.style.fontSize = "10px";
+                                removeBtn.onclick = () => {
+                                    tag.remove();
+                                    updateScroll();
+                                };
+                                tag.appendChild(removeBtn);
+
+                                tagsContainer.appendChild(tag);
+                            });
+                            updateScroll();
+                        }
                     },
                     onError: function (error) {
                         console.error('Error al leer los metadatos:', error);
                         coverImage.src = '/img/upload.svg';
                         coverInput.value = '';
                         songName.value = "";
-                        songArtists.value = "";
                         songAlbum.value = "";
+                        tagsContainer.innerHTML = '';
                     }
                 });
 
@@ -304,11 +375,11 @@
     </script>
 </div>
 
-<div th:fragment="playlist-search" class="container">
+<div th:fragment="playlist-search" class="container p-0">
     <div class="container sticky-filters" id="playlist-search-filters">
         <!-- Contenedor fijo para filtros y ordenar por -->
 
-        <div class="row d-flex mb-3">
+        <div class="row d-flex g-3">
             <!--Filtros-->
             <div class="col-8 d-flex flex-column">
                 <div class="card text-center flex-grow-1">
@@ -372,7 +443,7 @@
         </script>
     </div>
 
-    <div id="playlists-container">
+    <div id="playlists-container" class="container">
 
     </div>
 
@@ -387,11 +458,11 @@
     </div>
 
     <div class="pagination-controls d-flex justify-content-center align-items-center my-3">
-        <button id="playlistPrevPageBtn" class="btn btn-secondary mx-1">Anterior</button>
+        <button id="playlistPrevPageBtn" class="btn btn-secondary mx-1" type="button">Anterior</button>
         <div class="input-group mx-2" style="width: 100px;">
             <input id="playlistCurrentPageInput" type="number" class="form-control text-center" min="1" value="1">
         </div>
-        <button id="playlistNextPageBtn" class="btn btn-secondary mx-1">Siguiente</button>
+        <button id="playlistNextPageBtn" class="btn btn-secondary mx-1" type="button">Siguiente</button>
     </div>
 
     <script th:src="@{/js/image-preview.js}"></script>
@@ -604,7 +675,7 @@
                                         <div class="container d-flex justify-content-between align-items-center mb-2">
                                             <h4>Canciones</h4>
                                             <button id="add" class="btn btn-primary align-self-end" type="button" data-bs-dismiss="modal">
-                                                <img src="/img/admin/plus.svg" alt="Añadir canción"></img>
+                                                <img src="/img/admin/plus.svg" alt="Añadir canciones"></img>
                                             </button>
                                         </div>
 
@@ -649,6 +720,11 @@
 
                         imagePreview(coverImage, coverInput);
 
+                        new bootstrap.Tooltip(coverImage, {
+                            title: "Cambiar portada",
+                            placement: "top",
+                        });
+
                         coverImage.src = coverURL;
 
                         const saveButton = modalElement.querySelector('#save');
@@ -666,7 +742,7 @@
                         });
 
                         const tooltipAdd = new bootstrap.Tooltip(addButton, {
-                            title: "Añadir canción",
+                            title: "Añadir canciones",
                             placement: "top"
                         });
 
@@ -1454,6 +1530,11 @@
 
                     imagePreview(coverImage, coverInput);
                     document.querySelector(`#new-song-card #player`).volume = 0.25;
+
+                    new bootstrap.Tooltip(document.querySelector(`#new-song-card #delete`), {
+                        title: "Borrar cambios",
+                        placement: "top"
+                    });
                 });
             </script>
         </div>
@@ -1481,7 +1562,8 @@
             } // TODO: Fix (si envías formulario y das para atrás, la card no sale)
         });
 
-        document.querySelector('#new-song-card #delete').addEventListener('click', function () {
+        const deleteButton = document.querySelector('#new-song-card #delete');
+        deleteButton.addEventListener('click', function () {
             songFile.value = '';
             songFile.dispatchEvent(new Event('change'));
         });
@@ -1791,7 +1873,7 @@
         </script>
     </div>
 
-    <div id="songs-container"></div>
+    <div id="songs-container" class="container"></div>
 
     <div class="audio-loader-container" id="songSearchLoader">
         <div class="audio-loader">
@@ -1804,13 +1886,12 @@
     </div>
 
     <div class="pagination-controls d-flex justify-content-center align-items-center my-3">
-        <button id="songPrevPageBtn" class="btn btn-secondary mx-1">Anterior</button>
+        <button id="songPrevPageBtn" class="btn btn-secondary mx-1" type="button">Anterior</button>
         <div class="input-group mx-2" style="width: 100px;">
             <input id="songCurrentPageInput" type="number" class="form-control text-center" min="1" value="1">
         </div>
-        <button id="songNextPageBtn" class="btn btn-secondary mx-1">Siguiente</button>
+        <button id="songNextPageBtn" class="btn btn-secondary mx-1" type="button">Siguiente</button>
     </div>
-
 
     <script th:src="@{/js/image-preview.js}"></script>
     <script th:src="@{/js/song-utils.js}"></script>
@@ -2082,6 +2163,8 @@
                             title: 'Descartar cambios'
                         });
 
+                        let artistsTooltip;
+
                         editButton.addEventListener('click', function () {
                             songCard.querySelectorAll('input').forEach(input => input.removeAttribute('disabled'));
                             songActiveCheckbox.classList.remove('d-none');
@@ -2094,6 +2177,13 @@
                             songPlayer.pause();
 
                             songFileContainer.classList.remove('d-none');
+
+                            artistsTooltip = new bootstrap.Tooltip(songArtists, {
+                                trigger: 'hover',
+                                container: 'body',
+                                title: 'Separa los artistas por /',
+                                placement: 'bottom'
+                            });
                         });
 
                         deleteButton.addEventListener('click', function () {
@@ -2157,6 +2247,8 @@
                                     .finally(() => {
                                         deleteModal.hide();
                                         confirmDeleteModal.remove();
+
+                                        artistsTooltip?.dispose();
                                     });
                             });
 
@@ -2235,6 +2327,8 @@
                                     songActiveCheckbox.classList.add('d-none');
                                     editButton.classList.remove('d-none');
                                     deleteButton.classList.remove('d-none');
+
+                                    artistsTooltip?.dispose();
                                 });
                         });
 
@@ -2262,6 +2356,8 @@
                                 coverImg.src = coverUrl;
                             if (songPlayer.src != audioUrl)
                                 songPlayer.src = audioUrl;
+
+                            artistsTooltip?.dispose();
                         });
                     });
 
