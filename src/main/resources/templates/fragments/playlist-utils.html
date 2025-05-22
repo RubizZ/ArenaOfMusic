@@ -1559,7 +1559,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             if (songFile.files.length > 0) {
                 songFile.dispatchEvent(new Event('change'));
-            } // TODO: Fix (si envías formulario y das para atrás, la card no sale)
+            }
         });
 
         const deleteButton = document.querySelector('#new-song-card #delete');

@@ -1,134 +1,145 @@
 <!DOCTYPE html>
 <html class="h-100" xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <th:block th:replace="~{fragments/head :: header}" />
-    <title>Admin - Arena of Music</title>
+  <th:block th:replace="~{fragments/head :: header}" />
+  <title>Admin - Arena of Music</title>
 </head>
+
 <body class="d-flex flex-column h-100">
-    <header th:replace="~{fragments/nav.html :: nav}"></header>
-    <main class="flex-shrink-0">
-        <div class="container">
-            <h1 class="mt-5 mb-5 text-center">REPORTES</h1>
-            <!-- Filtros -->
-            <form th:action="@{/admin/reports/filtrar}" method="get" class="row g-3 mb-4">
-                <div class="col-auto">
-                    <input type="date" name="startDate" class="form-control" th:value="${startDate}" />
-                </div>
-                <div class="col-auto">
-                    <input type="date" name="endDate" class="form-control" th:value="${endDate}" />
-                </div>
-
-                 <!-- Filtro de estado -->
-                <div class="col-auto">
-                    <select name="status" class="form-select">
-                        <option value="all" th:selected="${status == 'all'}">Todos</option>
-                        <option value="pending" th:selected="${status == 'pending'}">Pendientes</option>
-                        <option value="resolved" th:selected="${status == 'resolved'}">Resueltos sin baneo</option>
-                        <option value="banned" th:selected="${status == 'banned'}">Resueltos con baneo</option>
-                    </select>
-                </div>
-                <div class="col-auto">
-                    <button type="submit" class="btn btn-primary">Filtrar</button>
-                </div>
-            </form>
-
-
-            <table class="table table-sm table-responsive table-light table-striped table-bordered text-center align-middle">
-                <thead class="table-success align-middle">
-                    <tr>
-                        <th>ID</th><th>Reportado</th><th>Reporta</th><th>Razón</th>
-                        <th>Partida</th><th>Creación</th><th>Resolución</th><th>Admin</th><th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="r : ${reports}" th:attr="data-report-id=${r.id}">
-                        <td th:text="${r.id}"></td>
-                        <td>
-                          <a th:href="@{/admin/reports/ver-perfil/reportado/{id}(id=${r.id})}"
-                             th:text="${r.reported.username}"></a>
-                        </td>
-                        <td>
-                          <a th:href="@{/admin/reports/ver-perfil/reportador/{id}(id=${r.id})}"
-                             th:text="${r.reporter.username}"></a>
-                        </td>
-                        <td th:text="${r.reason == 1 ? 'Trampas' : (r.reason == 2 ? 'Inapropiado' : 'Spam')}"></td>
-                        <td>
-                            <span th:if="${r.game != null}"><a th:href="@{/games/{id}(id=${r.game.id})}" th:text="${r.game.id}"></a></span> <!--TODO falta ajustar el enlace para que lleve donde tiene que ir--> 
-                            <span th:if="${r.game == null}">-</span>
-                        </td>
-                        <td th:text="${r.creationDate != null ? #temporals.format(r.creationDate, 'dd-MM-yyyy') : '-'}"></td>
-                        <td th:text="${r.resolutionDate != null ? #temporals.format(r.resolutionDate, 'dd-MM-yyyy') : '-'}"></td>
-                        <td>
-                            <span th:if="${r.admin != null}" ><a th:href="@{/admin/reports/ver-perfil/admin/{id}(id=${r.id})}" th:text="${r.admin.username}"></a></span>
-                            <span th:if="${r.admin == null}">-</span>
-                        </td>
-                        <td><th:block th:replace="~{fragments/report-actions :: report-actions(${r.id})}" /></td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <!-- Botón para abrir confirmación global -->
-            <button type="button" class="btn btn-danger mt-3" data-bs-toggle="modal" data-bs-target="#confirmModal">
-                Confirmar baneos y resoluciones
-            </button>
+  <header th:replace="~{fragments/nav.html :: nav}"></header>
+  <main class="flex-shrink-0">
+    <div class="container">
+      <h1 class="mt-5 mb-5 text-center">REPORTES</h1>
+      <!-- Filtros -->
+      <form th:action="@{/admin/reports/filtrar}" method="get" class="row g-3 mb-4">
+        <div class="col-auto">
+          <input type="date" name="startDate" class="form-control" th:value="${startDate}" />
         </div>
-    </main>
+        <div class="col-auto">
+          <input type="date" name="endDate" class="form-control" th:value="${endDate}" />
+        </div>
 
-    <!-- Modal de confirmación global -->
-    <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="confirmModalLabel">Confirmar acciones</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            ¿Estás seguro de que quieres confirmar los baneos y las resoluciones seleccionadas?
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="button" class="btn btn-danger" onclick="handleConfirmBans()">Confirmar</button>
-          </div>
+        <!-- Filtro de estado -->
+        <div class="col-auto">
+          <select name="status" class="form-select">
+            <option value="all" th:selected="${status == 'all'}">Todos</option>
+            <option value="pending" th:selected="${status == 'pending'}">Pendientes</option>
+            <option value="resolved" th:selected="${status == 'resolved'}">Resueltos sin baneo</option>
+            <option value="banned" th:selected="${status == 'banned'}">Resueltos con baneo</option>
+          </select>
+        </div>
+        <div class="col-auto">
+          <button type="submit" class="btn btn-primary">Filtrar</button>
+        </div>
+      </form>
+
+
+      <table class="table table-sm table-responsive table-light table-striped table-bordered text-center align-middle">
+        <thead class="table-success align-middle">
+          <tr>
+            <th>ID</th>
+            <th>Reportado</th>
+            <th>Reporta</th>
+            <th>Razón</th>
+            <th>Partida</th>
+            <th>Creación</th>
+            <th>Resolución</th>
+            <th>Admin</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="r : ${reports}" th:attr="data-report-id=${r.id}">
+            <td th:text="${r.id}"></td>
+            <td>
+              <a th:href="@{/admin/reports/ver-perfil/reportado/{id}(id=${r.id})}" th:text="${r.reported.username}"></a>
+            </td>
+            <td>
+              <a th:href="@{/admin/reports/ver-perfil/reportador/{id}(id=${r.id})}"
+                th:text="${r.reporter.username}"></a>
+            </td>
+            <td th:text="${r.reason == 1 ? 'Trampas' : (r.reason == 2 ? 'Inapropiado' : 'Spam')}"></td>
+            <td>
+              <span th:if="${r.game != null}"><a th:href="@{/games/{id}(id=${r.game.id})}"
+                  th:text="${r.game.id}"></a></span>
+              <span th:if="${r.game == null}">-</span>
+            </td>
+            <td th:text="${r.creationDate != null ? #temporals.format(r.creationDate, 'dd-MM-yyyy') : '-'}"></td>
+            <td th:text="${r.resolutionDate != null ? #temporals.format(r.resolutionDate, 'dd-MM-yyyy') : '-'}"></td>
+            <td>
+              <span th:if="${r.admin != null}"><a th:href="@{/admin/reports/ver-perfil/admin/{id}(id=${r.id})}"
+                  th:text="${r.admin.username}"></a></span>
+              <span th:if="${r.admin == null}">-</span>
+            </td>
+            <td>
+              <th:block th:replace="~{fragments/report-actions :: report-actions(${r.id})}" />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Botón para abrir confirmación global -->
+      <button type="button" class="btn btn-danger mt-3" data-bs-toggle="modal" data-bs-target="#confirmModal">
+        Confirmar baneos y resoluciones
+      </button>
+    </div>
+  </main>
+
+  <!-- Modal de confirmación global -->
+  <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="confirmModalLabel">Confirmar acciones</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          ¿Estás seguro de que quieres confirmar los baneos y las resoluciones seleccionadas?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" onclick="handleConfirmBans()">Confirmar</button>
         </div>
       </div>
     </div>
+  </div>
 
-    <th:block th:replace="~{fragments/footer.html :: footer}" />
-    <!-- JS: Tooltips y Bootstrap Bundle -->
-    <script th:src="@{/js/activate-tooltips.js}"></script>
-    <script
-      th:src="@{https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js}"
-      integrity="sha384-ENjdO4Dr2bkBIFxQpeo3oSP3lWQuG5zVtbt6RU6P0b4JvBr4XKp4YfRvH+8abtTE"
-      crossorigin="anonymous"></script>
-    <!-- JS interno para procesar las acciones -->
-    <script>
-      function handleConfirmBans() {
-        document.querySelectorAll('tr[data-report-id]').forEach(row => {
-          const csrfToken = document.querySelector('input[name="_csrf"]').value;
-          const id = row.getAttribute('data-report-id');
-          const selected = row.querySelector(`input[name="btnradio-${id}"]:checked`);
-          if (!selected) return;
-          const action = selected.id.endsWith('-open')  ? 'reopen'
-                       : selected.id.endsWith('-noban') ? 'resolve'
-                       : selected.id.endsWith('-ban')   ? 'ban'
-                       : 'none';
-          if (action === 'delete') {
-            fetch(`/admin/reports/${id}`, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrfToken } })
-              .then(r => r.ok ? row.remove() : alert('Error eliminando reporte ' + id));
-          } else if (action === 'ban') {
-            fetch(`/admin/reports/${id}/banear`, { method: 'POST', headers: { 'X-CSRF-TOKEN': csrfToken } })
-              .then(r => r.ok ? row.remove() : alert('Error baneando usuario ' + id));
-          } else if (action === 'resolve') {
-            fetch(`/admin/reports/${id}/resolver`, { method: 'POST', headers: { 'X-CSRF-TOKEN': csrfToken } })
-              .then(r => r.ok ? row.remove() : alert('Error resolviendo reporte ' + id));
-          }
-          else if (action === 'reopen') {
-            fetch(`/admin/reports/${id}/reopen`, { method: 'POST', headers: { 'X-CSRF-TOKEN': csrfToken } })
-              .then(r => r.ok ? row.remove() : alert('Error reabriendo reporte ' + id));
-          }
-        });
-        var modalEl = document.getElementById('confirmModal');
-        var modal = bootstrap.Modal.getInstance(modalEl);
-        modal.hide();
-      }
-    </script>
+  <th:block th:replace="~{fragments/footer.html :: footer}" />
+  <!-- JS: Tooltips y Bootstrap Bundle -->
+  <script th:src="@{/js/activate-tooltips.js}"></script>
+  <script th:src="@{https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js}"
+    integrity="sha384-ENjdO4Dr2bkBIFxQpeo3oSP3lWQuG5zVtbt6RU6P0b4JvBr4XKp4YfRvH+8abtTE"
+    crossorigin="anonymous"></script>
+  <!-- JS interno para procesar las acciones -->
+  <script>
+    function handleConfirmBans() {
+      document.querySelectorAll('tr[data-report-id]').forEach(row => {
+        const csrfToken = document.querySelector('input[name="_csrf"]').value;
+        const id = row.getAttribute('data-report-id');
+        const selected = row.querySelector(`input[name="btnradio-${id}"]:checked`);
+        if (!selected) return;
+        const action = selected.id.endsWith('-open') ? 'reopen'
+          : selected.id.endsWith('-noban') ? 'resolve'
+            : selected.id.endsWith('-ban') ? 'ban'
+              : 'none';
+        if (action === 'delete') {
+          fetch(`/admin/reports/${id}`, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrfToken } })
+            .then(r => r.ok ? row.remove() : alert('Error eliminando reporte ' + id));
+        } else if (action === 'ban') {
+          fetch(`/admin/reports/${id}/banear`, { method: 'POST', headers: { 'X-CSRF-TOKEN': csrfToken } })
+            .then(r => r.ok ? row.remove() : alert('Error baneando usuario ' + id));
+        } else if (action === 'resolve') {
+          fetch(`/admin/reports/${id}/resolver`, { method: 'POST', headers: { 'X-CSRF-TOKEN': csrfToken } })
+            .then(r => r.ok ? row.remove() : alert('Error resolviendo reporte ' + id));
+        }
+        else if (action === 'reopen') {
+          fetch(`/admin/reports/${id}/reopen`, { method: 'POST', headers: { 'X-CSRF-TOKEN': csrfToken } })
+            .then(r => r.ok ? row.remove() : alert('Error reabriendo reporte ' + id));
+        }
+      });
+      var modalEl = document.getElementById('confirmModal');
+      var modal = bootstrap.Modal.getInstance(modalEl);
+      modal.hide();
+    }
+  </script>
