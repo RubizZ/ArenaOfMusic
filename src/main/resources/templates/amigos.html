@@ -103,7 +103,8 @@
                     username: li.getAttribute("data-username"),
                     photoUrl: li.getAttribute("data-photourl") || "/img/default-profile.png",
                 };
-                loadFriendProfile(friendData);
+                //loadFriendProfile(friendData);
+                window.location.href = `/amigos/ver-perfil/${friendData.username}`;
             }
         }
 

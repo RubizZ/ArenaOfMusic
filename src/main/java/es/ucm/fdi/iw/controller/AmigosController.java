@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import es.ucm.fdi.iw.model.User;
@@ -159,5 +160,11 @@ public class AmigosController {
     public Map<String, Boolean> reportUser(@RequestBody Map<String, String> reportData, Principal principal) {
         reportService.createReport(principal.getName(), reportData.get("reportedUsername"), Integer.parseInt(reportData.get("reason")));
         return Map.of("success", true);
+    }
+
+    @GetMapping("/ver-perfil/{name}")
+    public String verPerfilUsuario(@PathVariable String name, Model model) {
+        model.addAttribute("user", amigosService.findUser(name));
+        return "ver-perfil";
     }
 }

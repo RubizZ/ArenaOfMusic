@@ -35,6 +35,11 @@ public class AmigosService {
     @Autowired
     private MessageService messageService;
 
+    
+    public User findUser(String name) {
+        return userService.findByUsername(name);
+    }
+
     // Devuelve la lista de amigos
     public List<Map<String, Object>> getFriends(String username, String search)
     {
