@@ -82,29 +82,39 @@
     -->
         <div class="container my-5">
             <h2 class="text-center mb-4 text-success bg-light p-2 rounded">Historial de Partidas</h2>
-            <ul class="list-group">
-                <li th:if="${#lists.isEmpty(games)}" class="list-group-item text-center text-muted">
-                    No has jugado ninguna partida.
-                </li>
-                <li th:each="game : ${games}" class="list-group-item d-flex justify-content-between align-items-center">
-                    <span>
-                        <b>Playlist:</b>
-                        <span th:text="${game.playlistName}"></span>
-                    </span>
-                    <span>
-                        <b th:if="${game.position != 0}">Posición:</b>
-                        <span th:text="${game.position == 0 ? 'Solitario' : game.position}"></span>
-                    </span>
-                    <span>
-                        <b>Aciertos:</b> <span th:text="${game.guessedSongs}"></span> / <span
-                            th:text="${game.totalSongs}"></span>
-                    </span>
-                    <a th:href="@{/partida/resultados/{id}(id=${game.gameId})}"
-                        class="btn btn-outline-success btn-sm ms-2">
-                        Ver detalles
-                    </a>
-                </li>
-            </ul>
+            <!-- Tabla de historial de partidas -->
+            <table class="table table-striped">
+                <thead>
+                    <tr class="text-center">
+                        <th class="text-start">Playlist</th>
+                        <th>Posición</th>
+                        <th>Aciertos</th>
+                        <th>Detalles</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${#lists.isEmpty(games)}">
+                        <td colspan="4" class="text-center text-muted">No has jugado ninguna partida.</td>
+                    </tr>
+                    <tr th:each="game : ${games}" class="text-center">
+                        <td class="text-start">
+                            <span th:text="${game.playlistName}"></span>
+                        </td>
+                        <td>
+                            <span th:text="${game.position == 0 ? 'Solitario' : game.position + 'º'}">º</span>
+                        </td>
+                        <td>
+                            <span th:text="${game.guessedSongs}"></span> / <span th:text="${game.totalSongs}"></span>
+                        </td>
+                        <td>
+                            <a th:href="@{/partida/resultados/{id}(id=${game.gameId})}"
+                                class="btn btn-outline-success btn-sm">
+                                Ver detalles
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
 
 

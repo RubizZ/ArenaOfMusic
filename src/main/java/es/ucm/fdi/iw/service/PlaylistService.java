@@ -205,16 +205,19 @@ public class PlaylistService {
         return cover;
     }
 
-    public Page<Playlist.Transfer> searchPlaylists(PlaylistSearchFiltersDTO filters,
-            Pageable pageable) {
-
+    public Page<Playlist.Transfer> searchPlaylists(PlaylistSearchFiltersDTO filters, Pageable pageable) {
         StringBuilder queryBuilder = new StringBuilder("SELECT p FROM Playlist p WHERE 1=1");
+        StringBuilder countBuilder = new StringBuilder("SELECT COUNT(p) FROM Playlist p WHERE 1=1");
+
         if (filters.getId() != null) {
             queryBuilder.append(" AND p.id = :id");
+            countBuilder.append(" AND p.id = :id");
         }
         if (filters.getName() != null) {
             queryBuilder.append(" AND p.name LIKE :name");
+            countBuilder.append(" AND p.name LIKE :name");
         }
+
         if (pageable.isPaged() && pageable.getSort().isSorted()) {
             queryBuilder.append(" ORDER BY ");
             pageable.getSort().forEach(order -> {
@@ -224,22 +227,32 @@ public class PlaylistService {
             queryBuilder.setLength(queryBuilder.length() - 2);
         }
 
+        // Consulta principal paginada
         TypedQuery<Playlist> query = entityManager.createQuery(queryBuilder.toString(), Playlist.class);
+        // Consulta para contar total de resultados
+        TypedQuery<Long> countQuery = entityManager.createQuery(countBuilder.toString(), Long.class);
+
         if (filters.getId() != null) {
             query.setParameter("id", filters.getId());
+            countQuery.setParameter("id", filters.getId());
         }
         if (filters.getName() != null) {
             query.setParameter("name", "%" + filters.getName() + "%");
+            countQuery.setParameter("name", "%" + filters.getName() + "%");
         }
+
         if (pageable.isPaged()) {
             query.setFirstResult((int) pageable.getOffset());
             query.setMaxResults(pageable.getPageSize());
         }
-        List<Playlist> playlists = query.getResultList();
-        List<Playlist.Transfer> transfers = playlists.stream()
-                .map(playlist -> playlist.toTransfer())
+
+        List<Playlist.Transfer> transfers = query.getResultList().stream()
+                .map(Playlist::toTransfer)
                 .collect(Collectors.toList());
-        return new PageImpl<>(transfers, pageable, query.getResultList().size());
+
+        long total = countQuery.getSingleResult();
+
+        return new PageImpl<>(transfers, pageable, total);
     }
 
     @Transactional(rollbackFor = { Exception.class })
