@@ -51,7 +51,7 @@ Ambas versiones serán posibles adiciones con la implementación de web sockets 
 
 ## Funcionalidades Principales (Version Entrega Examen 22 de mayo 2025)
 
-### Credenciales para usuarios iniciales: 
+### Credenciales para usuarios iniciales:
 //TODO
 
 ### Partida
@@ -130,7 +130,7 @@ La página de perfil ofrece a los usuarios un espacio completo para gestionar y 
 
 Además, la página muestra una lista detallada de los objetos poseídos, permitiendo al usuario visualizar todos los elementos adquiridos a lo largo del juego. (Ampliable en caso de incluir la tienda)
 
-También se presentan estadísticas personales, proporcionando un resumen del rendimiento, logros alcanzados y progresos realizados. (Solo registro de resultados de partida) 
+También se presentan estadísticas personales, proporcionando un resumen del rendimiento, logros alcanzados y progresos realizados. (Solo registro de resultados de partida)
 
 Por último, el historial de partidas ofrece un registro completo de las partidas jugadas, con detalles sobre los resultados y el progreso en el juego. (Se desarrollará al terminar las partidas)
 
@@ -140,7 +140,7 @@ Al acceder en la tienda se verán separadas en filas los actuales tipos de cosm�
 Todos los iconos y los marcos incluidos hns sido obtenidas de flaticon.com con licencia gratuita con atribución (al ser imagenes actualmente de placeholder no se incluye la atribución, pero en caso de ser incluidos en la versión final los autores serán debidamente referenciados). Todos los banners incluidos han sido obtenidos de Canva.es que pertenecen al contenido gratuito
 
 Todo el contenido ha sido removido en este momento. Se volverá a incluir si llega a desarrollarse.
-### Vista Amigos 
+### Vista Amigos
 En esta vista, los jugadores pueden gestionar su lista de amigos y las solicitudes de amistad recibidas, así como consultar el perfil de un usuario concreto. La pantalla se compone de dos paneles principales.
 
 En el panel izquierdo se puede alternar entre la lista de amigos y las solicitudes recibidas mediante dos botones, mostrando las listas correspondientes. En el caso de la lista de amigos, se muestra el nombre de usuario, su imagen de perfil y el estado de conexión, así como un botón para añadir amigos. Para la lista de solicitudes, se muestra el nombre de usuario, el nivel y el porcentaje de victorias, además de los botones correspondientes para aceptar o rechazar la solicitud. En ambos se presenta un área de búsqueda para filtrar o localizar usuarios concretos.
@@ -182,8 +182,12 @@ También se presenta el historial de partidas, que ofrece un registro completo d
 //TODO ?
 
 Todo el contenido ha sido removido en este momento. Se volverá a incluir si llega a desarrollarse.
-### Vista Amigos 
-//TODO
+### Vista Amigos
+La vista de amigos permite a los usuarios gestionar su lista de amistades y solicitudes, así como consultar el perfil de un usuario concreto. El diseño está centrado en pantalla, desplazando el contenido al seleccionar un usuario para acceder a los detalles de este. Estos detalles incluyen la foto de perfil, el nombre de usuario, su estado de conexión, playlists recientes jugadas y estadísticas generales, como victorias totales, puntuación media y máxima puntuación. El usuario puede cerrar esta ventana de detalles y volver a la disposición anterior en cualquier momento.
+
+En la pantalla principal, el usuario puede alternar entre la lista de amigos y la de solicitudes. En el caso de la lista de amigos, se muestra el nombre de usuario, su imagen de perfil, el nivel de experiencia y un indicador de mensajes pendientes de leer, así como un botón para añadir amigos y un buscador. Para la lista de solicitudes, se muestra el nombre de usuario, el nivel y botones para aceptar o rechazar la solicitud. Si hay solicitudes sin responder, aparece un indicador de notificación.
+
+Para cada amigo, se pueden realizar acciones mediante un menú de acciones rápidas, las cuales incluyen enviar un mensaje, eliminar de la lista de amigas y bloquear o reportar al usuario.
 
 ### Vistas Login y Registro
 Incluyen las vistas que permiten a los usuarios iniciar sesión o registrarse. Al momento del registro, se verifica si ya existe un usuario con la misma dirección de correo electrónico. Durante el inicio de sesión, se comprueba también si el usuario ha sido baneado: en ese caso, se muestra un aviso y no se permite el acceso a la aplicación.
