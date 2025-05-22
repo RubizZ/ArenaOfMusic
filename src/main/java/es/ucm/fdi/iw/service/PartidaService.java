@@ -40,7 +40,6 @@ public class PartidaService {
     @PersistenceContext
     private EntityManager entityManager;
 
-
     // GAME LOOP LOGIC
 
     @Transactional
@@ -275,7 +274,7 @@ public class PartidaService {
     public void leaveGame(Game game) {
         // Abandonar la partida
 
-        // ToDo: Implementar la lógica para que el jugador abandone la partida
+        // Implementar la lógica para que el jugador abandone la partida
         // y se settee el estado de la partida a "ABANDONED" cuando no haya jugadores
         // (Cuando se implemente el modo de juego multiplayer)
 
@@ -285,7 +284,7 @@ public class PartidaService {
 
     // FIN GAME LOOP LOGIC
 
-     // GAME GETTERS and AUX METHODS
+    // GAME GETTERS and AUX METHODS
 
     public Map<String, Object> getPlaylist(Game game) {
         // Obtener la configuración del juego

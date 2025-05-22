@@ -59,7 +59,7 @@ public class PlaylistsController {
     public String index(Model model, @RequestParam(name = "view", required = false) String viewType,
             @RequestParam(required = false) String search, @RequestParam(required = false) String songUpload,
             @RequestParam(required = false) String playlistUpload,
-            @RequestParam(required = false) String id) {// TODO Hacer que el GET acepte todo tipo de filtros
+            @RequestParam(required = false) String id) {
         model.addAttribute("viewType", viewType == null || viewType.isBlank() ? "list" : viewType);
         model.addAttribute("search", search == null || search.isBlank() ? "playlists" : search);
 
