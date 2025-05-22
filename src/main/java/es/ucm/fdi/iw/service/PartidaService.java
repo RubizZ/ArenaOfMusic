@@ -1,117 +1,478 @@
 package es.ucm.fdi.iw.service;
 
-import java.util.Arrays;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+
+import es.ucm.fdi.iw.dto.game.GameConfigDTO;
+import es.ucm.fdi.iw.dto.game.GamePlayerDTO;
+import es.ucm.fdi.iw.dto.game.GameRoundsDTO;
+import es.ucm.fdi.iw.dto.game.RoundInfoDTO;
+import es.ucm.fdi.iw.dto.game.RoundResponseDTO;
+import es.ucm.fdi.iw.model.Game;
+import es.ucm.fdi.iw.model.PlayerGame;
+import es.ucm.fdi.iw.model.PlayerGameId;
+import es.ucm.fdi.iw.model.Playlist;
+import es.ucm.fdi.iw.model.Song;
+import es.ucm.fdi.iw.model.User;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PartidaService {
 
-    public List<Map<String, Object>> getPlaylists() {
-        return Arrays.asList(
-                Map.of("id", 1, "image", "img/default-profile.png", "title", "The Weeknd", "author", "ArenaOfMusic"),
-                Map.of("id", 2, "image", "img/default-profile.png", "title", "ColdPlay", "author", "ArenaOfMusic"),
-                Map.of("id", 3, "image", "img/default-profile.png", "title", "Clásicos 80's", "author", "ArenaOfMusic"),
-                Map.of("id", 4, "image", "img/default-profile.png", "title", "Post Malone", "author", "ArenaOfMusic"),
-                Map.of("id", 5, "image", "img/default-profile.png", "title", "Country", "author", "ArenaOfMusic"),
-                Map.of("id", 6, "image", "img/default-profile.png", "title", "Ed Sheeran", "author", "ArenaOfMusic")
-        );
+    @PersistenceContext
+    private EntityManager entityManager;
+
+
+    // GAME LOOP LOGIC
+
+    @Transactional
+    public UUID createGame(GameConfigDTO gameConfig) throws RuntimeException, IllegalArgumentException {
+        // Crear una nueva partida
+        try {
+            // Verificar si la playlist existe y está activa
+            Playlist playlist = entityManager.find(Playlist.class, gameConfig.getPlaylistId());
+            if (playlist == null || !playlist.isActive()) {
+                throw new IllegalArgumentException(
+                        "La playlist seleccionada no existe o no se encuentra disponible.");
+            }
+            // Se crea la partida con la configuración dada, sin información de rondas, en
+            // estado Waiting y con la playlist seleccionada
+            Game game = new Game();
+            game.setConfigJson(gameConfig.toString());
+            game.setRoundJson("[]");
+            game.setGameState(Game.GameState.WAITING);
+            game.setPlaylist(playlist);
+
+            entityManager.persist(game);
+
+            return game.getId();
+        } catch (Exception e) {
+            throw new RuntimeException("No se pudo crear la partida.");
+        }
     }
 
-    public Map<String, Object> getPlaylist() {
-        Map<String, Object> playlist = new HashMap<>();
-        playlist.put("image", "img/logo.jpeg");
-        playlist.put("name", "Top Hits 2010's");
-        playlist.put("songs", 30);
-        playlist.put("author", "ArenaOfMusic");
-        List<Map<String, String>> canciones = Arrays.asList(
-                Map.of("name", "Sorry", "artist", "Justin Bieber"),
-                Map.of("name", "God's Plan", "artist", "Drake"),
-                Map.of("name", "Memories", "artist", "David Guetta ft. Kid Cudi"),
-                Map.of("name", "Good Feeling", "artist", "Flo Rida"),
-                Map.of("name", "Can't Hold Us", "artist", "Macklemore ft. Ryan Lewis"));
-        playlist.put("canciones", canciones);
+    @Transactional
+    public void playerEntersTheGame(UUID gameId, long userId) {
 
-        return playlist;
+        try {
+            // Agregar el jugador a la partida
+            PlayerGame pg = addPlayerIntoGame(userId, gameId);
+            // Agrgar partida al registro del jugador
+            addPlayerGameToUser(userId, pg);
+            // Agregar jugador al registro de la partida
+            addPlayerGameToGame(gameId, pg);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+
     }
 
-    public List<Map<String, Object>> getSortedParticipants() {
-        List<Map<String, Object>> sortedParticipants = Arrays.asList(
-                Map.of(
-                        "user", Map.of("username", "Eric", "photoUrl", "img/logo.jpeg"),
-                        "hits", 13,
-                        "score", 5750),
-                Map.of(
-                        "user", Map.of("username", "Ava", "photoUrl", "img/logo.jpeg"),
-                        "hits", 11,
-                        "score", 5200),
-                Map.of(
-                        "user", Map.of("username", "Sam", "photoUrl", "img/logo.jpeg"),
-                        "hits", 10,
-                        "score", 4850),
-                Map.of(
-                        "user", Map.of("username", "Taylor", "photoUrl", "img/logo.jpeg"),
-                        "hits", 6,
-                        "score", 2650));
+    @Transactional
+    public PlayerGame addPlayerIntoGame(long userId, UUID gameId) {
+        // Agregar el jugador a la partida
+        Game game = entityManager.find(Game.class, gameId);
+        User user = entityManager.find(User.class, userId);
+
+        PlayerGame playerGame = new PlayerGame();
+        playerGame.setGame(game);
+        playerGame.setUser(user);
+
+        PlayerGameId playerGameId = new PlayerGameId(game.getId(), user.getId());
+        playerGame.setId(playerGameId);
+
+        playerGame.setScore(0);
+        playerGame.setPosition(0);
+
+        entityManager.persist(playerGame);
+
+        GameConfigDTO gameConfig = new GameConfigDTO();
+        gameConfig.parseGameConfigDTO(game.getConfigJson());
+        gameConfig.setNumPlayers(gameConfig.getNumPlayers() + 1);
+        game.setConfigJson(gameConfig.toString());
+
+        return playerGame;
+    }
+
+    @Transactional
+    public void addPlayerGameToUser(long userId, PlayerGame pg) {
+        // Agrgar partida al registro del jugador
+        User user = entityManager.find(User.class, userId);
+        user.addPlayerGame(pg);
+    }
+
+    @Transactional
+    public void addPlayerGameToGame(UUID gameId, PlayerGame pg) {
+        // Agregar jugador al registro de la partida
+        Game game = entityManager.find(Game.class, gameId);
+        game.addPlayerGame(pg);
+    }
+
+    @Transactional
+    public void loadSongs(Game game) {
+        // Cargar las canciones de la playlist en la partida
+        GameConfigDTO gameConfigDTO = new GameConfigDTO();
+        gameConfigDTO.parseGameConfigDTO(game.getConfigJson());
+
+        Playlist playlist = game.getPlaylist();
+
+        List<Song> cancionesAleatorias = getSongsByPlaylistId(playlist.getId());
+
+        // Verificar si hay suficientes canciones para el número de rondas
+        if (cancionesAleatorias.size() < gameConfigDTO.getRounds()) {
+            throw new IllegalArgumentException(
+                    "No hay suficientes canciones en la playlist para el número de rondas configurado.");
+        }
+
+        // Mezclar las canciones aleatoriamente
+        Collections.shuffle(cancionesAleatorias);
+
+        // Seleccionar las canciones para las rondas de la partida de 0 a 'rounds'
+        cancionesAleatorias = cancionesAleatorias.subList(0, gameConfigDTO.getRounds());
+
+        GameRoundsDTO gameRoundsDTO = new GameRoundsDTO();
+        gameRoundsDTO.setSongsIds(cancionesAleatorias.stream()
+                .map(Song::getId)
+                .collect(Collectors.toList()));
+
+        gameRoundsDTO.setRoundNumber(0);
+
+        game.setRoundJson(gameRoundsDTO.toString());
+    }
+
+    @Transactional
+    public void startGame(Game game) {
+        // Iniciar la partida
+        // Cargar las canciones para la partida
+        loadSongs(game);
+        // Settear el estado de la partida a "PLAYING"
+        game.setGameState(Game.GameState.PLAYING);
+    }
+
+    @Transactional
+    public RoundInfoDTO startRound(Game game) {
+        // Iniciar una nueva ronda
+        // Obtener la configuración del juego
+        GameRoundsDTO gameRoundsDTO = new GameRoundsDTO();
+        RoundInfoDTO roundInfo = new RoundInfoDTO();
+
+        // Obtener la información de la ronda que toca
+        gameRoundsDTO = gameRoundsDTO.parse(game.getRoundJson());
+        Long songId = gameRoundsDTO.getSong(gameRoundsDTO.getRoundNumber());
+        Song song = entityManager.find(Song.class, songId);
+
+        // Cargar la información de la nueva ronda
+        roundInfo.setRoundNumber(gameRoundsDTO.getRoundNumber() + 1);
+        roundInfo.setSongId(song.getId());
+        gameRoundsDTO.addRound(roundInfo);
+        game.setRoundJson(gameRoundsDTO.toString());
+        entityManager.persist(game);
+
+        return roundInfo;
+    }
+
+    @Transactional
+    public RoundResponseDTO endRound(Game game, Map<Long, String> userAnswers) {
+        // Terminar la ronda actual
+        // Obtener la configuración del juego
+        GameRoundsDTO gameRoundsDTO = new GameRoundsDTO();
+        RoundInfoDTO roundInfo = new RoundInfoDTO();
+        // Obtener la información de la ronda que termina
+        RoundResponseDTO roundResponse = new RoundResponseDTO();
+        gameRoundsDTO = gameRoundsDTO.parse(game.getRoundJson());
+        roundInfo = gameRoundsDTO.getRound(gameRoundsDTO.getRoundNumber() - 1);
+        gameRoundsDTO.setRound(gameRoundsDTO.getRoundNumber() - 1, roundInfo);
+        Song song = entityManager.find(Song.class, gameRoundsDTO.getSong(gameRoundsDTO.getRoundNumber() - 1));
+        roundResponse.setSongId(song.getId());
+        roundResponse.setSongName(song.getName());
+
+        // Procesar las respuestas de los jugadores
+        Map<Long, Boolean> userTry = new HashMap<>();
+        userAnswers.forEach((key, value) -> {
+
+            PlayerGame playerGame = entityManager.find(PlayerGame.class,
+                    new PlayerGameId(game.getId(), key));
+            int score = 0;
+            if (value.equalsIgnoreCase(song.getName())) {
+                // Guardar el intento correcto
+                score += 10;
+                userTry.put(key, true);
+            } else {
+                // Guardar el intento incorrecto
+                userTry.put(key, false);
+            }
+            if (playerGame != null) {
+                // Actualizar el puntaje del jugador
+                playerGame.setScore(playerGame.getScore() + score);
+                entityManager.persist(playerGame);
+            }
+            // Guardar el puntaje del jugador en el resultado
+            roundResponse.getResult().put(key, score);
+        });
+        roundInfo.setUserAnswers(userTry);
+        game.setRoundJson(roundInfo.toString());
+
+        // Actualizar la información de la ronda en el juego
+        GameConfigDTO gameConfig = new GameConfigDTO();
+        gameConfig.parseGameConfigDTO(game.getConfigJson());
+        game.setRoundJson(gameRoundsDTO.toString());
+
+        // Devolver el resultado de la ronda
+        return roundResponse;
+    }
+
+    @Transactional
+    public void endGame(Game game) {
+        // Terminar la partida
+        // Settear el estado de la partida a "FINISHED"
+        game.setGameState(Game.GameState.FINISHED);
+
+        // Obtener la lista de jugadores de la partida y ordenar por puntaje
+        List<PlayerGame> players = game.getParticipants();
+        PriorityQueue<PlayerGame> priorityQueue = new PriorityQueue<>(
+                Comparator.comparingInt(PlayerGame::getScore).reversed());
+
+        priorityQueue.addAll(players);
+
+        // Obtener la información de la partida
+        GameConfigDTO gameConfig = new GameConfigDTO();
+        gameConfig.parseGameConfigDTO(game.getConfigJson());
+
+        // Actualizar el puntaje de los jugadores y asignar posiciones
+        int position = gameConfig.getMaxPlayers() > 1 ? 1 : 0;
+        while (!priorityQueue.isEmpty()) {
+            PlayerGame playerGame = priorityQueue.poll();
+            User user = entityManager.find(User.class, playerGame.getUser().getId());
+            if (user != null) {
+                user.setEXP(user.getEXP() + playerGame.getScore());
+                user.setEXP_total(user.getEXP_total() + playerGame.getScore());
+                System.out.println("El jugador " + user.getUsername() + " ha ganado " + playerGame.getScore()
+                        + " puntos de EXP.");
+            }
+            playerGame.setPosition(position++);
+        }
+
+    }
+
+    @Transactional
+    public void leaveGame(Game game) {
+        // Abandonar la partida
+
+        // ToDo: Implementar la lógica para que el jugador abandone la partida
+        // y se settee el estado de la partida a "ABANDONED" cuando no haya jugadores
+        // (Cuando se implemente el modo de juego multiplayer)
+
+        // Settear el estado de la partida a "ABANDONED"
+        game.setGameState(Game.GameState.ABANDONED);
+    }
+
+    // FIN GAME LOOP LOGIC
+
+     // GAME GETTERS and AUX METHODS
+
+    public Map<String, Object> getPlaylist(Game game) {
+        // Obtener la configuración del juego
+        GameConfigDTO gameConfig = new GameConfigDTO();
+        gameConfig.parseGameConfigDTO(game.getConfigJson());
+
+        // Obtener la información de las rondas
+        GameRoundsDTO rounds = new GameRoundsDTO();
+        rounds = rounds.parse(game.getRoundJson());
+
+        // Obtener la información de la playlist
+        Playlist playlist = entityManager.find(Playlist.class, gameConfig.getPlaylistId());
+        Map<String, Object> GamePlaylist = new HashMap<>();
+        GamePlaylist.put("name", playlist.getName());
+        GamePlaylist.put("songs", gameConfig.getRounds());
+
+        // Obtener las de las canciones de la playlist
+        List<Song> canciones = getSongsByGame(rounds.getSongsIds());
+        GamePlaylist.put("canciones", canciones);
+
+        return GamePlaylist;
+    }
+
+    private List<Song> getSongsByGame(List<Long> ids) {
+        // Devuelve la información de las canciones de la lista
+        return entityManager.createNamedQuery("Song.getSongsOfList", Song.class)
+                .setParameter("ids", ids)
+                .getResultList();
+    }
+
+    public PriorityQueue<PlayerGame> getSortedParticipants(Game game) {
+        // Obtener la lista de jugadores de la partida
+        List<PlayerGame> players = game.getParticipants();
+
+        // Crear una PriorityQueue para ordenar a los jugadores por su puntaje
+        PriorityQueue<PlayerGame> sortedParticipants = new PriorityQueue<>(
+                Comparator.comparingInt(PlayerGame::getScore).reversed());
+        sortedParticipants.addAll(players);
+
         return sortedParticipants;
-
     }
 
-    public List<Map<String, Object>> getSongResults() {
-        List<Map<String, Object>> songResults = Arrays.asList(
-                Map.of(
-                        "song", Map.of("name", "Sorry", "artist", "Justin Bieber"),
-                        "winnerName", "Sam",
-                        "time", 2.1),
-                Map.of(
-                        "song", Map.of("name", "God's Plan", "artist", "Drake"),
-                        "winnerName", "Eric",
-                        "time", 3.9),
-                Map.of(
-                        "song", Map.of("name", "Memories", "artist", "David Guetta ft. Kid Cudi"),
-                        "winnerName", "Eric",
-                        "time", 3.5),
-                Map.of(
-                        "song", Map.of("name", "Good Feeling", "artist", "Flo Rida"),
-                        "winnerName", "Sam",
-                        "time", 4.8),
-                Map.of(
-                        "song", Map.of("name", "Can't Hold Us", "artist", "Macklemore ft. Ryan Lewis"),
-                        "winnerName", "Ava",
-                        "time", 2.7));
+    public List<Map<String, Object>> getGameResults(GameRoundsDTO gameRoundsDTO) {
+        // Obtener la información de las canciones y los resultados de los jugadores
+        List<Map<String, Object>> songResults = new ArrayList<>();
+        for (int i = 0; i < gameRoundsDTO.getRounds().size(); i++) {
+            Map<String, Object> songResult = new HashMap<>();
+            RoundInfoDTO roundInfo = gameRoundsDTO.getRound(i);
+            Song song = entityManager.find(Song.class, roundInfo.getSongId());
+
+            Map<String, Object> songInfo = new HashMap<>();
+            songResult.put("id", song.getId());
+            songInfo.put("name", song.getName());
+            songInfo.put("artists", song.getArtists());
+
+            songResult.put("song", songInfo);
+            songResult.put("responses", roundInfo.getUserAnswers());
+
+            songResults.add(songResult);
+        }
         return songResults;
-
     }
 
-    public Map<String, Object> getPlaylistInfo() {
-        return Map.of(
-            "title", "Top Hits 2010's",
-            "image", "img/logo.jpeg"
-        );
+    public List<Playlist> getActivePlaylists() {
+        // Obtener la lista de playlists activas
+        TypedQuery<Playlist> playlists;
+        try {
+            playlists = entityManager.createNamedQuery("Playlist.active", Playlist.class);
+        } catch (Exception e) {
+            throw new RuntimeException("No se pudieron obtener las playlist.");
+        }
+        return playlists.getResultList();
     }
 
-    public List<Map<String, Object>> getPlayers() {
-        return List.of(
-            Map.of("username", "Ava", "photoUrl", "img/default-profile.png", "level", 4, "winRate", 85),
-            Map.of("username", "Sam", "photoUrl", "img/default-profile.png", "level", 3, "winRate", 75),
-            Map.of("username", "Taylor", "photoUrl", "img/default-profile.png", "level", 8, "winRate", 71)
-        );
+    public Set<GamePlayerDTO> getGamePlayers(UUID gameId) {
+        // Obtener la lista de jugadores de la partida
+        Game game = entityManager.find(Game.class, gameId);
+
+        List<PlayerGame> gamePlayers = game.getParticipants();
+        Set<GamePlayerDTO> players = new HashSet<>();
+
+        for (PlayerGame playerGame : gamePlayers) {
+            // Obtener la información del jugador durante la partida
+            User player = entityManager.find(User.class, playerGame.getUser().getId());
+            GamePlayerDTO playerDTO = new GamePlayerDTO();
+            playerDTO.setId(player.getId());
+            playerDTO.setUsername(player.getUsername());
+            playerDTO.setEXP_total(player.getEXP_total());
+            playerDTO.setTotalWins(entityManager.createNamedQuery("PlayerGame.countWinsByUser", Long.class)
+                    .setParameter("userId", player.getId())
+                    .getSingleResult());
+            playerDTO.setProfileImage(player.getProfileImage());
+            players.add(playerDTO);
+        }
+
+        return players;
     }
 
-    public Map<String, Object> getHost() {
-        return Map.of("username", "Eric", "photoUrl", "img/default-profile.png", "level", 4, "winRate", 38);
+    public List<Song> getSongsByPlaylistId(long playlistId) {
+        // Obtener la lista de canciones de la playlist
+        try {
+            return entityManager.createNamedQuery("Song.findByPlaylistId", Song.class)
+                    .setParameter("playlistId", playlistId)
+                    .getResultList();
+        } catch (Exception e) {
+            throw new RuntimeException("No se pudieron obtener las canciones de la playlist.", e);
+        }
     }
 
-    public Map<String, Object> getGameInfo() {
-        return Map.of(
-            "code", "XT8V5L",
-            "status", "waiting",
-            "mode", "options",
-            "rounds", 20,
-            "songTime", 10
-        );
+    public Game getGameById(UUID gameId) {
+        // Obtener la partida por su ID
+        Game game = entityManager.find(Game.class, gameId);
+        if (game == null || !game.getActive()) {
+            throw new IllegalArgumentException("La partida no existe.");
+        }
+        return game;
     }
+
+    public Boolean isPlayerInGame(long userId, UUID gameId) {
+        // Verificar si el jugador está en la partida
+        PlayerGameId checkId = new PlayerGameId(gameId, userId);
+        PlayerGame playerGame = entityManager.find(PlayerGame.class, checkId);
+        return playerGame != null;
+    }
+
+    public List<String> getTitles() throws RuntimeException {
+        // Obtener la lista de títulos de canciones activas
+        List<String> titulos = new ArrayList<>();
+        try {
+            titulos = entityManager.createNamedQuery("Song.getActiveSongsTitles", String.class)
+                    .getResultList();
+        } catch (Exception e) {
+            throw new RuntimeException("No se pudieron obtener los títulos de las canciones.", e);
+        }
+        return titulos;
+    }
+
+    public int getPosition(Game game, long id) {
+        // Obtener la posición del jugador en la partida
+        PlayerGame playerGame = entityManager.find(PlayerGame.class,
+                new PlayerGameId(game.getId(), id));
+        if (playerGame != null) {
+            return playerGame.getPosition();
+        } else {
+            throw new IllegalArgumentException("El jugador no está en la partida.");
+        }
+    }
+
+    public File generateFragment(File audioOriginal, int duracion) throws IOException, InterruptedException {
+        // Método para generar un fragmento de audio aleatorio de una canción mediante
+        // ffmpeg
+        // 1. Obtener duración total del audio
+        ProcessBuilder probeBuilder = new ProcessBuilder(
+                "ffprobe", "-v", "error",
+                "-show_entries", "format=duration",
+                "-of", "default=noprint_wrappers=1:nokey=1",
+                audioOriginal.getAbsolutePath());
+        Process probe = probeBuilder.start();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(probe.getInputStream()));
+        double totalDuration = Double.parseDouble(reader.readLine().trim());
+        probe.waitFor();
+
+        // 2. Si la canción es más corta que el tiempo requerido, devolver el original
+        if (totalDuration <= duracion)
+            return audioOriginal;
+
+        // 3. Calcular inicio aleatorio
+        double start = Math.random() * (totalDuration - duracion);
+
+        // 4. Crear archivo temporal
+        File tempFile = File.createTempFile("fragment_", ".mp3");
+
+        // 5. Ejecutar ffmpeg para recortar el audio e insertarlo en el archivo temporal
+        ProcessBuilder ffmpegBuilder = new ProcessBuilder(
+                "ffmpeg", "-y",
+                "-ss", String.valueOf(start),
+                "-t", String.valueOf(duracion),
+                "-i", audioOriginal.getAbsolutePath(),
+                "-c:a", "libmp3lame",
+                tempFile.getAbsolutePath());
+        ffmpegBuilder.redirectErrorStream(true);
+        Process ffmpeg = ffmpegBuilder.start();
+        ffmpeg.waitFor();
+
+        // 6. Devolver el archivo temporal con el fragmento
+        return tempFile;
+    }
+
+    // FIN GAME GETTERS and AUX METHODS
 }
