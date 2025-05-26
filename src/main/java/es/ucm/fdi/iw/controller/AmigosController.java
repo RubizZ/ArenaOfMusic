@@ -139,8 +139,8 @@ public class AmigosController {
     // Enviar solicitud de amistad
     @PostMapping("/request/send")
     @ResponseBody
-    public Map<String, Boolean> sendRequest(@RequestBody Map<String, String> requestData, Principal principal) {
-        boolean result = amigosService.sendRequest(principal.getName(), requestData.get("username"));
+    public Map<String, String> sendRequest(@RequestBody Map<String, String> requestData, Principal principal) {
+        String result = amigosService.sendRequest(principal.getName(), requestData.get("username"));
         return Map.of("success", result);
     }
 

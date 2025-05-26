@@ -258,15 +258,20 @@ public class AmigosService {
     }
 
     // Enviar una solicitud de amistad
-    public boolean sendRequest(String username, String toUsername) {
+    public String sendRequest(String username, String toUsername) {
         if (username.equalsIgnoreCase(toUsername)) {
-            return false;
+            return "No puedes enviarte una solicitud a ti mismo";
         }
 
         User me = userService.findByUsername(username);
-        User other = userService.findByUsername(toUsername);
+        User other = null;
+        try {
+            other = userService.findByUsername(toUsername);
+        } catch (Exception e) {
+            return "El usuario no existe";
+        }
         if (other == null) {
-            return false;
+            return "El usuario no existe";
         }
 
         // Comprobar si la solicitud ya existe
@@ -280,13 +285,13 @@ public class AmigosService {
                 .getResultList();
 
         if (!existingFriendship.isEmpty()) {
-            return false;
+            return "La solicitud de amistad ya existe";
         }
 
         // Comprobar posibles bloqueos
         if (blockService.isBlocked(me.getId(), other.getId()) ||
                 blockService.isBlocked(other.getId(), me.getId())) {
-            return false;
+            return "No puedes enviar una solicitud de amistad a un usuario bloqueado";
         }
 
         // Crear la solicitud de amistad
@@ -299,7 +304,7 @@ public class AmigosService {
         friendship.setAccepted(false);
         entityManager.persist(friendship);
 
-        return true;
+        return "ok";
     }
 
     // Obtener el estado de conexión del usuario

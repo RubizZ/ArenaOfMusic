@@ -98,7 +98,8 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-success" onclick="addFriend();" data-bs-dismiss="modal">Agregar</button>
+                        <button type="submit" class="btn btn-success" onclick="addFriend();"
+                            data-bs-dismiss="modal">Agregar</button>
                     </div>
                 </div>
             </div>
@@ -222,7 +223,10 @@
                         document.getElementById("requestList").innerHTML = html;
                     }
                 })
-                .catch(error => console.error(error));
+                .catch(error => {
+                    showErrorNotification("Error al cargar la lista de amigos y solicitudes", 'error');
+                    console.error(error)
+                });
         }
 
         const myName = /*[[${u.username}]]*/ "me";
@@ -319,7 +323,10 @@
                     profileHtml += '</ul>';
                     document.getElementById("friendProfile").innerHTML = profileHtml;
                 })
-                .catch(error => console.error(error));
+                .catch(error => {
+                    showErrorNotification("Error al cargar el perfil del amigo", 'error');
+                    console.error(error)
+                });
         }
 
         // Ocultar el perfil de un amigo
@@ -337,21 +344,29 @@
                 .then(data => {
                     if (data.success) {
                         loadList('solicitudes');
-                        alert("Solicitud de amistad aceptada");
+                        showErrorNotification("Solicitud de amistad aceptada", 'success');
                     }
                 })
-                .catch(error => console.error(error));
-        }
+                .catch(error => {
+                    showErrorNotification("Error al aceptar la solicitud de amistad", 'error');
+                    console.error(error);
+                })
+        };
+
 
         // Rechazar solicitud de amistadac
         function rejectRequest(username) {
             go(config.rootUrl + "/amigos/request/reject", "POST", { username: username })
                 .then(data => {
                     if (data.success) {
+                        showErrorNotification("Solicitud de amistad rechazada", 'success');
                         loadList('solicitudes');
                     }
                 })
-                .catch(error => console.error(error));
+                .catch(error => {
+                    showErrorNotification("Error al rechazar la solicitud de amistad", 'error');
+                    console.error(error)
+                });
         }
 
         // Abrir el panel de chat
@@ -374,10 +389,13 @@
                 .then(data => {
                     if (data.success) {
                         loadList('amigos');
-                        alert("Usuario eliminado de la lista de amigos");
+                        showErrorNotification("Usuario eliminado de la lista de amigos", 'success');
                     }
                 })
-                .catch(error => console.error(error));
+                .catch(error => {
+                    showErrorNotification("Error al eliminar el usuario de la lista de amigos", 'error');
+                    console.error(error)
+                });
         }
 
         // Bloquear y reportar usuario
@@ -390,14 +408,17 @@
                     if (data.success) {
                         loadList('amigos');
                         loadList('solicitudes');
-
+                        showErrorNotification("Usuario bloqueado", 'success');
                         document.getElementById("reportUsername").value = username;
                         document.getElementById("reportUserText").textContent = username;
 
                         new bootstrap.Modal(document.getElementById("reportModal")).show();
                     }
                 })
-                .catch(error => console.error(error));
+                .catch(error => {
+                    showErrorNotification("Error al bloquear al usuario", 'error');
+                    console.error(error)
+                });
         }
 
         // Añadir amigos
@@ -408,12 +429,21 @@
             if (username && username !== myName) {
                 go(config.rootUrl + "/amigos/request/send", "POST", { username: username })
                     .then(data => {
-                        if (data.success) {
+                        if (data.success === "ok") {
                             loadList('amigos');
-                            alert("Solicitud de amistad enviada");
+                            showErrorNotification("Solicitud de amistad enviada", 'success');
+                        } else {
+                            showErrorNotification(data.success, 'warning');
                         }
                     })
-                    .catch(error => console.error(error));
+                    .catch(error => {
+                        showErrorNotification("Error al enviar la solicitud de amistad", 'error');
+                        console.error(error)
+                    });
+            } else if (username === myName) {
+                showErrorNotification("No puedes añadirte a ti mismo como amigo", 'warning');
+            } else {
+                showErrorNotification("Por favor, introduce un nombre de usuario válido", 'warning');
             }
         }
 
@@ -440,7 +470,10 @@
                     loadList(viewType);
                     updateNotificationIndicator();
                 })
-                .catch(error => console.error(error));
+                .catch(error => {
+                    showErrorNotification("Error al actualizar el estado de los amigos", 'error');
+                    console.error(error)
+                });
         }
 
         // Cargar la lista al cargar la página y filtrar búsqueda
@@ -477,9 +510,12 @@
             go(config.rootUrl + "/amigos/report", "POST", data)
                 .then(response => {
                     bootstrap.Modal.getInstance(document.getElementById("reportModal")).hide();
-                    alert("Reporte enviado con éxito");
+                    showErrorNotification("Reporte enviado con éxito", 'success');
                 })
-                .catch(error => console.error(error));
+                .catch(error => {
+                    showErrorNotification("Error al enviar el reporte", 'error');
+                    console.error(error)
+                });
         });
 
         // Actualizar la lista de amigos al volver a la página
