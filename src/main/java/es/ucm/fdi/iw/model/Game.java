@@ -1,6 +1,7 @@
 package es.ucm.fdi.iw.model;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,6 +18,8 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -53,6 +56,10 @@ public class Game implements Transferable<Game.Transfer> {
     @Column(name = "active", nullable = false)
     private Boolean active = true;
 
+    @Column(nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date creationDateTime = new Date();
+    
     @ManyToOne
     @JoinColumn(name = "playlist_id", nullable = false)
     private Playlist playlist;

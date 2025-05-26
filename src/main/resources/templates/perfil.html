@@ -81,7 +81,7 @@
 
     -->
         <div class="container my-5">
-            <h2 class="text-center mb-4 text-success bg-light p-2 rounded">Historial de Partidas</h2>
+            <h2 class="text-center mb-4 text-success p-2 rounded">Historial de Partidas</h2>
             <!-- Tabla de historial de partidas -->
             <table class="table table-striped">
                 <thead>
@@ -89,6 +89,7 @@
                         <th class="text-start">Playlist</th>
                         <th>Posición</th>
                         <th>Aciertos</th>
+                        <th>Fecha</th>
                         <th>Detalles</th>
                     </tr>
                 </thead>
@@ -105,6 +106,9 @@
                         </td>
                         <td>
                             <span th:text="${game.guessedSongs}"></span> / <span th:text="${game.totalSongs}"></span>
+                        </td>
+                        <td>
+                            <span th:text="${game.creationDateTime}"></span>
                         </td>
                         <td>
                             <a th:href="@{/partida/resultados/{id}(id=${game.gameId})}"

@@ -1,6 +1,9 @@
 package es.ucm.fdi.iw.controller;
 
+import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -51,6 +54,7 @@ public class PerfilController {
         private int guessedSongs;
         private int totalSongs;
         private String playlistName;
+        private String creationDateTime;
     }
 
     @GetMapping("/perfil")
@@ -59,7 +63,10 @@ public class PerfilController {
         User user = (User) session.getAttribute("u");
 
         List<Game> games = perfilService.getUserGames(user);
+        games.sort(Comparator.comparing(Game::getCreationDateTime).reversed());
+
         List<GameSummary> summaries = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy - HH:mm");
 
         for (Game game : games) {
             try {
@@ -80,13 +87,15 @@ public class PerfilController {
                 }
                 String playlistName = game.getPlaylist().getName();
                 int totalSongs = songResults.size();
+                String formattedDate = sdf.format(game.getCreationDateTime());
 
                 summaries.add(new GameSummary(
                         game.getId(),
                         position,
                         guessedSongs,
                         totalSongs,
-                        playlistName));
+                        playlistName,
+                        formattedDate));
 
             } catch (Exception e) {
                 // log error se vuoi
