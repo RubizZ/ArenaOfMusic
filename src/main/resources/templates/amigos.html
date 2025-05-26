@@ -103,8 +103,7 @@
                     username: li.getAttribute("data-username"),
                     photoUrl: li.getAttribute("data-photourl") || "/img/default-profile.png",
                 };
-                //loadFriendProfile(friendData);
-                window.location.href = `/amigos/ver-perfil/${encodeURIComponent(friendData.username)}`;
+                loadFriendProfile(friendData);
             }
         }
 
@@ -286,12 +285,12 @@
                         <li class="list-group-item d-flex align-items-center border-0 bg-transparent mb-2">
                             <div class="me-3">
                                 <div class="rounded" style="width: 50px; height: 50px; overflow: hidden;">
-                                    <!-- <img src="${playlist.id}" class="img-fluid"/> -->
+                                    <img src='/partida/playlist/${playlist.id}/cover' class="img-fluid"/>
                                 </div>
                             </div>
                             <div>
                                 <div class="fw-semibold">${playlist.title}</div>
-                                <small class="text-muted">by ${playlist.description}</small>
+                                <small class="text-muted">· ${playlist.description} ·</small>
                             </div>
                         </li>
                     `
@@ -412,7 +411,7 @@
                 credentials: "same-origin",
                 headers: {
                     "Content-Type": "application/json",
-                    [config.csrf.name]: config.csrf.value
+                    'X-CSRF-TOKEN': config.csrf.value
                 }
             })
             .then(() => {
