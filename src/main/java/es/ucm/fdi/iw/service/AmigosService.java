@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import es.ucm.fdi.iw.dto.game.GameRoundsDTO;
 import es.ucm.fdi.iw.model.Friendship;
 import es.ucm.fdi.iw.model.FriendshipId;
 import es.ucm.fdi.iw.model.Game;
@@ -197,11 +198,27 @@ public class AmigosService {
                 .filter(p -> p.getPosition() == 1)
                 .count();
         double averageScore = friend.getPartidas().stream()
-                .mapToInt(PlayerGame::getScore)
+                .filter(pg -> pg.getGame() != null && pg.getGame().getGameState() == Game.GameState.FINISHED)
+                .mapToDouble(pg -> {
+                    int aciertos = pg.getScore() / 10;
+                    Game game = pg.getGame();
+                    int totalRondas = 1;
+                    GameRoundsDTO rounds = new GameRoundsDTO().parse(game.getRoundJson());
+                    totalRondas = rounds.getRounds().size();
+                    return ((double) aciertos / totalRondas) * 100.0;
+                })
                 .average()
                 .orElse(0);
-        int maxScore = friend.getPartidas().stream()
-                .mapToInt(PlayerGame::getScore)
+        double maxScore = friend.getPartidas().stream()
+                .filter(pg -> pg.getGame() != null && pg.getGame().getGameState() == Game.GameState.FINISHED)
+                .mapToDouble(pg -> {
+                    int aciertos = pg.getScore() / 10;
+                    Game game = pg.getGame();
+                    int totalRondas = 1;
+                    GameRoundsDTO rounds = new GameRoundsDTO().parse(game.getRoundJson());
+                    totalRondas = rounds.getRounds().size();
+                    return ((double) aciertos / totalRondas) * 100.0;
+                })
                 .max()
                 .orElse(0);
 
@@ -236,7 +253,7 @@ public class AmigosService {
                 "status", status,
                 "wins", wins,
                 "averageScore", String.format("%.1f", averageScore),
-                "maxScore", maxScore,
+                "maxScore", String.format("%.1f", maxScore),
                 "recentPlaylists", recentPlaylists);
     }
 
