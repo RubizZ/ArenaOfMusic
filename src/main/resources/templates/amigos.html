@@ -62,7 +62,7 @@
 
                         <!-- Añadir amigos -->
                         <div class="d-grid">
-                            <button class="btn border" onclick="event.stopPropagation(); addFriend()">
+                            <button class="btn border" data-bs-target="#exampleModal" data-bs-toggle="modal">
                                 <i class="bi bi-plus"></i> Añadir amigos
                             </button>
                         </div>
@@ -77,6 +77,29 @@
                 <!-- Perfil del usuario seleccionado -->
                 <div class="col-md-6 right-panel ms-md-4" id="rightPanel" style="display: none;">
                     <div id="friendProfile"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Añadir amigos</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form">
+                            <label for="friendUsername" class="p-1">Introduce el nombre de usuario:</label>
+                            <input type="text" class="form-control" id="friendUsername"
+                                placeholder="Introduce el nombre de usuario">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-success" onclick="addFriend();" data-bs-dismiss="modal">Agregar</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -379,8 +402,10 @@
 
         // Añadir amigos
         function addFriend() {
-            const username = prompt("Introduce el nombre de usuario:");
-            if (username) {
+            event.preventDefault();
+            const username = document.getElementById("friendUsername").value.trim();
+
+            if (username && username !== myName) {
                 go(config.rootUrl + "/amigos/request/send", "POST", { username: username })
                     .then(data => {
                         if (data.success) {
