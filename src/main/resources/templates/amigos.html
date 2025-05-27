@@ -62,7 +62,7 @@
 
                         <!-- Añadir amigos -->
                         <div class="d-grid">
-                            <button class="btn border" data-bs-target="#exampleModal" data-bs-toggle="modal">
+                            <button class="btn border" data-bs-target="#addFriend" data-bs-toggle="modal">
                                 <i class="bi bi-plus"></i> Añadir amigos
                             </button>
                         </div>
@@ -82,11 +82,11 @@
         </div>
 
         <!-- Modal -->
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal fade" id="addFriend" tabindex="-1" aria-labelledby="addFriendModal" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="exampleModalLabel">Añadir amigos</h1>
+                        <h1 class="modal-title fs-5" id="addFriend">Añadir amigos</h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -97,9 +97,54 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
                         <button type="submit" class="btn btn-success" onclick="addFriend();"
                             data-bs-dismiss="modal">Agregar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="blockFriend" tabindex="-1" aria-labelledby="blockFriendModal" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="blockFriendModalLabel">Bloquear Amigo</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>¿Seguro que deseas bloquear a este usuario?</p>
+                        <input type="hidden" id="blockFriendUsername" />
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger" onclick="confirmBlockUser()"
+                            data-bs-dismiss="modal">Bloquear</button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="deleteFriend" tabindex="-1" aria-labelledby="deleteFriendModal" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="deleteFriendLabel">Eliminar amigos</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>¿Seguro que deseas eliminar este amigo?</p>
+                        <input type="hidden" id="deleteFriendUsername" />
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger" onclick="confirmDeleteFriend()"
+                            data-bs-dismiss="modal">Eliminar</button>
                     </div>
                 </div>
             </div>
@@ -170,7 +215,7 @@
                                             <a
                                                 class="dropdown-item small"
                                                 style="cursor: pointer; user-select: none;"
-                                                onclick="event.stopPropagation(); deleteFriend('${item.username}')">
+                                                onclick="event.stopPropagation(); showDeleteFriendModal('${item.username}')">
                                                 <i class="bi bi-person-x me-3"></i>Eliminar
                                             </a>
                                         </li>
@@ -178,7 +223,7 @@
                                             <a
                                                 class="dropdown-item text-danger small"
                                                 style="cursor: pointer; user-select: none;"
-                                                onclick="event.stopPropagation(); blockUser('${item.username}')">
+                                                onclick="event.stopPropagation(); showBlockUserModal('${item.username}')">
                                                 <i class="bi bi-ban me-3"></i>Bloquear y reportar
                                             </a>
                                         </li>
@@ -217,10 +262,16 @@
                         }
                     });
                     if (viewType === 'amigos') {
-                        document.getElementById("friendList").innerHTML = html;
+                        const friendList = document.getElementById("friendList");
+                        if(friendList) {
+                            friendList.innerHTML = html;
+                        }
                     }
                     else if (viewType === 'solicitudes') {
-                        document.getElementById("requestList").innerHTML = html;
+                        const requestList = document.getElementById("requestList");
+                        if(requestList) {
+                            requestList.innerHTML = html;
+                        } 
                     }
                 })
                 .catch(error => {
@@ -381,10 +432,8 @@
         }
 
         // Eliminar usuario de la lista de amigos
-        function deleteFriend(username) {
-            if (!confirm(`¿Estás seguro de que quieres eliminar a ${username}?`)) {
-                return;
-            }
+        function confirmDeleteFriend() {
+            const username = document.getElementById("deleteFriendUsername").value;
             go(config.rootUrl + "/amigos/delete", "POST", { username: username })
                 .then(data => {
                     if (data.success) {
@@ -399,10 +448,8 @@
         }
 
         // Bloquear y reportar usuario
-        function blockUser(username) {
-            if (!confirm(`¿Estás seguro de que quieres bloquear a ${username}?`)) {
-                return;
-            }
+        function confirmBlockUser() {
+            const username = document.getElementById("blockFriendUsername").value;
             go(config.rootUrl + "/amigos/block", "POST", { username: username })
                 .then(data => {
                     if (data.success) {
@@ -411,7 +458,6 @@
                         showErrorNotification("Usuario bloqueado", 'success');
                         document.getElementById("reportUsername").value = username;
                         document.getElementById("reportUserText").textContent = username;
-
                         new bootstrap.Modal(document.getElementById("reportModal")).show();
                     }
                 })
@@ -451,7 +497,10 @@
         function updateNotificationIndicator() {
             go(config.rootUrl + "/amigos/list", "POST", { view: "solicitudes", search: "" })
                 .then(requests => {
-                    document.getElementById("notificationIndicator").style.display = (requests.length > 0 ? "block" : "none");
+                    const notificationIndicator = document.getElementById("notificationIndicator")
+                    if (notificationIndicator) {
+                        notificationIndicator.style.display = (requests.length > 0 ? "block" : "none");
+                    }
                 })
                 .catch(error => console.error(error));
         }
@@ -520,6 +569,16 @@
 
         // Actualizar la lista de amigos al volver a la página
         window.addEventListener('pageshow', () => refresh('amigos'));
+
+        function showDeleteFriendModal(username) {
+            document.getElementById("deleteFriendUsername").value = username;
+            new bootstrap.Modal(document.getElementById("deleteFriend")).show();
+        }
+
+        function showBlockUserModal(username) {
+            document.getElementById("blockFriendUsername").value = username;
+            new bootstrap.Modal(document.getElementById("blockFriend")).show();
+        }
     </script>
 </body>
 
