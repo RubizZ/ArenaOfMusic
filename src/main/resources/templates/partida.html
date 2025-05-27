@@ -155,13 +155,16 @@
 
 
                     <!-- Input y botón -->
-                    <div class="input-group mt-3">
+                    <div th:if="${gameConfig.gameMode == 'song'}" class="input-group mt-3">
                         <input type="text" class="form-control border-success border-3" id="songInput"
                             placeholder="Introduce el título de la canción..." value="" autocomplete="off">
                         <button class="btn-custom" id="marcarBtn" onclick="marcarRespuesta()">Marcar</button>
                     </div>
                     <div id="sugerencias" class="sugerencias-container"></div>
 
+                    <div th:if="${gameConfig.gameMode == 'options'}" class="mt-3" id="optionsGroup">
+                        <!-- Las opciones se insertarán aquí por JS -->
+                    </div>
                 </div>
 
                 <!-- Sección de Jugadores -->
@@ -206,6 +209,7 @@
         window.gameId = [[${ gameId }]];
         const game = [[${ gameId }]]; // UUID que te pase tu backend
         const gameConfig = [[${ gameConfig }]]
+        console.log(gameConfig);
         const player = [[${ u.id }]];
         /*<![CDATA[*/
         const players = /*[[${players}]]*/[];

@@ -3,15 +3,15 @@
 
 // VARIABLES 
 // VARIABLES DE CONFIGURACIÓN
-let gameId = null;            
-let playerId = null;           
-let isHost = false;    
-let totalRounds = 0;          
+let gameId = null;
+let playerId = null;
+let isHost = false;
+let totalRounds = 0;
 let timePerRound = 0;
 
 // VARIABLES DE CANCIONES
-let currentSongId = null;     
-let currentRound = 0;         
+let currentSongId = null;
+let currentRound = 0;
 let audioURL;
 let audio;
 let imageURL;
@@ -20,9 +20,12 @@ let imageURL;
 let availableSongs = [];
 
 // VARIABLES DE JUEGO
-let countdownTimer = null;    
-let selectedAnswer = "";      
+let countdownTimer = null;
+let selectedAnswer = "";
 let rondaFinalizada = false;
+
+//VARIABLES DE OPCIONES
+let roundSongOptions = [];
 
 
 //METODOS
@@ -61,6 +64,9 @@ function iniciarRonda() {
         .then(data => {
             currentRound = data.roundNumber;
             currentSongId = data.songId;
+            if (gameConfig.gameMode === "options") {
+                roundSongOptions = data.songOptions; // Guardamos las opciones de la ronda
+            }
             actualizarVistaRonda(currentRound);  // Actualiza la UI con la nueva ronda
             obtenerCancion(currentSongId);       // Siguiente paso.
         })
@@ -234,23 +240,56 @@ function actualizarCover() {
 
 function actualizarVistaRonda(roundData) {
     document.getElementById('numeroRonda').innerText = `${roundData}`;
+    if (gameConfig.gameMode === "options") {
+        const optionsContainer = document.getElementById("optionsGroup");
+        optionsContainer.innerHTML = ""; // Limpiamos las opciones previas
 
-    const inputRespuesta = document.getElementById('songInput');
-    const botonRespuesta = document.getElementById('marcarBtn');
+        // Añadimos las nuevas opciones como radio buttons
+        roundSongOptions.forEach((option, idx) => {
+            const div = document.createElement("div");
+            div.className = "form-check";
 
-    const overlay = document.getElementById("songTitleOverlay");
+            const input = document.createElement("input");
+            input.className = "form-check-input";
+            input.type = "radio";
+            input.name = "songOption";
+            input.id = "option" + idx;
+            input.value = option;
 
-    if (!rondaFinalizada) {
-        overlay.style.display = "none";
+            input.onclick = () => {
+                selectedAnswer = option;
+            };
 
-        inputRespuesta.value = '';
-        inputRespuesta.disabled = false;
-        botonRespuesta.disabled = false;
-        selectedAnswer = "";  // Reinicia la respuesta previa
+            const label = document.createElement("label");
+            label.className = "form-check-label";
+            label.htmlFor = input.id;
+            label.innerText = option;
+
+            div.appendChild(input);
+            div.appendChild(label);
+            optionsContainer.appendChild(div);
+        });
     } else {
-        inputRespuesta.disabled = true;
-        botonRespuesta.disabled = true;
+        const inputRespuesta = document.getElementById('songInput');
+        const botonRespuesta = document.getElementById('marcarBtn');
+
+        const overlay = document.getElementById("songTitleOverlay");
+
+        if (!rondaFinalizada) {
+            overlay.style.display = "none";
+
+            inputRespuesta.value = '';
+            inputRespuesta.disabled = false;
+            botonRespuesta.disabled = false;
+            selectedAnswer = "";  // Reinicia la respuesta previa
+        } else {
+            inputRespuesta.disabled = true;
+            botonRespuesta.disabled = true;
+            const sugerenciasDiv = document.getElementById('sugerencias');
+            sugerenciasDiv.innerHTML = ''; // Limpiamos las sugerencias
+        }
     }
+
 }
 
 function mostrarResultadoRonda(data) {
