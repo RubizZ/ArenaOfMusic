@@ -88,7 +88,7 @@ function finalizarRonda() {
 
     clearInterval(countdownTimer);
     let respuesta = "";
-    if (mode === "songs") {
+    if (mode === "song") {
         respuesta = selectedAnswer || document.querySelector("#songInput").value;
     } else {
         const selectedOption = document.querySelector('input[name="songOption"]:checked');
