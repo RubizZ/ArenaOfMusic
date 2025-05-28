@@ -1,5 +1,6 @@
 package es.ucm.fdi.iw.controller;
 
+import java.util.Date;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -22,6 +23,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 
 /**
  * Site administration.
@@ -123,8 +125,10 @@ public class AdminController {
         ObjectMapper mapper = new ObjectMapper();
         try {
             List<User> results = q.getResultList();
-            System.out.println("Utenti trovati: " + results.size());
-            return mapper.writeValueAsString(results);
+            // Mapea a DTO plano para evitar problemas de serialización con jpa y 
+            // no enviar datos innecesarios como la contraseña
+            List<UserDTO> dtos = results.stream().map(UserDTO::fromUser).toList();
+            return mapper.writeValueAsString(dtos);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return "{}";
@@ -171,5 +175,32 @@ public class AdminController {
     @GetMapping({ "/stats", "/stats/" })
     public String stats(Model model) {
         return "admin/stats";
+    }
+
+    // DTO interno
+    public static class UserDTO {
+        public Long id;
+        public String username;
+        public String email;
+        public String roles;
+        public boolean enabled;
+        public boolean banned;
+        public String profileImage;
+        public Date creationDateTime;
+        public Date lastLogin;
+
+        public static UserDTO fromUser(User u) {
+            UserDTO dto = new UserDTO();
+            dto.id = u.getId();
+            dto.username = u.getUsername();
+            dto.email = u.getEmail();
+            dto.roles = u.getRoles();
+            dto.enabled = u.isEnabled();
+            dto.banned = u.isBanned();
+            dto.profileImage = u.getProfileImage();
+            dto.creationDateTime = u.getCreationDateTime();
+            dto.lastLogin = u.getLastLogin();
+            return dto;
+        }
     }
 }
