@@ -16,6 +16,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.bytedeco.ffmpeg.global.avutil;
+import org.bytedeco.javacv.FFmpegFrameGrabber;
+import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.springframework.stereotype.Service;
 
 import es.ucm.fdi.iw.dto.game.GameConfigDTO;
@@ -453,43 +456,55 @@ public class PartidaService {
     }
 
     public File generateFragment(File audioOriginal, int duracion) throws IOException, InterruptedException {
-        // Método para generar un fragmento de audio aleatorio de una canción mediante
-        // ffmpeg
+        // Método para generar un fragmento de audio aleatorio de una canción usando
+        // FFmpegFrameGrabber y FFmpegFrameRecorder
         // 1. Obtener duración total del audio
-        ProcessBuilder probeBuilder = new ProcessBuilder(
-                "ffprobe", "-v", "error",
-                "-show_entries", "format=duration",
-                "-of", "default=noprint_wrappers=1:nokey=1",
-                audioOriginal.getAbsolutePath());
-        Process probe = probeBuilder.start();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(probe.getInputStream()));
-        double totalDuration = Double.parseDouble(reader.readLine().trim());
-        probe.waitFor();
+        avutil.av_log_set_level(avutil.AV_LOG_QUIET);
+        try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(audioOriginal)) {
+            grabber.start();
+            double totalDuration = grabber.getLengthInTime() / 1_000_000.0; // microsegundos a segundos
 
-        // 2. Si la canción es más corta que el tiempo requerido, devolver el original
-        if (totalDuration <= duracion)
-            return audioOriginal;
+            // 2. Si la canción es más corta que el tiempo requerido, devolver el original
+            if (totalDuration <= duracion) {
+                grabber.stop();
+                return audioOriginal;
+            }
 
-        // 3. Calcular inicio aleatorio
-        double start = Math.random() * (totalDuration - duracion);
+            // 3. Calcular inicio aleatorio
+            double start = Math.random() * (totalDuration - duracion);
 
-        // 4. Crear archivo temporal
-        File tempFile = File.createTempFile("fragment_", ".mp3");
+            // 4. Crear archivo temporal
+            File tempFile = File.createTempFile("fragment_", ".mp3");
 
-        // 5. Ejecutar ffmpeg para recortar el audio e insertarlo en el archivo temporal
-        ProcessBuilder ffmpegBuilder = new ProcessBuilder(
-                "ffmpeg", "-y",
-                "-ss", String.valueOf(start),
-                "-t", String.valueOf(duracion),
-                "-i", audioOriginal.getAbsolutePath(),
-                "-c:a", "libmp3lame",
-                tempFile.getAbsolutePath());
-        ffmpegBuilder.redirectErrorStream(true);
-        Process ffmpeg = ffmpegBuilder.start();
-        ffmpeg.waitFor();
+            // 5. Posicionar el grabber en el tiempo de inicio
+            grabber.setTimestamp((long) (start * 1_000_000)); // segundos a microsegundos
 
-        // 6. Devolver el archivo temporal con el fragmento
-        return tempFile;
+            // 6. Configurar el recorder
+            try (FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(
+                    tempFile, grabber.getAudioChannels())) {
+                recorder.setFormat("mp3");
+                recorder.setSampleRate(grabber.getSampleRate());
+                recorder.setAudioChannels(grabber.getAudioChannels());
+                recorder.setAudioCodec(org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_ID_MP3);
+                recorder.start();
+
+                // 7. Grabar los frames de audio durante la duración solicitada
+                long endTimestamp = (long) ((start + duracion) * 1_000_000);
+                while (grabber.getTimestamp() < endTimestamp) {
+                    org.bytedeco.javacv.Frame frame = grabber.grab();
+                    if (frame == null)
+                        break;
+                    if (frame.samples != null) {
+                        recorder.record(frame);
+                    }
+                }
+                recorder.stop();
+            }
+            grabber.stop();
+
+            // 8. Devolver el archivo temporal con el fragmento
+            return tempFile;
+        }
     }
 
     // FIN GAME GETTERS and AUX METHODS

@@ -56,6 +56,7 @@ public class AudioConverter {
      * @throws Exception
      */
     public static void convertToMP3(String inputFilePath, String outputFilePath) throws AudioConversionException {
+        avutil.av_log_set_level(avutil.AV_LOG_QUIET);
         FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(inputFilePath);
         FFmpegFrameRecorder recorder = null;
         try {
