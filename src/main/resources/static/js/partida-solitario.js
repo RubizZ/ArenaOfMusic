@@ -8,6 +8,7 @@ let playerId = null;
 let isHost = false;
 let totalRounds = 0;
 let timePerRound = 0;
+let mode = null;
 
 // VARIABLES DE CANCIONES
 let currentSongId = null;
@@ -30,20 +31,25 @@ let roundSongOptions = [];
 
 //METODOS
 //LÓGICA PARTIDA
-function iniciarJuego(id, player, hostId, rondas, fragmentDuration) {
+function iniciarJuego(id, player, hostId, rondas, fragmentDuration, gameMode) {
     gameId = id;
     playerId = player
     isHost = hostId === player;
     totalRounds = rondas;
     timePerRound = fragmentDuration;
-
-    obtenerListaCanciones()
-        .then(() => {
-            iniciarRonda();
-        })
-        .catch(error => {
-            console.error('Error obteniendo la lista de canciones:', error);
-        });
+    mode = gameMode;
+    if (mode === "song") {
+        obtenerListaCanciones()
+            .then(() => {
+                iniciarRonda();
+            })
+            .catch(error => {
+                console.error('Error obteniendo la lista de canciones:', error);
+            });
+    }
+    else {
+        iniciarRonda();
+    }
 }
 
 function iniciarRonda() {
@@ -64,10 +70,10 @@ function iniciarRonda() {
         .then(data => {
             currentRound = data.roundNumber;
             currentSongId = data.songId;
-            if (gameConfig.gameMode === "options") {
-                roundSongOptions = data.songOptions; // Guardamos las opciones de la ronda
+            if (mode === "options") {
+                roundSongOptions = data.options; // Guardamos las opciones de la ronda
             }
-            actualizarVistaRonda(currentRound);  // Actualiza la UI con la nueva ronda
+            actualizarVistaRonda();  // Actualiza la UI con la nueva ronda
             obtenerCancion(currentSongId);       // Siguiente paso.
         })
         .catch(error => {
@@ -81,9 +87,17 @@ function finalizarRonda() {
     actualizarVistaRonda(currentRound);  // Actualiza la UI con la nueva ronda
 
     clearInterval(countdownTimer);
-
-    let respuesta = selectedAnswer || document.querySelector("#songInput").value;
-
+    let respuesta = "";
+    if (mode === "songs") {
+        respuesta = selectedAnswer || document.querySelector("#songInput").value;
+    } else {
+        const selectedOption = document.querySelector('input[name="songOption"]:checked');
+        if (selectedOption) {
+            respuesta = selectedOption.value;
+        } else {
+            respuesta = ""; // Si no hay opción seleccionada, se envía vacío
+        }
+    }
     const csrfToken = config.csrf.value;
 
     // Construir el Map en JSON: { playerId: "respuesta" }
@@ -145,11 +159,11 @@ function obtenerCancion(songId) {
         if (!response.ok) {
             throw new Error("Error al obtener la canción");
         }
-        return response.blob(); // asumimos que el backend envía audio como blob
+        return response.blob();
     }).then(blob => {
         audioURL = URL.createObjectURL(blob);
         actualizarCover();
-        reproducirCancion(); // devolverá la URL temporal para reproducir
+        reproducirCancion();
     }).catch(error => {
         console.error('Error al obtener la canción:', error);
     });
@@ -224,7 +238,10 @@ function actualizarSugerencias() {
 }
 
 function marcarRespuesta() {
-    selectedAnswer = document.getElementById('songInput').value;
+    const marca = document.getElementById('songInput');
+    if (marca) {
+        selectedAnswer = marca.value;
+    }
 }
 //FIN LÓGICA SUGERENCIAS
 //-----------------------------------------------------
@@ -238,42 +255,63 @@ function actualizarCover() {
     }
 }
 
-function actualizarVistaRonda(roundData) {
-    document.getElementById('numeroRonda').innerText = `${roundData}`;
+function actualizarVistaRonda() {
+    document.getElementById('numeroRonda').innerText = `${currentRound}`;
+    const overlay = document.getElementById("songTitleOverlay");
+
     if (gameConfig.gameMode === "options") {
         const optionsContainer = document.getElementById("optionsGroup");
-        optionsContainer.innerHTML = ""; // Limpiamos las opciones previas
 
-        // Añadimos las nuevas opciones como radio buttons
-        roundSongOptions.forEach((option, idx) => {
-            const div = document.createElement("div");
-            div.className = "form-check";
+        if (!rondaFinalizada) {
+            optionsContainer.innerHTML = ""; // Limpiamos las opciones previas
+            overlay.style.display = "none";
 
-            const input = document.createElement("input");
-            input.className = "form-check-input";
-            input.type = "radio";
-            input.name = "songOption";
-            input.id = "option" + idx;
-            input.value = option;
+            roundSongOptions.forEach((option, idx) => {
+                const div = document.createElement("div");
+                div.className = "col col-sm-12 col-md-5 option-div p-3 m-1 rounded border";
+                div.style.cursor = "pointer";
+                div.style.transition = "background 0.2s";
 
-            input.onclick = () => {
-                selectedAnswer = option;
-            };
+                const input = document.createElement("input");
+                input.type = "radio";
+                input.name = "songOption";
+                input.id = "option" + idx;
+                input.value = option;
+                input.style.display = "none"; // Oculta el círculo
 
-            const label = document.createElement("label");
-            label.className = "form-check-label";
-            label.htmlFor = input.id;
-            label.innerText = option;
+                const label = document.createElement("label");
+                label.className = "w-100 h-100 m-0";
+                label.htmlFor = input.id;
+                label.innerText = option;
+                label.style.cursor = "pointer";
 
-            div.appendChild(input);
-            div.appendChild(label);
-            optionsContainer.appendChild(div);
-        });
+                // Selección visual al hacer clic en el div
+                div.onclick = () => {
+                    // Desmarca todos los divs
+                    document.querySelectorAll('.option-div').forEach(d => {
+                        d.style.background = "";
+                        d.classList.remove("border-success");
+                    });
+                    // Marca el input y cambia el fondo
+                    input.checked = true;
+                    div.style.background = "#19875433"; // Verde Bootstrap con transparencia
+                    div.classList.add("border-success");
+                    selectedAnswer = option;
+                };
+
+                div.appendChild(input);
+                div.appendChild(label);
+                optionsContainer.appendChild(div);
+            });
+        } else {
+            const radios = optionsContainer.querySelectorAll('input[type="radio"]');
+            radios.forEach(radio => {
+                radio.disabled = true;
+            });
+        }
     } else {
         const inputRespuesta = document.getElementById('songInput');
         const botonRespuesta = document.getElementById('marcarBtn');
-
-        const overlay = document.getElementById("songTitleOverlay");
 
         if (!rondaFinalizada) {
             overlay.style.display = "none";

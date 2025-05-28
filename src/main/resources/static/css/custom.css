@@ -921,7 +921,7 @@ label.btn-outline-dark:hover {
 }
 
 input.btn-check:checked+label.btn-outline-dark {
-    border: 2px solid black !important;
+    border: 5px double black  !important;
     background-color: #ECECEC !important;
     color: black !important;
 }

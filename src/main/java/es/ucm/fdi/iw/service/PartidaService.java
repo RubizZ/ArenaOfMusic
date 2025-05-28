@@ -177,6 +177,25 @@ public class PartidaService {
         Long songId = gameRoundsDTO.getSong(gameRoundsDTO.getRoundNumber());
         Song song = entityManager.find(Song.class, songId);
 
+        GameConfigDTO gameConfig = new GameConfigDTO();
+        gameConfig.parseGameConfigDTO(game.getConfigJson());
+        if(gameConfig.getGameMode().equals("options")){
+            List<String> options = new ArrayList<>();
+            // Generar opciones aleatorias para la ronda
+            List<Song> allSongs = getSongsByPlaylistId(game.getPlaylist().getId());
+            allSongs.remove(song); // Eliminar la canción actual de las opciones
+            Collections.shuffle(allSongs);
+            // Seleccionar 3 canciones aleatorias diferentes
+            for (int i = 0; i < 3 && i < allSongs.size(); i++) {
+                options.add(allSongs.get(i).getName());
+            }
+            // Agregar la canción actual a las opciones
+            options.add(song.getName());
+            // Mezclar las opciones
+            Collections.shuffle(options);
+            // Establecer las opciones en la ronda
+            roundInfo.setOptions(options);  
+        }
         // Cargar la información de la nueva ronda
         roundInfo.setRoundNumber(gameRoundsDTO.getRoundNumber() + 1);
         roundInfo.setSongId(song.getId());

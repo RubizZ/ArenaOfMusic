@@ -1,7 +1,9 @@
 package es.ucm.fdi.iw.dto.game;
 
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import lombok.AllArgsConstructor;
@@ -14,79 +16,21 @@ import lombok.NoArgsConstructor;
 public class RoundInfoDTO {
     int roundNumber;
     Long songId;
-    //String songName;
     Map<Long, Boolean> userAnswers = new HashMap<>();
-
-    // @Override
-    // public String toString() {
-    // StringBuilder userAnswersString = new StringBuilder();
-    // for (Map.Entry<Long, String> entry : userAnswers.entrySet()) {
-    // if (userAnswersString.length() > 0) {
-    // userAnswersString.append(";"); // Separador entre respuestas
-    // }
-    // userAnswersString.append(entry.getKey()).append(":").append(entry.getValue());
-    // }
-    // return "roundNumber=" + roundNumber +
-    // "~song=" + songId + // Manejar valores nulos
-    // "~userAnswers=" + userAnswersString;
-    // }
-
-    // public void parseRoundInfoDTO(String roundInfo) {
-    // try {
-    // String[] parts = roundInfo.split("~", 3); // Dividir en 3 partes principales
-    // if (parts.length != 3) {
-    // throw new IllegalArgumentException("Invalid input format: missing fields");
-    // }
-
-    // // Parse roundNumber
-    // String[] roundNumberPart = parts[0].split("=");
-    // if (roundNumberPart.length != 2 || roundNumberPart[1].isEmpty()) {
-    // throw new IllegalArgumentException("Invalid roundNumber format");
-    // }
-    // this.roundNumber = Integer.parseInt(roundNumberPart[1]);
-
-    // // Parse song
-    // String[] songPart = parts[1].split("=");
-    // if (songPart.length != 2) {
-    // throw new IllegalArgumentException("Invalid song format");
-    // }
-    // this.songId = Long.parseLong(songPart[1]);
-
-    // // Parse userAnswers
-    // String[] userAnswersPart = parts[2].split("=");
-    // if (userAnswersPart.length != 2) {
-    // throw new IllegalArgumentException("Invalid userAnswers format");
-    // }
-    // String[] answers = userAnswersPart[1].split(";");
-    // for (String answer : answers) {
-    // if (!answer.isEmpty()) {
-    // String[] keyValue = answer.split(":");
-    // if (keyValue.length == 2) {
-    // try {
-    // Long key = Long.parseLong(keyValue[0]);
-    // String value = keyValue[1];
-    // userAnswers.put(key, value);
-    // } catch (NumberFormatException e) {
-    // throw new IllegalArgumentException("Invalid key in userAnswers: " +
-    // keyValue[0]);
-    // }
-    // } else {
-    // throw new IllegalArgumentException("Invalid answer format: " + answer);
-    // }
-    // }
-    // }
-    // } catch (Exception e) {
-    // throw new RuntimeException("Failed to parse RoundInfoDTO: " + e.getMessage(),
-    // e);
-    // }
-    // }
+    List<String> options = new ArrayList<>();
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(roundNumber).append("|")
-                .append(songId).append("|");
-                //.append(Base64.getEncoder().encodeToString(songName.getBytes())).append("|");
+          .append(songId).append("|");
+
+        // Opciones separadas por coma y codificadas en Base64 para evitar problemas con caracteres especiales
+        for (int i = 0; i < options.size(); i++) {
+            sb.append(Base64.getEncoder().encodeToString(options.get(i).getBytes()));
+            if (i < options.size() - 1) sb.append(";");
+        }
+        sb.append("|");
 
         userAnswers.forEach((key, value) -> {
             sb.append(key).append("=").append(value).append(";");
@@ -100,10 +44,21 @@ public class RoundInfoDTO {
         RoundInfoDTO dto = new RoundInfoDTO();
         dto.roundNumber = Integer.parseInt(parts[0]);
         dto.songId = Long.parseLong(parts[1]);
-       // dto.songName = new String(Base64.getDecoder().decode(parts[2]));
 
+        // Opciones
+        dto.options = new ArrayList<>();
         if (!parts[2].isEmpty()) {
-            String[] entries = parts[2].split(";");
+            String[] encodedOptions = parts[2].split(";");
+            for (String encoded : encodedOptions) {
+                if (!encoded.isEmpty()) {
+                    dto.options.add(new String(Base64.getDecoder().decode(encoded)));
+                }
+            }
+        }
+
+        // userAnswers
+        if (parts.length > 3 && !parts[3].isEmpty()) {
+            String[] entries = parts[3].split(";");
             for (String entry : entries) {
                 if (!entry.isEmpty()) {
                     String[] kv = entry.split("=", 2);
