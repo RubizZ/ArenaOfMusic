@@ -311,6 +311,7 @@ public class PartidaController {
     public String resultados(Model model, @PathVariable UUID gameId, HttpSession session,
             RedirectAttributes redirectAttributes) {
         try {
+            playerEnPartida(gameId, ((User) session.getAttribute("u")).getId());
             Game game = validarEstadoPartida(gameId, Game.GameState.FINISHED);
 
             User creator = (User) session.getAttribute("u");
