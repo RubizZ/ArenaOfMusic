@@ -132,8 +132,10 @@ public class PartidaController {
     }
 
     @PostMapping("/partida/abandonar/{gameId}")
-    public ResponseEntity<String> abandonarPartida(@PathVariable UUID gameId, HttpServletResponse response) {
+    public ResponseEntity<String> abandonarPartida(@PathVariable UUID gameId, HttpServletResponse response,
+            HttpSession session) {
         try {
+            playerEnPartida(gameId, ((User) session.getAttribute("u")).getId());
             Game game = partidaService.getGameById(gameId);
             if (game == null || !game.getActive()) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
@@ -161,8 +163,11 @@ public class PartidaController {
     }
 
     @PostMapping("/partida/iniciar/{gameId}")
-    public String iniciarPartida(@PathVariable UUID gameId, RedirectAttributes redirectAttributes) {
+    public String iniciarPartida(@PathVariable UUID gameId, RedirectAttributes redirectAttributes,
+            HttpSession session) {
         try {
+            playerEnPartida(gameId, ((User) session.getAttribute("u")).getId());
+
             Game game = validarEstadoPartida(gameId, Game.GameState.WAITING);
             partidaService.startGame(game);
             return "redirect:/partida/" + gameId.toString();
@@ -176,8 +181,11 @@ public class PartidaController {
     }
 
     @GetMapping("/partida/{gameId}")
-    public String partida(@PathVariable UUID gameId, Model model, RedirectAttributes redirectAttributes) {
+    public String partida(@PathVariable UUID gameId, Model model, RedirectAttributes redirectAttributes,
+            HttpSession session) {
         try {
+            playerEnPartida(gameId, ((User) session.getAttribute("u")).getId());
+
             Game game = validarEstadoPartida(gameId, Game.GameState.PLAYING);
 
             // Obtener Configuracion de la Partida
@@ -212,8 +220,11 @@ public class PartidaController {
     }
 
     @PostMapping("/partida/inicioRonda/{gameId}")
-    public ResponseEntity<RoundInfoDTO> inicioRonda(@PathVariable UUID gameId, RedirectAttributes redirectAttributes) {
+    public ResponseEntity<RoundInfoDTO> inicioRonda(@PathVariable UUID gameId, RedirectAttributes redirectAttributes,
+            HttpSession session) {
         try {
+            playerEnPartida(gameId, ((User) session.getAttribute("u")).getId());
+
             Game game = validarEstadoPartida(gameId, Game.GameState.PLAYING);
 
             RoundInfoDTO response = partidaService.startRound(game);
@@ -231,8 +242,10 @@ public class PartidaController {
     }
 
     @GetMapping("/partida/song/{id}/audio/{gameId}")
-    public ResponseEntity<byte[]> getSongAudio(@PathVariable Long id, @PathVariable UUID gameId) {
+    public ResponseEntity<byte[]> getSongAudio(@PathVariable Long id, @PathVariable UUID gameId, HttpSession session) {
         try {
+            playerEnPartida(gameId, ((User) session.getAttribute("u")).getId());
+
             Game game = validarEstadoPartida(gameId, Game.GameState.PLAYING);
 
             GameConfigDTO gameConfig = new GameConfigDTO();
@@ -260,14 +273,16 @@ public class PartidaController {
     }
 
     @GetMapping("/partida/playlist/{id}/cover")
-    public ResponseEntity<byte[]> getPlaylistCover(@PathVariable Long id) {
+    public ResponseEntity<byte[]> getPlaylistCover(@PathVariable Long id, HttpSession session) {
         return responseEntityFromFileGetter(() -> playlistService.getPlaylistCover(id));
     }
 
     @PostMapping("/partida/finRonda/{gameId}")
     public ResponseEntity<RoundResponseDTO> finRonda(@PathVariable UUID gameId, @RequestBody Map<Long, String> body,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes, HttpSession session) {
         try {
+            playerEnPartida(gameId, ((User) session.getAttribute("u")).getId());
+
             Game game = validarEstadoPartida(gameId, Game.GameState.PLAYING);
 
             RoundResponseDTO response = partidaService.endRound(game, body);
@@ -278,8 +293,11 @@ public class PartidaController {
     }
 
     @PostMapping("/partida/finalizar/{gameId}")
-    public ResponseEntity<Void> finalizarPartida(@PathVariable UUID gameId, RedirectAttributes redirectAttributes) {
+    public ResponseEntity<Void> finalizarPartida(@PathVariable UUID gameId, RedirectAttributes redirectAttributes,
+            HttpSession session) {
         try {
+            playerEnPartida(gameId, ((User) session.getAttribute("u")).getId());
+
             Game game = validarEstadoPartida(gameId, Game.GameState.PLAYING);
 
             partidaService.endGame(game);
@@ -321,6 +339,13 @@ public class PartidaController {
     }
 
     // Métodos auxiliares
+
+    private void playerEnPartida(UUID gameId, Long userId) throws ResponseStatusException {
+        // Verificar si el jugador está en la partida
+        if (partidaService.isPlayerInGame(userId, gameId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No estás en la partida.");
+        }
+    }
 
     private Game validarEstadoPartida(UUID gameId, Game.GameState estadoEsperado) throws ResponseStatusException {
         // Validar el estado de la partida
