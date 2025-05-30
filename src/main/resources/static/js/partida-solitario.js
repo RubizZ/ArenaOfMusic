@@ -40,22 +40,30 @@ function iniciarJuego(id, player, hostId, rondas, fragmentDuration, gameAnswerMo
     timePerRound = fragmentDuration;
     answerMode = gameAnswerMode;
     answerType = gameAnswerType;
+
+
     if (answerType === "write") {
         if (answerMode === "artist") {
             obtenerListaArtistas()
                 .then(() => {
+                    const input = document.getElementById('songInput');
+                    if (input) input.addEventListener('input', actualizarSugerencias);
                     iniciarRonda();
                 })
                 .catch(error => {
                     console.error('Error obteniendo la lista de artistas:', error);
+                    errorRedirecting('Error obteniendo la lista de artistas: ' + (error.reason ? error.reason : ''));
                 });
         } else if (answerMode === "song") {
             obtenerListaCanciones()
                 .then(() => {
+                    const input = document.getElementById('songInput');
+                    if (input) input.addEventListener('input', actualizarSugerencias);
                     iniciarRonda();
                 })
                 .catch(error => {
                     console.error('Error obteniendo la lista de canciones:', error);
+                    errorRedirecting('Error obteniendo la lista de canciones: ' + (error.message ? error.message : ''));
                 });
         }
     } else if (answerType === "options") {
@@ -66,7 +74,6 @@ function iniciarJuego(id, player, hostId, rondas, fragmentDuration, gameAnswerMo
 function iniciarRonda() {
     rondaFinalizada = false;
     const csrfToken = config.csrf.value;
-
     fetch("/partida/inicioRonda/" + gameId, {
         method: 'POST',
         headers: {
@@ -74,22 +81,26 @@ function iniciarRonda() {
             'X-CSRF-TOKEN': csrfToken
         }
     })
-        .then(response => {
-            if (!response.ok) throw new Error(`Error al iniciar la ronda: ${response.status}`);
-            return response.json();
-        })
-        .then(data => {
-            currentRound = data.roundNumber;
-            currentSongId = data.songId;
-            if (answerType === "options") {
-                roundSongOptions = data.options; // Guardamos las opciones de la ronda
-            }
-            actualizarVistaRonda();  // Actualiza la UI con la nueva ronda
-            obtenerCancion(currentSongId);       // Siguiente paso.
-        })
-        .catch(error => {
-            console.error('Error iniciando ronda:', error);
-        });
+    .then(response => {
+        if (!response.ok) {
+            return response.json()
+                .then(err => { throw new Error(err.error || "Error iniciando ronda"); })
+                .catch(() => { throw new Error("Error iniciando ronda"); });
+        }
+        return response.json();
+    })
+    .then(data => {
+        currentRound = data.roundNumber;
+        currentSongId = data.songId;
+        if (answerType === "options") {
+            roundSongOptions = data.options;
+        }
+        actualizarVistaRonda();
+        obtenerCancion(currentSongId);
+    })
+    .catch(error => {
+        errorRedirecting(error.message ? error.message : "Error iniciando ronda");
+    });
 }
 
 function finalizarRonda() {
@@ -133,6 +144,7 @@ function finalizarRonda() {
         })
         .catch(error => {
             console.error('Error enviando respuesta:', error);
+            errorRedirecting('Error enviando respuesta u obteniendo resultados: ' + (error.message ? error.message : ''));
         });
 }
 
@@ -153,6 +165,7 @@ function finalizarPartida() {
         window.location.href = `/partida/resultados/${gameId}`;
     }).catch(error => {
         console.error('Error al finalizar la partida:', error);
+        errorRedirecting('Error al finalizar la partida: ' + (error.message ? error.message : ''));
     });
 }
 //FIN LOGICA PARTIDA
@@ -177,6 +190,7 @@ function obtenerCancion(songId) {
         reproducirCancion();
     }).catch(error => {
         console.error('Error al obtener la canción:', error);
+        errorRedirecting('Error al obtener la canción: ' + (error.message ? error.message : ''));
     });
 }
 
@@ -194,6 +208,7 @@ function obtenerCover(songId) {
         })
         .catch(error => {
             console.error('Error cargando la cover:', error);
+            errorRedirecting('Error cargando la cover: ' + (error.message ? error.message : ''));
         });
 }
 //FIN LOGICA CANCIONES
@@ -201,41 +216,45 @@ function obtenerCover(songId) {
 //LÓGICA SUGERENCIAS
 function obtenerListaCanciones() {
     const csrfToken = config.csrf.value;
-
     return fetch(`/partida/obtenerTitulos`, {
         method: 'GET',
         headers: {
             'X-CSRF-TOKEN': csrfToken
         }
-    }).then(response => {
-        if (!response.ok) throw new Error(`Error al obtener la lista: ${response.status}`);
-        return response.json();
-    }).then(data => {
-        availableAnswers = data; // Guardamos la lista recibida
-    });
+    })
+        .then(response => {
+            if (!response.ok) {
+                return response.json()
+                    .then(err => { throw new Error(err.error || "Error al obtener la lista"); })
+                    .catch(() => { throw new Error("Error al obtener la lista"); });
+            }
+            return response.json();
+        })
+        .then(data => {
+            availableAnswers = data;
+        });
 }
 
 function obtenerListaArtistas() {
     const csrfToken = config.csrf.value;
-
     return fetch(`/partida/obtenerArtistas`, {
         method: 'GET',
         headers: {
             'X-CSRF-TOKEN': csrfToken
         }
-    }).then(response => {
-        if (!response.ok) throw new Error(`Error al obtener la lista de artistas: ${response.status}`);
-        return response.json();
-    }).then(data => {
-        availableAnswers = data; // Guardamos la lista recibida
-    });
+    })
+        .then(response => {
+            if (!response.ok) {
+                return response.json()
+                    .then(err => { throw new Error(err.error || "Error al obtener la lista de artistas"); })
+                    .catch(() => { throw new Error("Error al obtener la lista de artistas"); });
+            }
+            return response.json();
+        })
+        .then(data => {
+            availableAnswers = data;
+        });
 }
-document.addEventListener('DOMContentLoaded', () => {
-    if (answerType === "write") {
-        const input = document.getElementById('songInput');
-        input.addEventListener('input', actualizarSugerencias);
-    }
-});
 
 document.addEventListener('click', (e) => {
     if (e.target.classList.contains('sugerencia-item')) {
@@ -315,15 +334,11 @@ function actualizarVistaRonda() {
 
                 // Selección visual al hacer clic en el div
                 div.onclick = () => {
-                    // Desmarca todos los divs
                     document.querySelectorAll('.option-div').forEach(d => {
-                        d.style.background = "";
-                        d.classList.remove("border-success");
+                        d.classList.remove("border-warning", "bg-warning-subtle");
                     });
-                    // Marca el input y cambia el fondo
                     input.checked = true;
-                    div.style.background = "#19875433"; // Verde Bootstrap con transparencia
-                    div.classList.add("border-success");
+                    div.classList.add("border-warning", "bg-warning-subtle");
                     selectedAnswer = option;
                 };
 
@@ -335,6 +350,10 @@ function actualizarVistaRonda() {
             const radios = optionsContainer.querySelectorAll('input[type="radio"]');
             radios.forEach(radio => {
                 radio.disabled = true;
+            });
+            // Opcional: deshabilita el click en los divs y cambia el estilo visual
+            optionsContainer.querySelectorAll('.option-div').forEach(div => {
+                div.style.pointerEvents = "none";
             });
         }
     } else if (answerType === "write") {
@@ -394,7 +413,35 @@ function mostrarResultadoRonda(data) {
         }
     }
 
+    if (answerType === "options") {
+        const optionsContainer = document.getElementById("optionsGroup");
+        const radios = optionsContainer.querySelectorAll('input[type="radio"]');
 
+        let correctOption = [];
+        if (answerMode === "artist") {
+            correctOption = data.artists;
+        } else if (answerMode === "song") {
+            correctOption.push(data.songName);
+        }
+
+        radios.forEach(radio => {
+            const div = radio.parentElement;
+            if (radio.checked) {
+                div.classList.remove("bg-warning-subtle", "bg-success-subtle", "bg-danger-subtle", "border-success", "border-danger", "border-warning");
+                if (correctOption.includes(radio.value)) { // Si acertó
+                    div.classList.add("bg-success-subtle", "border-success");
+                } else { // Si falló
+                    div.classList.add("bg-danger-subtle", "border-danger");
+                }
+            } else {
+                div.classList.remove("bg-warning-subtle", "bg-success-subtle", "bg-danger-subtle", "border-success", "border-danger");
+
+                if (correctOption.includes(radio.value)) { // Si la opción correcta no fue seleccionada
+                    div.classList.add("bg-success-subtle", "border-success");
+                }
+            }
+        });
+    }
 }
 //FIN LOGICA ACTUALIZACIÓN VISTAS
 //-----------------------------------------------------
@@ -469,3 +516,10 @@ function actualizarContador(tiempoRestante) {
 
 }
 //FIN LOGICA REPRODUCCION DE CANCIONES
+
+function errorRedirecting(reason) {
+    showErrorNotification(reason + " - Redirigiendo a la página principal...");
+    setTimeout(() => {
+        window.location.href = "/";
+    }, 5000); // Espera 5 segundos antes de redirigir
+}

@@ -133,34 +133,27 @@ public class PartidaController {
         }
     }
 
-    @PostMapping("/partida/abandonar/{gameId}")
-    public ResponseEntity<String> abandonarPartida(@PathVariable UUID gameId, HttpServletResponse response,
-            HttpSession session) {
+    // Obtener títulos
+    @GetMapping("/partida/obtenerTitulos")
+    public ResponseEntity<?> obtenerTitulos() {
         try {
-            playerEnPartida(gameId, ((User) session.getAttribute("u")).getId());
-            Game game = partidaService.getGameById(gameId);
-            if (game == null || !game.getActive()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
-            }
-            if (game.getGameState().equals(Game.GameState.FINISHED)
-                    || game.getGameState().equals(Game.GameState.ABANDONED)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no se puede abandonar.");
-            }
-            partidaService.leaveGame(game);
+            List<String> titles = partidaService.getTitles();
+            return ResponseEntity.ok(titles);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Error al obtener los títulos: " + e.getMessage()));
+        }
+    }
 
-            ResponseCookie cookie = ResponseCookie.from("partidaAbandonada" + gameId, "true")
-                    .path("/")
-                    .maxAge(10)
-                    .sameSite("Lax")
-                    .httpOnly(false)
-                    .build();
-
-            response.addHeader("Set-Cookie", cookie.toString());
-            return ResponseEntity.ok("Partida abandonada con éxito.");
-        } catch (ResponseStatusException e) {
-            return ResponseEntity.status(e.getStatusCode()).build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    // Obtener artistas
+    @GetMapping("/partida/obtenerArtistas")
+    public ResponseEntity<?> obtenerArtistas() {
+        try {
+            List<String> artists = partidaService.getArtists();
+            return ResponseEntity.ok(artists);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Error al obtener los artistas: " + e.getMessage()));
         }
     }
 
@@ -211,40 +204,53 @@ public class PartidaController {
         }
     }
 
-    @GetMapping("/partida/obtenerTitulos")
-    public ResponseEntity<List<String>> obtenerTitulos() {
+    @PostMapping("/partida/abandonar/{gameId}")
+    public ResponseEntity<?> abandonarPartida(@PathVariable UUID gameId, HttpServletResponse response,
+            HttpSession session) {
         try {
-            List<String> titles = partidaService.getTitles();
-            return ResponseEntity.ok(titles);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
+            playerEnPartida(gameId, ((User) session.getAttribute("u")).getId());
+            Game game = partidaService.getGameById(gameId);
+            if (game == null || !game.getActive()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La partida no existe.");
+            }
+            if (game.getGameState().equals(Game.GameState.FINISHED)
+                    || game.getGameState().equals(Game.GameState.ABANDONED)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no se puede abandonar.");
+            }
+            partidaService.leaveGame(game);
 
-    @GetMapping("/partida/obtenerArtistas")
-    public ResponseEntity<List<String>> obtenerArtistas() {
-        try {
-            List<String> artists = partidaService.getArtists();
-            return ResponseEntity.ok(artists);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            ResponseCookie cookie = ResponseCookie.from("partidaAbandonada" + gameId, "true")
+                    .path("/")
+                    .maxAge(10)
+                    .sameSite("Lax")
+                    .httpOnly(false)
+                    .build();
+
+            response.addHeader("Set-Cookie", cookie.toString());
+            return ResponseEntity.ok("Partida abandonada con éxito.");
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode())
+                .body(Map.of("error", "Error al abandonar la partida: " + e.getReason()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Error inesperado al abandonar la partida: " + e.getMessage()));
         }
     }
 
     @PostMapping("/partida/inicioRonda/{gameId}")
-    public ResponseEntity<RoundInfoDTO> inicioRonda(@PathVariable UUID gameId, RedirectAttributes redirectAttributes,
+    public ResponseEntity<?> inicioRonda(@PathVariable UUID gameId, RedirectAttributes redirectAttributes,
             HttpSession session) {
         try {
             playerEnPartida(gameId, ((User) session.getAttribute("u")).getId());
-
             Game game = validarEstadoPartida(gameId, Game.GameState.PLAYING);
-
             RoundInfoDTO response = partidaService.startRound(game);
             return ResponseEntity.ok(response);
         } catch (ResponseStatusException e) {
-            return ResponseEntity.status(e.getStatusCode()).build();
+            return ResponseEntity.status(e.getStatusCode())
+                .body(Map.of("error", "Error al iniciar la ronda: " + e.getReason()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Error inesperado al iniciar la ronda: " + e.getMessage()));
         }
     }
 
@@ -290,32 +296,30 @@ public class PartidaController {
     }
 
     @PostMapping("/partida/finRonda/{gameId}")
-    public ResponseEntity<RoundResponseDTO> finRonda(@PathVariable UUID gameId, @RequestBody Map<Long, String> body,
+    public ResponseEntity<?> finRonda(@PathVariable UUID gameId, @RequestBody Map<Long, String> body,
             RedirectAttributes redirectAttributes, HttpSession session) {
         try {
             playerEnPartida(gameId, ((User) session.getAttribute("u")).getId());
-
             Game game = validarEstadoPartida(gameId, Game.GameState.PLAYING);
-
             RoundResponseDTO response = partidaService.endRound(game, body);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Error al finalizar la ronda: " + e.getMessage()));
         }
     }
 
     @PostMapping("/partida/finalizar/{gameId}")
-    public ResponseEntity<Void> finalizarPartida(@PathVariable UUID gameId, RedirectAttributes redirectAttributes,
+    public ResponseEntity<?> finalizarPartida(@PathVariable UUID gameId, RedirectAttributes redirectAttributes,
             HttpSession session) {
         try {
             playerEnPartida(gameId, ((User) session.getAttribute("u")).getId());
-
             Game game = validarEstadoPartida(gameId, Game.GameState.PLAYING);
-
             partidaService.endGame(game);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Error al finalizar la partida: " + e.getMessage()));
         }
     }
 

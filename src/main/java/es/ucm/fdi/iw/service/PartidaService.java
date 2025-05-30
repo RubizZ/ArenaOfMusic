@@ -183,23 +183,51 @@ public class PartidaService {
 
         GameConfigDTO gameConfig = new GameConfigDTO();
         gameConfig.parseGameConfigDTO(game.getConfigJson());
+
         if (gameConfig.getAnswerType().equals("options")) {
             List<String> options = new ArrayList<>();
             // Generar opciones aleatorias para la ronda
             List<Song> allSongs = getSongsByPlaylistId(game.getPlaylist().getId());
             allSongs.remove(song); // Eliminar la canción actual de las opciones
             Collections.shuffle(allSongs);
+
             // Seleccionar 3 canciones aleatorias diferentes
             for (int i = 0; i < 3 && i < allSongs.size(); i++) {
-                options.add(allSongs.get(i).getName());
+                if (gameConfig.getGameAnswerMode().equals("artist")) {
+                    for (int j = 0; j < allSongs.get(i).getArtists().size(); j++) {
+                        // Si el modo de respuesta es por artista, agregar los artistas de la canción
+                        if (!allSongs.get(i).getArtists().isEmpty()) {
+                            if (!options.contains(allSongs.get(i).getArtists().get(j))) {
+                                options.add(allSongs.get(i).getArtists().get(j));
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    // Si el modo de respuesta es por título, agregar el nombre de la canción
+                    options.add(allSongs.get(i).getName());
+                }
             }
+
             // Agregar la canción actual a las opciones
-            options.add(song.getName());
+            if (gameConfig.getGameAnswerMode().equals("artist")) {
+                // Si el modo de respuesta es por artista, agregar los artistas de la canción
+                options.add(song.getArtists().getFirst());
+            } else {
+                // Si el modo de respuesta es por título, agregar el nombre de la canción
+                options.add(song.getName());
+            }
+
+            if (options.size() < 3) {
+                throw new IllegalArgumentException(
+                        "No hay opciones disponibles en la playlist para generar las de respuesta.");
+            }
             // Mezclar las opciones
             Collections.shuffle(options);
             // Establecer las opciones en la ronda
             roundInfo.setOptions(options);
         }
+
         // Cargar la información de la nueva ronda
         roundInfo.setRoundNumber(gameRoundsDTO.getRoundNumber() + 1);
         roundInfo.setSongId(song.getId());
