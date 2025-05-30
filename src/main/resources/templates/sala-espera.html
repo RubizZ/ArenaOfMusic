@@ -75,56 +75,58 @@
                             th:text="|CÓDIGO: ${gameId}|"></span>
                     </div>
 
-                    <div class="bg-secondary p-4 rounded mt-4 text-center" style="max-width: 400px; max-height: 250px;">
+                    <div class="bg-secondary text-white p-4 rounded mt-4 text-center"
+                        style="max-width: 400px; max-height: 250px;">
                         <!-- Adivina la canción -->
-                        <div th:if="${gameConfig.gameAnswerMode == 'song'}" class="d-flex align-items-center">
-                            <div class="me-3 d-flex flex-column align-items-center text-center">
+                        <div th:if="${gameConfig.gameAnswerMode == 'song'}" class="row d-flex align-items-center">
+                            <div class="col-sm-4 pe-3 d-flex flex-column align-items-center text-center">
                                 <i class="bi bi-music-note-beamed" style="font-size: 2rem;"></i>
                                 <div class="fw-semibold mt-1">Adivina la canción</div>
                             </div>
-                            <div class="flex-grow-1 text-start">
-                                <small class="d-block mt-1 text-muted">
+                            <div class="col-sm-8 flex-grow">
+                                <small class="d-block mt-1 text-center">
                                     Escribe el nombre de la canción
                                 </small>
                             </div>
                         </div>
 
                         <!-- Adivina el artista -->
-                        <div th:if="${gameConfig.gameAnswerMode == 'artist'}" class="d-flex align-items-center">
-                            <div class="me-3 d-flex flex-column align-items-center text-center">
+                        <div th:if="${gameConfig.gameAnswerMode == 'artist'}" class="row d-flex align-items-center">
+                            <div class="col-sm-4 pe-3 d-flex flex-column align-items-center text-center">
                                 <i class="bi bi-person-fill" style="font-size: 2rem;"></i>
                                 <div class="fw-semibold mt-1">Adivina el artista</div>
                             </div>
-                            <div class="flex-grow-1 text-start">
-                                <small class="d-block mt-1 text-muted">
+                            <div class="col-sm-8 flex-grow ">
+                                <small class="d-block mt-1 text-center">
                                     Escribe el nombre del artista de la canción
                                 </small>
                             </div>
                         </div>
                     </div>
-                    <div class="bg-secondary p-4 rounded mt-4 text-center" style="max-width: 400px; max-height: 250px;">
+                    <div class="bg-secondary text-white p-4 rounded mt-4 text-center"
+                        style="max-width: 400px; max-height: 250px;">
 
                         <!-- Opciones múltiples -->
-                        <div th:if="${gameConfig.answerType == 'options'}" class="d-flex align-items-center">
-                            <div class="me-3 mt-2 d-flex flex-column align-items-center text-center">
+                        <div th:if="${gameConfig.answerType == 'options'}" class="row d-flex mt-2 align-items-center">
+                            <div class="col-sm-4 pe-3 d-flex flex-column align-items-center text-center">
                                 <i class="bi bi-list-ul" style="font-size: 2rem;"></i>
                                 <div class="fw-semibold mt-1">Opciones múltiples</div>
                             </div>
-                            <div class="flex-grow-1 text-start">
-                                <small class="d-block mt-1 text-muted">
+                            <div class="col-sm-8 flex-grow">
+                                <small class="d-block mt-1 text-center">
                                     Elige entre 4 opciones posibles
                                 </small>
                             </div>
                         </div>
 
                         <!-- Opciones múltiples -->
-                        <div th:if="${gameConfig.answerType == 'write'}" class="d-flex align-items-center">
-                            <div class="me-3 mt-2 d-flex flex-column align-items-center text-center">
+                        <div th:if="${gameConfig.answerType == 'write'}" class="row d-flex mt-2 align-items-center">
+                            <div class="col-sm-4 pe-3 d-flex flex-column align-items-center text-center">
                                 <i class="bi bi-input-cursor-text" style="font-size: 2rem;"></i>
                                 <div class="fw-semibold mt-1">Escribe tu respuesta</div>
                             </div>
-                            <div class="flex-grow-1 text-start">
-                                <small class="d-block mt-1 text-muted">
+                            <div class="col-sm-8 flex-grow">
+                                <small class="d-block mt-1 text-center">
                                     Escribe la respuesta correcta
                                 </small>
                             </div>
