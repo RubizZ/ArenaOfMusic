@@ -183,7 +183,7 @@ public class PartidaService {
 
         GameConfigDTO gameConfig = new GameConfigDTO();
         gameConfig.parseGameConfigDTO(game.getConfigJson());
-        if (gameConfig.getGameMode().equals("options")) {
+        if (gameConfig.getAnswerType().equals("options")) {
             List<String> options = new ArrayList<>();
             // Generar opciones aleatorias para la ronda
             List<Song> allSongs = getSongsByPlaylistId(game.getPlaylist().getId());
@@ -230,7 +230,7 @@ public class PartidaService {
         gameConfig.parseGameConfigDTO(game.getConfigJson());
 
         List<String> correctAnswers;
-        if (gameConfig.getGameMode().equals("artist")) {
+        if (gameConfig.getGameAnswerMode().equals("artist")) {
             List<String> artists = roundResponse.getArtists();
             correctAnswers = new ArrayList<>(artists);
         } else {

@@ -87,39 +87,81 @@
                             </div>
                         </div>
 
-                        <!-- Modo de juego -->
+                        <!-- Modo de Adivinanza -->
                         <div class="mb-4">
-                            <h5 class="fw-semibold mb-3 fs-4">Modo de juego</h5>
-                            <div class="row row-cols-1 row-cols-sm-3">
+                            <h5 class="fw-semibold mb-3 fs-4">¿Qué quieres adivinar?</h5>
+                            <div class="row row-cols-1 row-cols-sm-2">
                                 <div class="col">
-                                    <input type="radio" class="btn-check" name="mode" id="options" value="options" />
-                                    <label class="btn btn-outline-dark w-100 h-100 text-center p-3" for="options">
-                                        <div><i class="bi bi-list-ul" style="font-size: 2rem;"></i></div>
-                                        <div class="fw-semibold text-dark mt-1">Opciones múltiples</div>
-                                        <small class="d-block mt-1">
-                                            Elige entre 4 opciones posibles
-                                        </small>
+                                    <input type="radio" class="btn-check" name="answerMode" id="song" value="song" />
+                                    <label
+                                        class="btn btn-outline-dark w-100 h-100 text-start p-3 d-flex align-items-center"
+                                        for="song">
+                                        <div class="me-3 d-flex flex-column align-items-center text-center">
+                                            <i class="bi bi-music-note-beamed" style="font-size: 2rem;"></i>
+                                            <div class="fw-semibold text-dark mt-1">Adivina la canción</div>
+                                        </div>
+                                        <div class="flex-grow-1 text-center">
+                                            <small class="d-block mt-1">
+                                                Adivina el nombre de la canción
+                                            </small>
+                                        </div>
                                     </label>
                                 </div>
                                 <div class="col">
-                                    <input type="radio" class="btn-check" name="mode" id="song" value="song" />
-                                    <label class="btn btn-outline-dark w-100 h-100 text-center p-3" for="song">
-                                        <div><i class="bi bi-music-note-beamed" style="font-size: 2rem;"></i></div>
-                                        <div class="fw-semibold text-dark mt-1">Adivina la canción</div>
-                                        <small class="d-block mt-1">
-                                            Escribe el nombre de la canción
-                                        </small>
+                                    <input type="radio" class="btn-check" name="answerMode" id="artist"
+                                        value="artist" />
+                                    <label
+                                        class="btn btn-outline-dark w-100 h-100 text-start p-3 d-flex align-items-center"
+                                        for="artist">
+                                        <div class="me-3 d-flex flex-column align-items-center text-center">
+                                            <i class="bi bi-person-fill" style="font-size: 2rem;"></i>
+                                            <div class="fw-semibold text-dark mt-1">Adivina el artista</div>
+                                        </div>
+                                        <div class="flex-grow-1 text-center">
+                                            <small class="d-block mt-1">
+                                                Adivina el nombre de un artista de la canción
+                                            </small>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
 
+                        <!-- Modo de Respuesta -->
+                        <div class="mb-4">
+                            <h5 class="fw-semibold mb-3 fs-4">Formato de Respuesta</h5>
+                            <div class="row row-cols-1 row-cols-sm-2">
+                                <div class="col">
+                                    <input type="radio" class="btn-check" name="answerType" id="write" value="write" />
+                                    <label
+                                        class="btn btn-outline-dark w-100 h-100 text-start p-3 d-flex align-items-center"
+                                        for="write">
+                                        <div class="me-3 d-flex flex-column align-items-center text-center">
+                                            <i class="bi bi-input-cursor-text" style="font-size: 2rem;"></i>
+                                            <div class="fw-semibold text-dark mt-1">Escribir respuesta</div>
+                                        </div>
+                                        <div class="flex-grow-1 text-center">
+                                            <small class="d-block mt-1">
+                                                Escribe la respuesta correcta
+                                            </small>
+                                        </div>
                                     </label>
                                 </div>
                                 <div class="col">
-                                    <input type="radio" class="btn-check" name="mode" id="artist" value="artist"/>
-                                    <label class="btn btn-outline-dark w-100 h-100 text-center p-3" for="artist">
-                                        <div><i class="bi bi-person-fill" style="font-size: 2rem;"></i></div>
-                                        <div class="fw-semibold text-dark mt-1">Adivina el artista</div>
-                                        <small class="d-block mt-1">
-                                            Escribe el nombre del artista de la canción
-                                        </small>
+                                    <input type="radio" class="btn-check" name="answerType" id="options"
+                                        value="options" />
+                                    <label
+                                        class="btn btn-outline-dark w-100 h-100 text-start p-3 d-flex align-items-center"
+                                        for="options">
+                                        <div class="me-3 d-flex flex-column align-items-center text-center">
+                                            <i class="bi bi-list-ul" style="font-size: 2rem;"></i>
+                                            <div class="fw-semibold text-dark mt-1">Opciones múltiples</div>
+                                        </div>
+                                        <div class="flex-grow-1 text-center">
+                                            <small class="d-block mt-1">
+                                                Elige entre 4 opciones posibles
+                                            </small>
+                                        </div>
                                     </label>
                                 </div>
                             </div>
@@ -195,22 +237,24 @@
 
                 // Obtenemos los valores del formulario
                 const selectedPlaylistInput = document.querySelector('input[name="selectedPlaylist"]:checked');
-                const modeInput = document.querySelector('input[name="mode"]:checked');
+                const answerModeInput = document.querySelector('input[name="answerMode"]:checked');
+                const answerTypeInput = document.querySelector('input[name="answerType"]:checked');
 
                 const playlistId = selectedPlaylistInput ? selectedPlaylistInput.value : null;
                 const maxPlayers = document.getElementById('maxPlayers').value;
                 const rondas = document.getElementById('rounds').value;
                 const tiempo = document.getElementById('time').value;
-                const modoJuego = modeInput ? modeInput.value : null;
+                const answerMode = answerModeInput ? answerModeInput.value : null;
+                const answerType = answerTypeInput ? answerTypeInput.value : null;
 
                 // Validaciones
-                if (!playlistId || !maxPlayers || !rondas || !tiempo || !modoJuego) {
+                if (!playlistId || !maxPlayers || !rondas || !tiempo || !answerMode || !answerType) {
                     showErrorNotification('Por favor, completa todos los campos.', 'warning');
                     return;
                 }
 
                 if (isNaN(maxPlayers) || isNaN(rondas) || isNaN(tiempo) || rondas <= 0 || tiempo <= 0) {
-                    alert('Las rondas y el tiempo deben ser números positivos.');
+                    showErrorNotification('Las rondas y el tiempo deben ser números positivos.', 'warning');
                     return;
                 }
 
@@ -222,8 +266,9 @@
                 formData.append('playlistId', playlistId);
                 formData.append('rondas', rondas);
                 formData.append('tiempo', tiempo);
-                formData.append('modoJuego', modoJuego);
                 formData.append('maxPlayers', maxPlayers);
+                formData.append('gameAnswerMode', answerMode);
+                formData.append('answerType', answerType);
 
                 fetch('/partida/crear-partida', {
                     method: 'POST',
@@ -238,7 +283,7 @@
                     }
                 }).catch(error => {
                     console.error('Error al crear la partida:', error);
-                    alert('Hubo un error al crear la partida. Intenta nuevamente.');
+                    showErrorNotification('Hubo un error al crear la partida. Intenta nuevamente.', 'danger');
                 });
             });
         });

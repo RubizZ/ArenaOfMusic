@@ -76,13 +76,15 @@ public class PartidaController {
             @RequestParam Long playlistId,
             @RequestParam int rondas,
             @RequestParam int tiempo,
-            @RequestParam String modoJuego,
+            @RequestParam String gameAnswerMode,
+            @RequestParam String answerType,
             @RequestParam int maxPlayers, // Se añadirá cuando se implemente el modo multijugador
             RedirectAttributes redirectAttributes,
             HttpSession session) {
 
         User creator = (User) session.getAttribute("u");
-        GameConfigDTO gameConfig = new GameConfigDTO(playlistId, modoJuego, rondas, tiempo, creator.getId(), maxPlayers,
+        GameConfigDTO gameConfig = new GameConfigDTO(playlistId, gameAnswerMode, answerType, rondas, tiempo,
+                creator.getId(), maxPlayers,
                 0, maxPlayers > 1);
         try {
             UUID gameId = partidaService.createGame(gameConfig);

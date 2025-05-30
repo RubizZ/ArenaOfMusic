@@ -8,7 +8,8 @@ let playerId = null;
 let isHost = false;
 let totalRounds = 0;
 let timePerRound = 0;
-let mode = null;
+let answerMode = null;
+let answerType = null;
 
 // VARIABLES DE CANCIONES
 let currentSongId = null;
@@ -31,30 +32,33 @@ let roundSongOptions = [];
 
 //METODOS
 //LÓGICA PARTIDA
-function iniciarJuego(id, player, hostId, rondas, fragmentDuration, gameMode) {
+function iniciarJuego(id, player, hostId, rondas, fragmentDuration, gameAnswerMode, gameAnswerType) {
     gameId = id;
     playerId = player
     isHost = hostId === player;
     totalRounds = rondas;
     timePerRound = fragmentDuration;
-    mode = gameMode;
-    if (mode === "song") {
-        obtenerListaCanciones()
-            .then(() => {
-                iniciarRonda();
-            })
-            .catch(error => {
-                console.error('Error obteniendo la lista de canciones:', error);
-            });
-    }else if( mode === "artist") {
-        obtenerListaArtistas()
-            .then(() => {
-                iniciarRonda();
-            })
-            .catch(error => {
-                console.error('Error obteniendo la lista de artistas:', error);
-            });
-    }else {
+    answerMode = gameAnswerMode;
+    answerType = gameAnswerType;
+    if (answerType === "write") {
+        if (answerMode === "artist") {
+            obtenerListaArtistas()
+                .then(() => {
+                    iniciarRonda();
+                })
+                .catch(error => {
+                    console.error('Error obteniendo la lista de artistas:', error);
+                });
+        } else if (answerMode === "song") {
+            obtenerListaCanciones()
+                .then(() => {
+                    iniciarRonda();
+                })
+                .catch(error => {
+                    console.error('Error obteniendo la lista de canciones:', error);
+                });
+        }
+    } else if (answerType === "options") {
         iniciarRonda();
     }
 }
@@ -77,7 +81,7 @@ function iniciarRonda() {
         .then(data => {
             currentRound = data.roundNumber;
             currentSongId = data.songId;
-            if (mode === "options") {
+            if (answerType === "options") {
                 roundSongOptions = data.options; // Guardamos las opciones de la ronda
             }
             actualizarVistaRonda();  // Actualiza la UI con la nueva ronda
@@ -95,9 +99,9 @@ function finalizarRonda() {
 
     clearInterval(countdownTimer);
     let respuesta = "";
-    if (mode === "song" || mode === "artist") {
+    if (answerType === "write") {
         respuesta = selectedAnswer || document.querySelector("#songInput").value;
-    } else {
+    } else if (answerType === "options") {
         const selectedOption = document.querySelector('input[name="songOption"]:checked');
         if (selectedOption) {
             respuesta = selectedOption.value;
@@ -211,7 +215,7 @@ function obtenerListaCanciones() {
     });
 }
 
-function obtenerListaArtistas (){
+function obtenerListaArtistas() {
     const csrfToken = config.csrf.value;
 
     return fetch(`/partida/obtenerArtistas`, {
@@ -227,8 +231,10 @@ function obtenerListaArtistas (){
     });
 }
 document.addEventListener('DOMContentLoaded', () => {
-    const input = document.getElementById('songInput');
-    input.addEventListener('input', actualizarSugerencias);
+    if (answerType === "write") {
+        const input = document.getElementById('songInput');
+        input.addEventListener('input', actualizarSugerencias);
+    }
 });
 
 document.addEventListener('click', (e) => {
@@ -281,7 +287,7 @@ function actualizarVistaRonda() {
     document.getElementById('numeroRonda').innerText = `${currentRound}`;
     const overlay = document.getElementById("songTitleOverlay");
 
-    if (gameConfig.gameMode === "options") {
+    if (answerType === "options") {
         const optionsContainer = document.getElementById("optionsGroup");
 
         if (!rondaFinalizada) {
@@ -331,7 +337,7 @@ function actualizarVistaRonda() {
                 radio.disabled = true;
             });
         }
-    } else {
+    } else if (answerType === "write") {
         const inputRespuesta = document.getElementById('songInput');
         const botonRespuesta = document.getElementById('marcarBtn');
 
