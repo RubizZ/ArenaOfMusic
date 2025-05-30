@@ -150,12 +150,14 @@
                         <!-- Título de la canción encima -->
                         <div id="songTitleOverlay" class="position-absolute" style="display: none;">
                             <strong id="songTitleText">Título de la canción</strong>
+                            <br>
+                            <i>~ <small id="songArtistText">Artistas</small> ~</i>
                         </div>
                     </div>
 
 
                     <!-- Input y botón -->
-                    <div th:if="${gameConfig.gameMode == 'song'}" class="input-group mt-3">
+                    <div th:if="${gameConfig.gameMode == 'song' || gameConfig.gameMode == 'artist'}" class="input-group mt-3">
                         <input type="text" class="form-control border-success border-3" id="songInput"
                             placeholder="Introduce el título de la canción..." value="" autocomplete="off">
                         <button class="btn-custom" id="marcarBtn" onclick="marcarRespuesta()">Marcar</button>

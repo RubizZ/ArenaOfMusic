@@ -17,8 +17,8 @@ let audioURL;
 let audio;
 let imageURL;
 
-//LISTA DE TITULOS DE CANCIONES PARA SUGERENCIAS
-let availableSongs = [];
+//LISTA DE TITULOS/ARTISTAS DE CANCIONES PARA SUGERENCIAS
+let availableAnswers = [];
 
 // VARIABLES DE JUEGO
 let countdownTimer = null;
@@ -46,8 +46,15 @@ function iniciarJuego(id, player, hostId, rondas, fragmentDuration, gameMode) {
             .catch(error => {
                 console.error('Error obteniendo la lista de canciones:', error);
             });
-    }
-    else {
+    }else if( mode === "artist") {
+        obtenerListaArtistas()
+            .then(() => {
+                iniciarRonda();
+            })
+            .catch(error => {
+                console.error('Error obteniendo la lista de artistas:', error);
+            });
+    }else {
         iniciarRonda();
     }
 }
@@ -88,7 +95,7 @@ function finalizarRonda() {
 
     clearInterval(countdownTimer);
     let respuesta = "";
-    if (mode === "song") {
+    if (mode === "song" || mode === "artist") {
         respuesta = selectedAnswer || document.querySelector("#songInput").value;
     } else {
         const selectedOption = document.querySelector('input[name="songOption"]:checked');
@@ -200,10 +207,25 @@ function obtenerListaCanciones() {
         if (!response.ok) throw new Error(`Error al obtener la lista: ${response.status}`);
         return response.json();
     }).then(data => {
-        availableSongs = data; // Guardamos la lista recibida
+        availableAnswers = data; // Guardamos la lista recibida
     });
 }
 
+function obtenerListaArtistas (){
+    const csrfToken = config.csrf.value;
+
+    return fetch(`/partida/obtenerArtistas`, {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken
+        }
+    }).then(response => {
+        if (!response.ok) throw new Error(`Error al obtener la lista de artistas: ${response.status}`);
+        return response.json();
+    }).then(data => {
+        availableAnswers = data; // Guardamos la lista recibida
+    });
+}
 document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('songInput');
     input.addEventListener('input', actualizarSugerencias);
@@ -228,7 +250,7 @@ function actualizarSugerencias() {
     }
 
     // Filtra los títulos que contengan el texto en cualquier parte
-    const sugerencias = availableSongs
+    const sugerencias = availableAnswers
         .filter(titulo => titulo.toLowerCase().includes(valor))
         .slice(0, 5); // Limitar a 5 sugerencias
 
@@ -334,8 +356,10 @@ function mostrarResultadoRonda(data) {
     obtenerCover(data.songId); // obtenemos la cover con el ID 
     const overlay = document.getElementById("songTitleOverlay");
     const overlayText = document.getElementById("songTitleText");
+    const overlayArtist = document.getElementById("songArtistText");
 
     overlayText.textContent = data.songName;
+    overlayArtist.textContent = data.artists.join(", ");
     overlay.style.display = "block";
 
     // Actualizamos los puntajes de cada jugador en su tarjeta
@@ -369,6 +393,7 @@ function mostrarResultadoRonda(data) {
 //FIN LOGICA ACTUALIZACIÓN VISTAS
 //-----------------------------------------------------
 //LOGICA REPRODCCION DE CANCIONES
+
 function iniciarCuentaAtrasInicial(callback) {
     const countdown = document.getElementById('countdown');
     const mensajes = ["Preparados...", "Listos...", "¡YA!"];

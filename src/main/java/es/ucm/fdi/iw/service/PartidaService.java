@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.UUID;
@@ -182,7 +183,7 @@ public class PartidaService {
 
         GameConfigDTO gameConfig = new GameConfigDTO();
         gameConfig.parseGameConfigDTO(game.getConfigJson());
-        if(gameConfig.getGameMode().equals("options")){
+        if (gameConfig.getGameMode().equals("options")) {
             List<String> options = new ArrayList<>();
             // Generar opciones aleatorias para la ronda
             List<Song> allSongs = getSongsByPlaylistId(game.getPlaylist().getId());
@@ -197,7 +198,7 @@ public class PartidaService {
             // Mezclar las opciones
             Collections.shuffle(options);
             // Establecer las opciones en la ronda
-            roundInfo.setOptions(options);  
+            roundInfo.setOptions(options);
         }
         // Cargar la información de la nueva ronda
         roundInfo.setRoundNumber(gameRoundsDTO.getRoundNumber() + 1);
@@ -222,8 +223,20 @@ public class PartidaService {
         gameRoundsDTO.setRound(gameRoundsDTO.getRoundNumber() - 1, roundInfo);
         Song song = entityManager.find(Song.class, gameRoundsDTO.getSong(gameRoundsDTO.getRoundNumber() - 1));
         roundResponse.setSongId(song.getId());
+        roundResponse.setArtists(song.getArtists());
         roundResponse.setSongName(song.getName());
 
+        GameConfigDTO gameConfig = new GameConfigDTO();
+        gameConfig.parseGameConfigDTO(game.getConfigJson());
+
+        List<String> correctAnswers;
+        if (gameConfig.getGameMode().equals("artist")) {
+            List<String> artists = roundResponse.getArtists();
+            correctAnswers = new ArrayList<>(artists);
+        } else {
+            correctAnswers = new ArrayList<>();
+            correctAnswers.add(song.getName());
+        }
         // Procesar las respuestas de los jugadores
         Map<Long, Boolean> userTry = new HashMap<>();
         userAnswers.forEach((key, value) -> {
@@ -231,7 +244,7 @@ public class PartidaService {
             PlayerGame playerGame = entityManager.find(PlayerGame.class,
                     new PlayerGameId(game.getId(), key));
             int score = 0;
-            if (value.equalsIgnoreCase(song.getName())) {
+            if (correctAnswers.contains(value)) {
                 // Guardar el intento correcto
                 score += 10;
                 userTry.put(key, true);
@@ -251,8 +264,6 @@ public class PartidaService {
         game.setRoundJson(roundInfo.toString());
 
         // Actualizar la información de la ronda en el juego
-        GameConfigDTO gameConfig = new GameConfigDTO();
-        gameConfig.parseGameConfigDTO(game.getConfigJson());
         game.setRoundJson(gameRoundsDTO.toString());
 
         // Devolver el resultado de la ronda
@@ -442,6 +453,27 @@ public class PartidaService {
             throw new RuntimeException("No se pudieron obtener los títulos de las canciones.", e);
         }
         return titulos;
+    }
+
+    public List<String> getArtists() {
+        // Obtener la lista de artistas de canciones activas
+        List<String> artistas = new ArrayList<>();
+        try {
+            List<?> artistasPorCancionRaw = entityManager
+                    .createNamedQuery("Song.getActiveSongsArtists", List.class).getResultList();
+
+            // Convertir cada elemento a List<String> y "flatten" eliminando duplicados
+            Set<String> artistasUnicos = artistasPorCancionRaw.stream()
+                    .filter(Objects::nonNull)
+                    .flatMap(o -> ((List<?>) o).stream().map(Object::toString))
+                    .collect(Collectors.toSet());
+
+            // Si necesitas una lista:
+            artistas = new ArrayList<>(artistasUnicos);
+        } catch (Exception e) {
+            throw new RuntimeException("No se pudieron obtener los artistas de las canciones.", e);
+        }
+        return artistas;
     }
 
     public int getPosition(Game game, long id) {

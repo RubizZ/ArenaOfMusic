@@ -1,6 +1,7 @@
 package es.ucm.fdi.iw.dto.game;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import lombok.AllArgsConstructor;
@@ -13,5 +14,6 @@ import lombok.NoArgsConstructor;
 public class RoundResponseDTO {
     private Long songId;
     private String songName;
+    private List<String> artists;
     private Map<Long, Integer> result = new LinkedHashMap<>();
 }

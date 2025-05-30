@@ -219,6 +219,16 @@ public class PartidaController {
         }
     }
 
+    @GetMapping("/partida/obtenerArtistas")
+    public ResponseEntity<List<String>> obtenerArtistas() {
+        try {
+            List<String> artists = partidaService.getArtists();
+            return ResponseEntity.ok(artists);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
     @PostMapping("/partida/inicioRonda/{gameId}")
     public ResponseEntity<RoundInfoDTO> inicioRonda(@PathVariable UUID gameId, RedirectAttributes redirectAttributes,
             HttpSession session) {
@@ -343,7 +353,7 @@ public class PartidaController {
 
     private void playerEnPartida(UUID gameId, Long userId) throws ResponseStatusException {
         // Verificar si el jugador está en la partida
-        if (partidaService.isPlayerInGame(userId, gameId)) {
+        if (!partidaService.isPlayerInGame(userId, gameId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No estás en la partida.");
         }
     }

@@ -49,7 +49,8 @@
                                 <!-- <h5 class="fw-semibold mt-4 fs-4">Selecciona el Máximo de Jugadores</h5> -->
                                 <label for="maxPlayers" class="form-label d-flex justify-content-between me-3">
                                     <h5 class="fw-semibold mt-4 fs-4"> Número Máximo de Jugadores</h5>
-                                    <h5 class="fw-semibold mt-4 fs-4" id="maxPlayersValue">[[${modo} == 'solo' ? 1 : (${modo}
+                                    <h5 class="fw-semibold mt-4 fs-4" id="maxPlayersValue">[[${modo} == 'solo' ? 1 :
+                                        (${modo}
                                         =='duel' ? 2 : 4)]]</h5>
                                 </label>
 
@@ -112,15 +113,13 @@
                                     </label>
                                 </div>
                                 <div class="col">
-                                    <input type="radio" class="btn-check" name="mode" id="artist" value="artist"
-                                        disabled />
+                                    <input type="radio" class="btn-check" name="mode" id="artist" value="artist"/>
                                     <label class="btn btn-outline-dark w-100 h-100 text-center p-3" for="artist">
                                         <div><i class="bi bi-person-fill" style="font-size: 2rem;"></i></div>
                                         <div class="fw-semibold text-dark mt-1">Adivina el artista</div>
                                         <small class="d-block mt-1">
                                             Escribe el nombre del artista de la canción
                                         </small>
-                                        <small><i>Proximamente...</i></small>
                                     </label>
                                 </div>
                             </div>
