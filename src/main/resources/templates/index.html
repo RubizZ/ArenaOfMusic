@@ -40,10 +40,23 @@
             <div class="row align-items-center">
                 <div class="col-md-8 text-center">
                     <h3 class="text-center">¿Cómo jugar?</h3>
-                    <p>
-                        Puedes jugar en distintas modalidades y crear tus propias playlists personalizadas para hacerlo aún más divertido.
-                        En cada partida se juegan varias rondas: se reproduce un fragmento de una canción de la playlist elegida y tendrás que adivinar el título lo más rápido posible.
-                        ¿Podrás reconocerlas todas solo con unos segundos de música? ¡Demuestra lo que sabes y reta a tus amigos!
+                    <p class="text-start">
+                        En Arena of Music, cada partida se compone de varias rondas en las que deberás demostrar tus
+                        conocimientos musicales. Al iniciar una partida, selecciona el modo de juego y la playlist que
+                        prefieras. En cada ronda, se reproducirá automáticamente un fragmento de una canción y tendrás
+                        un tiempo limitado para responder.
+                        <br><br>
+                        Según la configuración, deberás identificar correctamente el título de la canción o el nombre
+                        del artista. Puedes responder escribiendo tu respuesta manualmente o seleccionando entre varias
+                        opciones, dependiendo del formato de respuesta elegido. ¡La rapidez y la precisión son clave!
+                        <br><br> El sistema evalúa automáticamente tus respuestas y muestra los resultados al finalizar
+                        cada
+                        ronda. Puedes jugar en solitario para practicar o competir contra otros jugadores en los modos
+                        multijugador y duelo <i class="text-muted">(Próximamente...)</i>. Al finalizar la partida, se
+                        mostrarán las puntuaciones y los resultados de cada ronda.
+                        <br><br> ¡Optimiza tu estrategia, mejora tus tiempos de respuesta y conviértete en el referente
+                        musical
+                        de Arena of Music!
                     </p>
                 </div>
                 <div class="col-md-4 text-center">
@@ -75,7 +88,8 @@
                         <div class="row row-cols-3 justify-content-center align-items-center g-3">
 
                             <div class="col">
-                                <div class="card hoverable text-white text-center bg-secondary mb-3" id="modo-solitario">
+                                <div class="card hoverable text-white text-center bg-secondary mb-3"
+                                    id="modo-solitario">
                                     <a th:href="@{partida/configuracion-partida/solo}" class="stretched-link"></a>
                                     <img src="/img/iconos/solitario.png" alt="Modo Solitario" class="p-2">
                                     <div class="card-body">
@@ -84,7 +98,8 @@
                                 </div>
                             </div>
                             <div class="col">
-                                <div class="card desactivar text-white text-center bg-secondary mb-3 opacity-50" id="modo-duelo">
+                                <div class="card desactivar text-white text-center bg-secondary mb-3 opacity-50"
+                                    id="modo-duelo">
                                     <a th:href="@{configuracion-partida/duel}" class="stretched-link" disabled></a>
                                     <img src="/img/iconos/duelo.png" alt="Modo Duelo" class="p-2">
                                     <div class="card-body">
@@ -93,7 +108,8 @@
                                 </div>
                             </div>
                             <div class="col">
-                                <div class="card desactivar text-white text-center bg-secondary mb-3 opacity-50" id="modo-multijugador">
+                                <div class="card desactivar text-white text-center bg-secondary mb-3 opacity-50"
+                                    id="modo-multijugador">
                                     <a th:href="@{configuracion-partida/multiplayer}" class="stretched-link"
                                         disabled></a>
                                     <img src="/img/iconos/fiesta.png" alt="Modo Multijugador" class="p-2">
