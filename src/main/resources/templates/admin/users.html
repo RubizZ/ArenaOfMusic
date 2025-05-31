@@ -215,11 +215,11 @@
                         let lastLogin = new Date(u.lastLogin).toLocaleString('es-ES', dateOptions);
 
                         html += `
-                        <div class="card  mb-3" style="background-color: ${bgColor}">
+                        <div class="card mb-3" style="background-color: ${bgColor}">
                             <div class="card-body">
                                 <div class="row row-cols-5 align-items-center text-center">
                                     <div class="col">
-                                        <img src="${u.profileImage ?? config.rootUrl + '/img/default-profile.png'}"
+                                        <img id="img${u.id}" src="${u.profileImage ?? config.rootUrl + '/img/default-profile.png'}"
                                             class="rounded-circle border border-3 mb-3" style="width:100px;height:100px;object-fit:cover;">
                                     </div>
                                     <div class="col">
@@ -251,6 +251,19 @@
                         </div>`;
                     });
                     document.getElementById("userList").innerHTML = html;
+
+                    users.forEach(u => {
+                        let img = document.getElementById("userList").querySelector("#img" + u.id);
+                        img.style.cursor = 'pointer';
+                        img.addEventListener('click', () => {
+                            window.location.href = `/admin/user/${encodeURIComponent(u.username)}`;
+                        });
+
+                        new bootstrap.Tooltip(img, {
+                            title: "Ver perfil",
+                            placement: "top"
+                        });
+                    });
                 });
         }
 

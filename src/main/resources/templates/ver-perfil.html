@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
+
 <head>
   <!-- Fragmento de head con título dinámico -->
   <th:block th:replace="~{fragments/head :: header}" />
   <title>Admin - Arena of Music</title>
 </head>
+
 <body class="d-flex flex-column h-100">
   <!-- Navegación -->
   <header th:replace="~{fragments/nav.html :: nav}"></header>
@@ -14,8 +16,8 @@
       <div class="text-center">
         <!-- Imagen de perfil con fallback -->
         <img th:src="${user.profileImage} != null ? @{${user.profileImage}} : @{/img/default-profile.png}"
-             th:alt="${user.username} != null ? 'Foto de perfil de ' + ${user.username} : 'Foto de perfil por defecto'"
-             class="rounded-circle mb-3" width="120" height="120">
+          th:alt="${user.username} != null ? 'Foto de perfil de ' + ${user.username} : 'Foto de perfil por defecto'"
+          class="rounded-circle mb-3" width="120" height="120">
 
         <!-- Username -->
         <h3 class="mb-0" th:text="${user.username}">Username</h3>
@@ -32,19 +34,55 @@
 
         <!-- Fecha de creación -->
         <h5>Fecha de creación</h5>
-        <p th:text="${#dates.format(user.creationDateTime, 'dd MMMM yyyy')}">01 enero 2025</p> 
+        <p th:text="${#dates.format(user.creationDateTime, 'dd MMMM yyyy')}">01 enero 2025</p>
 
         <!-- Último login, solo si existe -->
         <h5>Último login</h5>
-        <p th:if="${user.lastLogin} != null" th:text="${#dates.format(user.lastLogin, 'dd MMMM yyyy ''a las'' HH:mm')}">--</p>
-        <p th:if="${user.lastLogin} == null" class="text-muted">No disponible.</p> 
+        <p th:if="${user.lastLogin} != null" th:text="${#dates.format(user.lastLogin, 'dd MMMM yyyy ''a las'' HH:mm')}">
+          --</p>
+        <p th:if="${user.lastLogin} == null" class="text-muted">No disponible.</p>
 
         <!-- Email -->
         <h5>Email</h5>
         <p th:text="${user.email}">usuario@example.com</p>
+
+        <div th:if="${u.hasRole('ADMIN')}">
+          <h5>Mensaje admin</h5>
+          <form id="submitAdminMsg" enctype="text/plain">
+            <input id="comment" type="text" th:value="${user.comment}" class="form-control mb-3"></input>
+            <button class="btn btn-primary" type="submit">Subir mensaje</button>
+          </form>
+        </div>
       </div>
     </div>
   </div>
+
+  <script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('submitAdminMsg').addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const formData = new FormData();
+        formData.set("username", /*[[${user.username}]]*/ "me");
+        formData.set("comment", document.getElementById('comment').value);
+
+        fetch('/admin/user/submitComment', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-CSRF-TOKEN': config.csrf.value
+          },
+          credentials: 'same-origin',
+          redirect: 'follow'
+        }).then(response => {
+          if (response.ok)
+            showErrorNotification('Se ha actualizado el mensaje correctamente', 'success');
+          else
+            showErrorNotification('Ha habido un error al actualizar el mensaje', 'error');
+        })
+      });
+    });
+  </script>
 
   <!-- Footer -->
   <th:block th:replace="~{fragments/footer.html :: footer}" />
@@ -52,4 +90,5 @@
   <!-- Scripts de Bootstrap -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

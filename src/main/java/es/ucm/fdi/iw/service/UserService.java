@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import es.ucm.fdi.iw.model.User;
 import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 
 @Service
 public class UserService {
@@ -36,8 +37,19 @@ public class UserService {
     // Buscar un usuario por su username
     public User findByUsername(String username) {
         return entityManager.createQuery(
-            "SELECT u FROM User u WHERE u.username = :username", User.class)
-            .setParameter("username", username)
-            .getSingleResult();
+                "SELECT u FROM User u WHERE u.username = :username", User.class)
+                .setParameter("username", username)
+                .getSingleResult();
+    }
+
+    @Transactional
+    public boolean addComment(String username, String comment) {
+        User u = findByUsername(username);
+        if (u == null)
+            return false;
+
+        u.setComment(comment.equals("") ? null : comment);
+        entityManager.persist(u);
+        return true;
     }
 }

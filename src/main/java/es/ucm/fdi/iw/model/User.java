@@ -118,11 +118,14 @@ public class User implements Transferable<User.Transfer> {
     private List<Block> blocksReceived;
 
     @OneToMany(mappedBy = "user")
-    private List<PlayerGame> partidas = new ArrayList<>();//new CopyOnWriteArrayList<>();
+    private List<PlayerGame> partidas = new ArrayList<>();// new CopyOnWriteArrayList<>();
 
     public synchronized void addPlayerGame(PlayerGame playerGame) {
         partidas.add(playerGame);
     }
+
+    @Column
+    private String comment;
 
     /**
      * Checks whether this user has a given role.
@@ -150,6 +153,7 @@ public class User implements Transferable<User.Transfer> {
         private Date lastLogin;
         private int totalReceived;
         private int totalSent;
+        private String comment;
     }
 
     @Override
@@ -165,7 +169,8 @@ public class User implements Transferable<User.Transfer> {
                 creationDateTime,
                 lastLogin,
                 received.size(),
-                sent.size());
+                sent.size(),
+                comment);
     }
 
     @Override

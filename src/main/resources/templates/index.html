@@ -22,6 +22,12 @@
             <h1 class="titulo shadow-lg p-3 rounded">ARENA OF MUSIC</h1>
         </div>
 
+        <div th:if="${u} and ${u.comment} != null" class="card p-2 mt-3 w-75"
+            style="background-color: var(--bs-danger);">
+            <h2>Mensaje de los administradores</h2>
+            <p th:text="${u.comment}"></p>
+        </div>
+
         <!-- Tarjeta de bienvenida -->
         <div class="card shadow-lg p-2 mt-3 w-75" style="max-width:700px;">
             <div class="card-body text-center">
