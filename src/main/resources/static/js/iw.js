@@ -199,9 +199,19 @@ document.addEventListener("DOMContentLoaded", () => {
         let subs = config.admin ? ["/topic/admin", "/user/queue/updates"] : ["/user/queue/updates"]
         ws.initialize(config.socketUrl, subs);
 
-        let p = document.querySelector("#nav-unread");
+        let p = document.querySelector("#unread-messages");
         if (p) {
-            go(`${config.rootUrl}/user/unread`, "GET").then(d => p.textContent = d.unread);
+            go(`${config.rootUrl}/user/unread`, "GET").then(d => {
+                handleUnreadMessages(d.unread);
+            });
+        }
+
+        let fr = document.querySelector("#friend-requests");
+        if (fr) {
+            go(config.rootUrl + "/amigos/list", "POST", { view: "solicitudes", search: "" })
+                .then(r => {
+                    handleFriendRequests(r.length);
+                });
         }
     } else {
         console.log("Not opening websocket: missing config", config)

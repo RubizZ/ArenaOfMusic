@@ -172,6 +172,9 @@
 
             go(config.rootUrl + "/amigos/list", "POST", filters)
                 .then(data => {
+                    if (viewType === 'solicitudes') {
+                        handleFriendRequests(data.length);
+                    }
                     let html = "";
                     data.forEach(item => {
                         if (viewType === 'amigos') {
@@ -263,15 +266,15 @@
                     });
                     if (viewType === 'amigos') {
                         const friendList = document.getElementById("friendList");
-                        if(friendList) {
+                        if (friendList) {
                             friendList.innerHTML = html;
                         }
                     }
                     else if (viewType === 'solicitudes') {
                         const requestList = document.getElementById("requestList");
-                        if(requestList) {
+                        if (requestList) {
                             requestList.innerHTML = html;
-                        } 
+                        }
                     }
                 })
                 .catch(error => {

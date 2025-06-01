@@ -22,14 +22,14 @@
                     </h2>
 
                     <!-- Mensajes -->
-                    <div
-                        id="chatBox" class="border rounded p-3 mb-2 d-flex flex-column gap-2"
+                    <div id="chatBox" class="border rounded p-3 mb-2 d-flex flex-column gap-2"
                         style="height: 400px; overflow: auto;">
                     </div>
 
                     <!-- Escribir nuevo mensaje -->
                     <div class="input-group">
-                        <textarea id="message" class="form-control shadow-none" rows="1" placeholder="Escribe un mensaje..."></textarea>
+                        <textarea id="message" class="form-control shadow-none" rows="1"
+                            placeholder="Escribe un mensaje..."></textarea>
                         <button class="btn btn-primary" onclick="sendMessage()">Enviar</button>
                     </div>
                 </section>
@@ -48,12 +48,12 @@
                 method: "GET",
                 credentials: "same-origin"
             })
-            .catch(error => console.error(error));
+                .catch(error => console.error(error));
         }
 
         ws.receive = (m) => {
             const involved = (m.from === friendName || m.to === friendName);
-            if(!involved) {
+            if (!involved) {
                 return;
             }
 
@@ -64,7 +64,7 @@
             }
         }
 
-        function appendMessage({from, text, sent}) {
+        function appendMessage({ from, text, sent }) {
             const box = document.getElementById("chatBox");
             const time = new Date(sent).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
             const mine = (from === myName);
@@ -93,7 +93,7 @@
             const message = msgText.value.trim();
             if (!message) return;
 
-            go(`${config.rootUrl}/chat/${friendName}/messages`, "POST", {message})
+            go(`${config.rootUrl}/chat/${friendName}/messages`, "POST", { message })
                 .then(() => {
                     appendMessage({
                         from: myName,
@@ -108,8 +108,11 @@
         // Historial
         function loadHistory() {
             go(`${config.rootUrl}/chat/${friendName}/messages`, "GET")
-            .then(messages => messages.forEach(appendMessage))
-            .catch((error) => console.error(error));
+                .then(messages => messages.forEach(appendMessage))
+                .catch((error) => console.error(error));
+            go(`${config.rootUrl}/user/unread`, "GET").then(d => {
+                handleUnreadMessages(d.unread);
+            });
         }
 
         // Enviar mensaje al pulsar enter
