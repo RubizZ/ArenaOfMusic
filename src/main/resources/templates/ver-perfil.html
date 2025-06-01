@@ -49,8 +49,8 @@
         <div th:if="${u.hasRole('ADMIN')}">
           <h5>Mensaje admin</h5>
           <form id="submitAdminMsg" enctype="text/plain">
-            <input id="comment" type="text" th:value="${user.comment}" class="form-control mb-3"></input>
-            <button class="btn btn-primary" type="submit">Subir mensaje</button>
+            <input id="comment" type="text" class="form-control mb-3"></input>
+            <button class="btn btn-primary" type="submit">Enviar mensaje</button>
           </form>
         </div>
       </div>
@@ -61,6 +61,11 @@
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('submitAdminMsg').addEventListener('submit', (e) => {
         e.preventDefault();
+
+        if (document.getElementById('comment').value.trim() === "") {
+          showErrorNotification('El mensaje no puede estar vacío', 'error');
+          return;
+        }
 
         const formData = new FormData();
         formData.set("username", /*[[${user.username}]]*/ "me");
@@ -76,9 +81,9 @@
           redirect: 'follow'
         }).then(response => {
           if (response.ok)
-            showErrorNotification('Se ha actualizado el mensaje correctamente', 'success');
+            showErrorNotification('Se ha enviado el mensaje correctamente', 'success');
           else
-            showErrorNotification('Ha habido un error al actualizar el mensaje', 'error');
+            showErrorNotification('Ha habido un error al enviar el mensaje', 'error');
         })
       });
     });

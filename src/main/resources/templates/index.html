@@ -23,10 +23,16 @@
         </div>
 
         <!-- Tarjeta de mensaje de los administradores -->
-        <div th:if="${u} and ${u.comment} != null" class="card p-2 mt-3 w-75"
-            style="background-color: var(--bs-danger);">
-            <h2>Mensaje de los administradores</h2>
-            <p th:text="${u.comment}"></p>
+        <div th:if="${u} and ${am} and ${am} > 0" class="card p-2 mt-3 d-flex text-center align-items-center"
+            style="background-color: var(--bs-warning-bg-subtle);">
+            <h2>⚠️</h2>
+            <h2 th:text="${am == 1} ? 'Tienes 1 mensaje de los administradores sin leer' : 'Tienes ' + ${am} + ' mensajes de los administradores sin leer'"
+                style="color: var(--bs-warning-text-emphasis);">
+            </h2>
+            <a th:href="@{/chat/ArenaOfMusic}" class="btn hoverable"
+                style="background-color: var(--bs-primary-border-subtle); color: var(--bs-primary-text-emphasis);">
+                Leer
+            </a>
         </div>
 
         <!-- Tarjeta de bienvenida -->
@@ -51,7 +57,7 @@
         </div>
 
         <!-- Sección con texto y foto -->
-        <div class="card shadow-lg p-2 mt-3 w-75">
+        <div class="card shadow-lg p-2 mt-3 mb-3 w-75">
             <div class="row align-items-center">
                 <div class="col-md-8 text-center">
                     <h3 class="text-center">¿Cómo jugar?</h3>

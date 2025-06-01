@@ -41,15 +41,4 @@ public class UserService {
                 .setParameter("username", username)
                 .getSingleResult();
     }
-
-    @Transactional
-    public boolean addComment(String username, String comment) {
-        User u = findByUsername(username);
-        if (u == null)
-            return false;
-
-        u.setComment(comment.equals("") ? null : comment);
-        entityManager.persist(u);
-        return true;
-    }
 }

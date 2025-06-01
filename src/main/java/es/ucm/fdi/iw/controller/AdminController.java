@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import es.ucm.fdi.iw.dto.UserCommentDTO;
 import es.ucm.fdi.iw.model.User;
+import es.ucm.fdi.iw.service.MessageService;
 import es.ucm.fdi.iw.service.UserService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -180,12 +181,14 @@ public class AdminController {
         return "ver-perfil";
     }
 
+    @Autowired
+    private MessageService messageService;
+
     @PostMapping("/user/submitComment")
     public ResponseEntity<?> submitComment(@ModelAttribute UserCommentDTO udto) {
-        if (userService.addComment(udto.getUsername(), udto.getComment()))
-            return ResponseEntity.ok().build();
-        else
-            return ResponseEntity.internalServerError().build();
+        messageService.sendMessage(userService.findByUsername("ArenaOfMusic"),
+                userService.findByUsername(udto.getUsername()), udto.getComment());
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping({ "/spectate", "/spectate/" })

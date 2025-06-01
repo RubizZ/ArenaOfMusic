@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 import es.ucm.fdi.iw.model.User;
+import es.ucm.fdi.iw.service.MessageService;
 import es.ucm.fdi.iw.service.UserService;
 import jakarta.servlet.http.HttpSession;
 
@@ -23,6 +24,12 @@ public class RootController {
 
         private static final Logger log = LogManager.getLogger(RootController.class);
 
+        @Autowired
+        private UserService userService;
+
+        @Autowired
+        private MessageService messageService;
+
         @ModelAttribute
         public void populateModel(HttpSession session, Model model, Principal principal) {
                 for (String name : new String[] { "u", "url", "ws" }) {
@@ -31,7 +38,13 @@ public class RootController {
         }
 
         @GetMapping("/")
-        public String index(Model model) {
+        public String index(Model model, HttpSession session, Principal principal) {
+                if (principal != null) {
+                        model.addAttribute("am", messageService
+                                        .countUnreadMessages(userService.findByUsername(principal.getName()))
+                                        .get((long) 1));
+                }
+
                 return "index";
         }
 

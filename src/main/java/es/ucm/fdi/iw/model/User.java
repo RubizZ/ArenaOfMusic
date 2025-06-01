@@ -124,9 +124,6 @@ public class User implements Transferable<User.Transfer> {
         partidas.add(playerGame);
     }
 
-    @Column
-    private String comment;
-
     /**
      * Checks whether this user has a given role.
      * 
@@ -153,7 +150,6 @@ public class User implements Transferable<User.Transfer> {
         private Date lastLogin;
         private int totalReceived;
         private int totalSent;
-        private String comment;
     }
 
     @Override
@@ -169,8 +165,7 @@ public class User implements Transferable<User.Transfer> {
                 creationDateTime,
                 lastLogin,
                 received.size(),
-                sent.size(),
-                comment);
+                sent.size());
     }
 
     @Override
