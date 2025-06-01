@@ -129,6 +129,27 @@ public class PartidaService {
     }
 
     @Transactional
+    public void updateGameConfig(Game game, GameConfigDTO gameConfig) {
+        try {
+            // Verificar si la playlist existe y está activa
+            Playlist playlist = entityManager.find(Playlist.class, gameConfig.getPlaylistId());
+            if (playlist == null || !playlist.isActive()) {
+                throw new IllegalArgumentException(
+                        "La playlist seleccionada no existe o no se encuentra disponible.");
+            }
+            if (getSongsByPlaylistId(playlist.getId()).size() < gameConfig.getRounds()) {
+                throw new IllegalArgumentException(
+                        "La playlist seleccionada no tiene suficientes canciones para el número de rondas configurado.");
+            }
+            game.setConfigJson(gameConfig.toString());
+            game.setPlaylist(playlist);
+            entityManager.persist(game);
+        } catch (Exception e) {
+            throw new RuntimeException("No se pudo actualizar la configuración del juego.", e);
+        }
+    }
+
+    @Transactional
     public void loadSongs(Game game) {
         // Cargar las canciones de la playlist en la partida
         GameConfigDTO gameConfigDTO = new GameConfigDTO();
@@ -189,32 +210,29 @@ public class PartidaService {
             // Generar opciones aleatorias para la ronda
             List<Song> allSongs = getSongsByPlaylistId(game.getPlaylist().getId());
             allSongs.remove(song); // Eliminar la canción actual de las opciones
-            Collections.shuffle(allSongs);
-
-            // Seleccionar 3 canciones aleatorias diferentes
-            for (int i = 0; i < 3 && i < allSongs.size(); i++) {
-                if (gameConfig.getGameAnswerMode().equals("artist")) {
-                    for (int j = 0; j < allSongs.get(i).getArtists().size(); j++) {
-                        // Si el modo de respuesta es por artista, agregar los artistas de la canción
-                        if (!allSongs.get(i).getArtists().isEmpty()) {
-                            if (!options.contains(allSongs.get(i).getArtists().get(j))) {
-                                options.add(allSongs.get(i).getArtists().get(j));
-                                break;
-                            }
-                        }
-                    }
-                } else {
-                    // Si el modo de respuesta es por título, agregar el nombre de la canción
-                    options.add(allSongs.get(i).getName());
-                }
-            }
-
-            // Agregar la canción actual a las opciones
             if (gameConfig.getGameAnswerMode().equals("artist")) {
-                // Si el modo de respuesta es por artista, agregar los artistas de la canción
+                // Recoge todos los artistas únicos de las canciones (excepto el correcto)
+                Set<String> uniqueArtists = new HashSet<>();
+                for (Song s : allSongs) {
+                    uniqueArtists.addAll(s.getArtists());
+                }
+                // Baraja y elige 3
+                List<String> artistOptions = new ArrayList<>(uniqueArtists);
+                Collections.shuffle(artistOptions);
+                for (int i = 0; i < 3 && i < artistOptions.size(); i++) {
+                    options.add(artistOptions.get(i));
+                }
                 options.add(song.getArtists().getFirst());
             } else {
-                // Si el modo de respuesta es por título, agregar el nombre de la canción
+                // Títulos únicos
+                Set<String> uniqueTitles = allSongs.stream()
+                        .map(Song::getName)
+                        .collect(Collectors.toSet());
+                List<String> titleOptions = new ArrayList<>(uniqueTitles);
+                Collections.shuffle(titleOptions);
+                for (int i = 0; i < 3 && i < titleOptions.size(); i++) {
+                    options.add(titleOptions.get(i));
+                }
                 options.add(song.getName());
             }
 

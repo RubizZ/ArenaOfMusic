@@ -118,11 +118,15 @@ public class PartidaController {
             // Obtener información de la playlist
             Playlist playlist = game.getPlaylist();
 
+            String modo = gameConfig.getMaxPlayers() == 1 ? "solo"
+                    : (gameConfig.getMaxPlayers() == 2 ? "duel" : "multiplayer");
             // Agregar datos al modelo
             model.addAttribute("gameId", game.getId().toString());
             model.addAttribute("players", players);
             model.addAttribute("gameConfig", gameConfig);
+            model.addAttribute("modo", modo);
             model.addAttribute("playlist", playlist);
+            model.addAttribute("playlists", partidaService.getActivePlaylists());
             return "sala-espera";
         } catch (ResponseStatusException e) {
             String reason = "Error al acceder a la sala de espera: " + e.getReason();
@@ -130,6 +134,46 @@ public class PartidaController {
         } catch (RuntimeException e) {
             String reason = "Error al acceder a la sala de espera: " + e.getMessage();
             return redireccion(redirectAttributes, reason);
+        }
+    }
+
+    @PostMapping("/partida/actualizar-configuracion")
+    public ResponseEntity<?> actualizarConfiguracionPartida(
+            @RequestParam UUID gameId,
+            @RequestParam Long playlistId,
+            @RequestParam int rondas,
+            @RequestParam int tiempo,
+            @RequestParam String gameAnswerMode,
+            @RequestParam String answerType,
+            RedirectAttributes redirectAttributes, HttpSession session) {
+        try {
+            Game game = validarEstadoPartida(gameId, Game.GameState.WAITING);
+            User creator = (User) session.getAttribute("u");
+
+            GameConfigDTO gameConfig = new GameConfigDTO();
+            gameConfig.parseGameConfigDTO(game.getConfigJson());
+
+            // Verificar que el creador de la partida es el usuario actual
+            if (gameConfig.getHostId() != creator.getId()) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No tienes permiso para modificar la partida.");
+            }
+
+            GameConfigDTO newGameConfig = new GameConfigDTO(
+                    playlistId, gameAnswerMode, answerType, rondas, tiempo,
+                    creator.getId(), gameConfig.getMaxPlayers(), gameConfig.getNumPlayers(),
+                    gameConfig.getMultiplayer());
+            partidaService.updateGameConfig(game, newGameConfig);
+
+            // Puedes devolver un mensaje de éxito o el nuevo estado si lo necesitas
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (ResponseStatusException e) {
+            String reason = "Error al actualizar la configuración de la partida: " + e.getReason();
+            return ResponseEntity.status(e.getStatusCode())
+                    .body(Map.of("error", reason));
+        } catch (Exception e) {
+            String reason = "Error al actualizar la configuración de la partida: " + e.getMessage();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", reason));
         }
     }
 
@@ -141,7 +185,7 @@ public class PartidaController {
             return ResponseEntity.ok(titles);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Error al obtener los títulos: " + e.getMessage()));
+                    .body(Map.of("error", "Error al obtener los títulos: " + e.getMessage()));
         }
     }
 
@@ -153,7 +197,7 @@ public class PartidaController {
             return ResponseEntity.ok(artists);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Error al obtener los artistas: " + e.getMessage()));
+                    .body(Map.of("error", "Error al obtener los artistas: " + e.getMessage()));
         }
     }
 
@@ -230,10 +274,10 @@ public class PartidaController {
             return ResponseEntity.ok("Partida abandonada con éxito.");
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode())
-                .body(Map.of("error", "Error al abandonar la partida: " + e.getReason()));
+                    .body(Map.of("error", "Error al abandonar la partida: " + e.getReason()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Error inesperado al abandonar la partida: " + e.getMessage()));
+                    .body(Map.of("error", "Error inesperado al abandonar la partida: " + e.getMessage()));
         }
     }
 
@@ -247,10 +291,10 @@ public class PartidaController {
             return ResponseEntity.ok(response);
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode())
-                .body(Map.of("error", "Error al iniciar la ronda: " + e.getReason()));
+                    .body(Map.of("error", "Error al iniciar la ronda: " + e.getReason()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Error inesperado al iniciar la ronda: " + e.getMessage()));
+                    .body(Map.of("error", "Error inesperado al iniciar la ronda: " + e.getMessage()));
         }
     }
 
@@ -305,7 +349,7 @@ public class PartidaController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Error al finalizar la ronda: " + e.getMessage()));
+                    .body(Map.of("error", "Error al finalizar la ronda: " + e.getMessage()));
         }
     }
 
@@ -319,7 +363,7 @@ public class PartidaController {
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Error al finalizar la partida: " + e.getMessage()));
+                    .body(Map.of("error", "Error al finalizar la partida: " + e.getMessage()));
         }
     }
 

@@ -75,7 +75,7 @@
                             th:text="|CÓDIGO: ${gameId}|"></span>
                     </div>
 
-                    <div class="bg-secondary text-white p-4 rounded mt-4 text-center"
+                    <div class="bg-secondary text-white p-2 rounded mt-4 text-center"
                         style="max-width: 400px; max-height: 250px;">
                         <!-- Adivina la canción -->
                         <div th:if="${gameConfig.gameAnswerMode == 'song'}" class="row d-flex align-items-center">
@@ -103,7 +103,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-secondary text-white p-4 rounded mt-4 text-center"
+                    <div class="bg-secondary text-white p-2 rounded mt-4 text-center"
                         style="max-width: 400px; max-height: 250px;">
 
                         <!-- Opciones múltiples -->
@@ -134,19 +134,65 @@
                     </div>
 
                     <!-- Comenzar partida -->
-                    <div class="text-start mt-4">
-                        <form th:action="@{/partida/iniciar/{gameId}(gameId=${gameId})}" method="post">
-                            <button class="btn btn-accept fw-bold rounded-4 text-dark" id="startButton" type="submit">
-                                Comenzar partida
+
+                </div>
+                <div class="text-start mt-4">
+                    <div class="row d-flex justify-content-end align-items-center">
+                        <div class="col text-end">
+                            <form th:action="@{/partida/iniciar/{gameId}(gameId=${gameId})}" method="post">
+                                <button class="btn btn-accept fw-bold rounded-4 text-dark" id="startButton"
+                                    type="submit">
+                                    <i class="bi bi-play-fill"></i>
+                                    Comenzar partida
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col text-start">
+                            <button class="btn btn-primary fw-bold rounded-4" data-bs-toggle="modal"
+                                data-bs-target="#configModal">
+                                <i class="bi bi-gear"></i>
+                                Configurar partida
                             </button>
-                        </form>
+                        </div>
                     </div>
                 </div>
-
             </div>
         </div>
         </div>
     </main>
+
+
+    <!-- Modal de configuración de partida -->
+    <div class="modal fade" id="configModal" tabindex="-1" aria-labelledby="configModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-fullscreen-xl-down">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="configModalLabel">Configuración de la partida</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <div
+                        th:replace="~{fragments/configuracion.html :: formularioConfiguracion(${modo}, ${playlists}, 'sala-espera')}">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mostrar valores dinámicamente
+        const maxPlayersInput = document.getElementById("maxPlayers");
+        const maxPlayersValue = document.getElementById("maxPlayersValue");
+        maxPlayersInput.addEventListener("input", () => maxPlayersValue.textContent = maxPlayersInput.value);
+
+        const rondasInput = document.getElementById("rounds");
+        const rondasValue = document.getElementById("roundsValue");
+        rondasInput.addEventListener("input", () => rondasValue.textContent = rondasInput.value);
+
+        const tiempoInput = document.getElementById("time");
+        const tiempoValue = document.getElementById("timeValue");
+        tiempoInput.addEventListener("input", () => tiempoValue.textContent = tiempoInput.value);
+    </script>
 
     <script th:inline="javascript">
         document.addEventListener("DOMContentLoaded", function () {
@@ -168,7 +214,108 @@
                     console.error('Error obteniendo carátula:', error);
                     playlistImg.src = '/img/default-profile.png'; // Imagen por defecto en caso de error
                 });
+
+            const playlists = document.querySelectorAll('.playlist-radio');
+
+            playlists.forEach(radio => {
+                const img = radio.nextElementSibling.querySelector('img');
+                const playlistId = radio.value;
+
+                fetch(`/partida/playlist/${playlistId}/cover`)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Error al cargar imagen');
+                        return response.blob();
+                    })
+                    .then(blob => {
+                        const imageUrl = URL.createObjectURL(blob);
+                        img.src = imageUrl;
+                    })
+                    .catch(error => {
+                        console.error('Error obteniendo carátula:', error);
+                        img.src = '/img/default-profile.png'; // Imagen por defecto en caso de error
+                    });
+            });
+
+            const configModal = document.getElementById('configModal');
+            if (configModal) {
+                configModal.addEventListener('shown.bs.modal', function () {
+                    const form = document.getElementById('formConfiguracionPartida');
+                    if (form && !form.dataset.listenerAdded) {
+                        form.addEventListener('submit', function (event) {
+                            event.preventDefault();
+
+                            // Obtenemos los valores del formulario
+                            const selectedPlaylistInput = document.querySelector('input[name="selectedPlaylist"]:checked');
+                            const answerModeInput = document.querySelector('input[name="answerMode"]:checked');
+                            const answerTypeInput = document.querySelector('input[name="answerType"]:checked');
+
+                            const playlistId = selectedPlaylistInput ? selectedPlaylistInput.value : null;
+                            const maxPlayers = document.getElementById('maxPlayers').value;
+                            const rondas = document.getElementById('rounds').value;
+                            const tiempo = document.getElementById('time').value;
+                            const answerMode = answerModeInput ? answerModeInput.value : null;
+                            const answerType = answerTypeInput ? answerTypeInput.value : null;
+
+                            // Validaciones
+                            if (!playlistId || !maxPlayers || !rondas || !tiempo || !answerMode || !answerType) {
+                                showErrorNotification('Por favor, completa todos los campos.', 'warning');
+                                return;
+                            }
+
+                            if (isNaN(maxPlayers) || isNaN(rondas) || isNaN(tiempo) || rondas <= 0 || tiempo <= 0) {
+                                showErrorNotification('Las rondas y el tiempo deben ser números positivos.', 'warning');
+                                return;
+                            }
+
+                            // Obtener el token CSRF
+                            const csrfToken = config.csrf.value;
+
+                            // Crear la petición
+                            const formData = new URLSearchParams();
+                            formData.append('playlistId', playlistId);
+                            formData.append('rondas', rondas);
+                            formData.append('tiempo', tiempo);
+                            formData.append('maxPlayers', maxPlayers);
+                            formData.append('gameAnswerMode', answerMode);
+                            formData.append('answerType', answerType);
+                            formData.append('gameId', window.gameId);
+
+                            fetch('/partida/actualizar-configuracion', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                    'X-CSRF-TOKEN': csrfToken
+                                },
+                                body: formData
+                            }).then(response => {
+                                bootstrap.Modal.getInstance(document.getElementById('configModal')).hide();
+                                if (!response.ok) {
+                                    throw new Error('Error al guardar la configuración');
+                                }
+                                return response.json();
+                            })
+                                .then(response => {
+                                    showErrorNotification('Configuración actualizada correctamente', "success");
+                                    setTimeout(() => {
+                                        showErrorNotification('Recargando información...', "info");
+                                    }, 500);
+
+                                    setTimeout(() => {
+                                        window.location.reload();
+                                    }, 3000);
+                                })
+                                .catch(error => {
+                                    console.error(error);
+                                    showErrorNotification("Hubo un error al guardar la configuración.");
+                                });
+                        });
+                        // Marca que ya hemos añadido el listener para evitar duplicados
+                        form.dataset.listenerAdded = "true";
+                    }
+                });
+            }
         });
+
     </script>
     <script src="/js/leaveGame.js"></script>
 

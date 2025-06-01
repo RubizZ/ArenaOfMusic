@@ -1,0 +1,138 @@
+<!-- fragments/configuracion-form.html -->
+<div th:fragment="formularioConfiguracion(modo, playlists, origen)">
+    <form id="formConfiguracionPartida">
+        <div class="row d-flex justify-content-between p-2">
+            <!-- Izquierda: Playlist y jugadores -->
+            <div class="col-md-5 left-panel me-md-4">
+                <div class="row">
+                    <div class="col-12">
+                        <h5 class="fw-semibold mt-4 fs-4">Selecciona una playlist</h5>
+                        <div class="row row-cols-2 row-cols-md-3 gx-0 mt-3 align-items-start">
+                            <div class="col d-flex text-center justify-content-center"
+                                th:each="playlist : ${playlists}">
+                                <input type="radio" class="btn-check playlist-radio" name="selectedPlaylist"
+                                    th:id="'playlist' + ${playlist.id}" th:value="${playlist.id}" autocomplete="off" />
+                                <label class="btn d-flex flex-column justify-content-center align-items-start rounded"
+                                    th:for="'playlist' + ${playlist.id}">
+                                    <img class="img-fluid rounded-3 mb-2" th:src="@{/img/default-profile.png}" />
+                                    <span class="fw-semibold" th:text="${playlist.name}">Título</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="maxPlayers" class="form-label d-flex justify-content-between me-3">
+                            <h5 class="fw-semibold mt-4 fs-4">Número Máximo de Jugadores</h5>
+                            <h5 class="fw-semibold mt-4 fs-4" id="maxPlayersValue"
+                                th:text="${modo == 'solo' ? 1 : (modo == 'duel' ? 2 : 4)}"></h5>
+                        </label>
+                        <input type="text" class="form-text" id="maxPlayers" name="maxPlayers"
+                            th:value="${modo == 'solo' ? 1 : (modo == 'duel' ? 2 : 4)}" style="display: none;" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Derecha: Ajustes de juego -->
+            <div class="col-md-6 right-panel justify-content-end ms-md-4">
+                <!-- Ajustes -->
+                <div class="mb-4">
+                    <h5 class="fw-semibold mt-4 mb-3 fs-4">Ajustes de juego</h5>
+                    <div class="mb-3">
+                        <label for="rounds" class="form-label d-flex justify-content-between me-3">
+                            <span>Número de rondas</span>
+                            <span class="fw-bold fs-5" id="roundsValue">5</span>
+                        </label>
+                        <input type="range" class="form-range" id="rounds" name="rounds" min="1" max="15" step="1"
+                            value="5" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="time" class="form-label d-flex justify-content-between me-3">
+                            <span>Duración del fragmento (segundos)</span>
+                            <span class="fw-bold fs-5" id="timeValue">5</span>
+                        </label>
+                        <input type="range" class="form-range" id="time" name="time" min="1" max="30" step="1"
+                            value="5" />
+                    </div>
+                </div>
+
+                <!-- Modo de Adivinanza -->
+                <div class="mb-4">
+                    <h5 class="fw-semibold mb-3 fs-4">¿Qué quieres adivinar?</h5>
+                    <div class="row row-cols-1 row-cols-sm-2">
+                        <div class="col">
+                            <input type="radio" class="btn-check" name="answerMode" id="song" value="song" />
+                            <label class="btn btn-outline-dark w-100 h-100 text-start p-3 d-flex align-items-center"
+                                for="song">
+                                <i class="bi bi-music-note-beamed me-3" style="font-size: 2rem;"></i>
+                                <div>
+                                    <div class="fw-semibold text-dark">Adivina la canción</div>
+                                    <small class="d-block mt-1">Adivina el nombre de la canción</small>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col">
+                            <input type="radio" class="btn-check" name="answerMode" id="artist" value="artist" />
+                            <label class="btn btn-outline-dark w-100 h-100 text-start p-3 d-flex align-items-center"
+                                for="artist">
+                                <i class="bi bi-person-fill me-3" style="font-size: 2rem;"></i>
+                                <div>
+                                    <div class="fw-semibold text-dark">Adivina el artista</div>
+                                    <small class="d-block mt-1">Adivina el nombre de un artista de la canción</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modo de Respuesta -->
+                <div class="mb-4">
+                    <h5 class="fw-semibold mb-3 fs-4">Formato de Respuesta</h5>
+                    <div class="row row-cols-1 row-cols-sm-2">
+                        <div class="col">
+                            <input type="radio" class="btn-check" name="answerType" id="write" value="write" />
+                            <label class="btn btn-outline-dark w-100 h-100 text-start p-3 d-flex align-items-center"
+                                for="write">
+                                <i class="bi bi-input-cursor-text me-3" style="font-size: 2rem;"></i>
+                                <div>
+                                    <div class="fw-semibold text-dark">Escribir respuesta</div>
+                                    <small class="d-block mt-1">Escribe la respuesta correcta</small>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col">
+                            <input type="radio" class="btn-check" name="answerType" id="options" value="options" />
+                            <label class="btn btn-outline-dark w-100 h-100 text-start p-3 d-flex align-items-center"
+                                for="options">
+                                <i class="bi bi-list-ul me-3" style="font-size: 2rem;"></i>
+                                <div>
+                                    <div class="fw-semibold text-dark">Opciones múltiples</div>
+                                    <small class="d-block mt-1">Elige entre 4 opciones posibles</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="row my-4 d-flex justify-content-between">
+            <div class="col-6 text-start">
+                <a th:if="${origen != 'sala-espera'}" class="btn btn-back fw-bold ms-3 rounded-4 text-dark"
+                    style="width: 220px;" th:href="@{/}">
+                    Volver
+                </a>
+                <button th:if="${origen == 'sala-espera'}" type="button"
+                    class="btn btn-back fw-bold ms-3 rounded-4 text-dark" style="width: 220px;" data-bs-dismiss="modal">
+                    Cerrar
+                </button>
+            </div>
+            <div class="col-6 d-flex justify-content-end">
+                <button id="buttonAccion" class="btn btn-accept fw-bold rounded-4 text-dark" style="width: 220px;"
+                    type="submit" th:text="${origen == 'sala-espera'} ? 'Guardar' : 'Iniciar'">
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
