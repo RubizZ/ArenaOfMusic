@@ -14,12 +14,31 @@
         <div class="container my-5">
             <div class="row align-items-start d-flex justify-content-center p-2 rounded ">
                 <section style="max-width: 600px;">
-                    <h2 class="fw-semibold mb-3">
-                        <a th:href="@{/amigos}" class="btn me-2 text-decoration-none shadow-none border-0">
+                    <div class="d-flex align-items-center text-center mb-3">
+                        <!-- Botón de volver -->
+                        <a th:href="@{/amigos}" class="btn text-decoration-none shadow-none border-0 me-3">
                             <i class="bi bi-arrow-left-circle fs-4"></i>
                         </a>
-                        <span th:text="${friend.username}"></span>
-                    </h2>
+
+                        <!-- Imagen de perfil -->
+                        <img th:src="${friend.profileImage} != null ? @{${friend.profileImage}} : @{/img/default-profile.png}"
+                            th:alt="${friend.username} != null ? 'Foto de perfil de ' + ${friend.username} : 'Foto de perfil por defecto'"
+                            class="rounded-circle me-3" width="40" height="40">
+
+                        <!-- Nombre de usuario y roles -->
+                        <div class="d-flex align-items-center">
+                            <h2 class="fw-semibold mb-0 me-3" th:text="${friend.username}"></h2>
+                            <span th:each="role : ${#strings.arrayJoin(friend.roles, ',').split(',')}" th:styleappend="|background-color: ${
+                                role == 'ROOT' ? 'var(--bs-danger)' : 
+                                (role == 'ADMIN' ? 'var(--bs-warning)' : 'var(--bs-primary)')
+                            }; 
+                            color: ${
+                                role == 'ADMIN' ? 'black' : 'white'
+                            }; 
+                            margin-right: 0.25rem;|" class="badge" th:text="${role}">
+                            </span>
+                        </div>
+                    </div>
 
                     <!-- Mensajes -->
                     <div id="chatBox" class="border rounded p-3 mb-2 d-flex flex-column gap-2"
