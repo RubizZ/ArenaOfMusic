@@ -22,6 +22,7 @@
             <h1 class="titulo shadow-lg p-3 rounded">ARENA OF MUSIC</h1>
         </div>
 
+        <!-- Tarjeta de mensaje de los administradores -->
         <div th:if="${u} and ${u.comment} != null" class="card p-2 mt-3 w-75"
             style="background-color: var(--bs-danger);">
             <h2>Mensaje de los administradores</h2>
@@ -38,6 +39,14 @@
                     amigos para ver quién es el verdadero experto. ¡Prepara tus oídos, porque la diversión está por
                     comenzar!
                 </p>
+            </div>
+        </div>
+
+        <!-- Tarjeta del botón -->
+        <div class="card tarjeta-boton shadow-lg mt-3">
+            <div class="card-body text-center">
+                <button id="btn-jugar" class="btn btn-success btn-lg" data-bs-toggle="modal"
+                    data-bs-target="#modosModal">JUGAR</button>
             </div>
         </div>
 
@@ -69,14 +78,6 @@
                     <img src="/img/dj.png" alt="Imagen de dj" class="img-fluid rounded"
                         style="max-width: 170px; height: auto;">
                 </div>
-            </div>
-        </div>
-
-        <!-- Tarjeta del botón -->
-        <div class="card tarjeta-boton shadow-lg mt-3">
-            <div class="card-body text-center">
-                <button id="btn-jugar" class="btn btn-success btn-lg" data-bs-toggle="modal"
-                    data-bs-target="#modosModal">JUGAR</button>
             </div>
         </div>
     </main>
