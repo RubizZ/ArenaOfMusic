@@ -1,17 +1,16 @@
+INSERT INTO IWUser (id, username, password, roles, email, enabled, EXP_total, EXP, creation_Date_Time, banned) 
+VALUES (1, 'ArenaOfMusic', '{bcrypt}$2a$10$2BpNTbrsarbHjNsUWgzfNubJqBRf.0Vz9924nRSHBqlbPKerkgX.W', 
+        'ROOT,ADMIN,USER', 'sa@example.com', TRUE, 0, 0, CURRENT_TIMESTAMP, FALSE);
+
 -- Inserimento di un utente admin con username 'a' e password 'aa' (bcrypt)
 INSERT INTO IWUser (id, username, password, roles, email, enabled, EXP_total, EXP, creation_Date_Time, banned) 
-VALUES (1, 'a', '{bcrypt}$2a$10$2BpNTbrsarbHjNsUWgzfNubJqBRf.0Vz9924nRSHBqlbPKerkgX.W', 
+VALUES (2, 'a', '{bcrypt}$2a$10$2BpNTbrsarbHjNsUWgzfNubJqBRf.0Vz9924nRSHBqlbPKerkgX.W', 
         'ADMIN,USER', 'a@example.com', TRUE, 0, 0, CURRENT_TIMESTAMP, FALSE);
 
 -- Inserimento di un utente normale con username 'b' e password 'bb' (bcrypt)
 INSERT INTO IWUser (id, username, password, roles, email, enabled, EXP_total, EXP, creation_Date_Time, banned) 
-VALUES (2, 'b', '{bcrypt}$2a$10$2BpNTbrsarbHjNsUWgzfNubJqBRf.0Vz9924nRSHBqlbPKerkgX.W', 
+VALUES (3, 'b', '{bcrypt}$2a$10$2BpNTbrsarbHjNsUWgzfNubJqBRf.0Vz9924nRSHBqlbPKerkgX.W', 
         'USER', 'b@example.com', TRUE, 0, 0, CURRENT_TIMESTAMP, FALSE);
-
-
-INSERT INTO report (id, reporter_id, reported_id, reason, game_id, solved, banned, admin_id, creation_date, resolution_date)
-VALUES (nextval('gen'), 1, 2, 1, NULL, FALSE, FALSE, NULL, '2025-05-04T10:00:00', NULL);
-
 
 INSERT INTO song (active, id, album, artists, name) VALUES
 (TRUE, 1025, 'Pájaros En La Cabeza', '["Amaral"]', 'Días de verano'),
