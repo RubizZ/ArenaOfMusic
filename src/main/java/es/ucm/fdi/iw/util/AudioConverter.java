@@ -64,10 +64,10 @@ public class AudioConverter {
                 grabber.start();
 
                 recorder = new FFmpegFrameRecorder(outputFilePath, grabber.getAudioChannels());
-                recorder.setFormat("mp3");
+                recorder.setFormat("opus");
                 recorder.setSampleRate(grabber.getSampleRate());
-                recorder.setAudioBitrate(192000);
-                recorder.setAudioCodec(avcodec.AV_CODEC_ID_MP3);
+                recorder.setAudioBitrate(49152);
+                recorder.setAudioCodec(avcodec.AV_CODEC_ID_OPUS);
 
                 // Start the recorder
                 recorder.start();
