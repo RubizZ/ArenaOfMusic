@@ -12,6 +12,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -112,7 +115,7 @@ public class PerfilController {
     public ResponseEntity<?> editarPerfilJson(
             @RequestBody Map<String, String> data,
             HttpSession session) {
-        User user = (User) session.getAttribute("u");
+        User user = perfilService.findById(((User) session.getAttribute("u")).getId());
 
         try {
             perfilService.actualizarPerfil(

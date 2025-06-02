@@ -226,7 +226,7 @@
                 alertBox.classList.remove("d-none");
 
                 setTimeout(() => {
-                    location.reload();
+                    window.location.href = "/perfil";
                 }, 1000);
             } catch (err) {
                 alertBox.className = "alert alert-danger";

@@ -58,7 +58,7 @@
                     <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
                         <!-- If user is logged in -->
                         <th:block th:if="${u}">
-                            <li class="nav-item" th:text="|${u.EXP} EXP|"></li>
+                            <li id="exp" class="nav-item d-none" th:text="|${u.EXP_total} EXP|"></li>
                             <li class="nav-item">
                                 <a id="profile" class="nav-link" th:href="@{/perfil}">
                                     <img th:src="${u.profileImage} != null ? @{${u.profileImage}} : @{/img/default-profile.png}"
@@ -135,7 +135,7 @@
                 </div>
             </div>
         </nav>
-        <script>
+        <script th:inline="javascript">
             let tooltipFriends = null;
             let friendRequests = 0;
             let unreadMessages = 0;
@@ -185,6 +185,24 @@
                     tooltipFriends = null;
                 }
             }
+
+
+
+
+        </script>
+
+        <script th:if="${u}" th:inline="javascript">
+            document.addEventListener('DOMContentLoaded', () => {
+                const expElement = document.getElementById('exp');
+                const id = /*[[${u.id}]]*/ null;
+
+                if (expElement) {
+                    go(`/user/${id}/exp`, 'GET').then(data => {
+                        expElement.textContent = `${data.exp} EXP`;
+                    });
+                    expElement.classList.remove('d-none');
+                }
+            });
         </script>
     </header>
 </body>

@@ -172,7 +172,7 @@ public class UserController {
 			}
 		}
 		target.setUsername(edited.getUsername());
-		
+
 		// update user session so that changes are persisted in the session, too
 		if (requester.getId() == target.getId()) {
 			session.setAttribute("u", target);
@@ -243,6 +243,19 @@ public class UserController {
 			}
 		}
 		return "{\"status\":\"photo uploaded correctly\"}";
+	}
+
+	@GetMapping("{id}/exp")
+	@ResponseBody
+	public String getUserExp(@PathVariable int id) {
+
+		User u = entityManager.find(User.class, id);
+		if (u == null) {
+			return "{\"error\": \"User not found\"}";
+		}
+		int exp = u.getEXP();
+		log.info("User {} has {} experience points", u.getUsername(), exp);
+		return "{\"exp\": " + exp + "}";
 	}
 
 	@GetMapping("error")
