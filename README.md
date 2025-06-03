@@ -216,8 +216,8 @@ Incluye accesos a:
 
 ## Estado del Proyecto
 
-| Módulo                     | Estado                                                 |
-|----------------------------|--------------------------------------------------------|
+| Módulo                     | Estado                                                                      |
+|----------------------------|-----------------------------------------------------------------------------|
 | Partida en solitario       | <span style="color: green; padding-right: 4px;">&#x25CF; </span> Completado |
 | Chat en tiempo real        | <span style="color: green; padding-right: 4px;">&#x25CF; </span> Completado |
 | Sistema de amistad         | <span style="color: green; padding-right: 4px;">&#x25CF; </span> Completado |
@@ -228,3 +228,46 @@ Incluye accesos a:
 | Visualización de partidas  | <span style="color: red; padding-right: 4px;">&#x25CF; </span> No hecho     |
 | Estadísticas generales     | <span style="color: red; padding-right: 4px;">&#x25CF; </span> No hecho     |
 | Tienda                     | <span style="color: red; padding-right: 4px;">&#x25CF; </span> Cancelado    |
+
+---
+
+## Colaboradores Entrega Post-Examen
+
+- ### Iván Alcalde Cámara
+- ### Rubén Hidalgo Arias
+
+---
+
+## Adiciones, Cambios y Mejoras desde la entrega pre-examen
+- ### Partida:
+  - Añadidos modo artista y opciones.
+  - Separación entre tipo de respuesta (Titulo o Artista) y formato de respuesta(Escribir u Opciones).
+  - Posibilidad de modificar la configuración de la partida desde la sala de espera
+
+- ### Amigos
+  - Sustituidos alerts y confirms por modals personalizados
+  - Sustituidos alerts por notificaciones personalizadas de error, confirmación, aviso e información.
+  - Arreglada visualización de perfil de amigos y mejorado el manejo de errores.
+
+- ### Perfil
+  - Modificado el Historial de Partidas(Añadida fecha de partida y ordenación por fecha).
+
+- ### Home
+  - Actualizado texto de *¿Cómo Jugar?*
+  - Visualización de Mensajes de administrador
+  - Mejorado diseño navbar:
+    1. Cambiados nombres de enlaces por iconos.
+    2. Añadido nombre de usuario loggeado a la navbar y la Experiencia total acumulada
+    3. Notificaciones de mensajes nuevos y solicitudes.
+
+- ### Admin - Usuarios
+  - Arreglada carga de usuarios
+  - Envio de mensajes de administrador a usuarios
+
+- ### Admin - Playlist
+  - Cambiado transformación de formato de `.mp3` a `.opus`.
+
+- ### ReadMe.md
+  - Eliminado histórico.
+  - Mejorado diseño y contenidos.
+  - Añadidas licencias y créditos.
