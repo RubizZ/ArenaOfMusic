@@ -160,7 +160,7 @@ Los usuarios tienen acceso a funcionalidades sociales:
 - Botones para volver a jugar o regresar al inicio.
 - Detalles de la partida: playlist utilizada, número de canciones jugadas, tabla de resultados por ronda (canción, artistas, aciertos/fallos de cada jugador).
 - Imagen de portada de la playlist y resumen de la configuración de la partida.
-
+--- 
 ### Panel de Administrador
 
 Incluye accesos a:
@@ -214,7 +214,7 @@ Incluye accesos a:
 
 ---
 
-## ✅ Estado del Proyecto
+## Estado del Proyecto
 
 | Módulo                     | Estado                                                 |
 |----------------------------|--------------------------------------------------------|
