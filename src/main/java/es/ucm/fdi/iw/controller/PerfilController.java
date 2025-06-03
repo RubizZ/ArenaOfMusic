@@ -1,5 +1,6 @@
 package es.ucm.fdi.iw.controller;
 
+import java.security.Principal;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -114,7 +115,8 @@ public class PerfilController {
     @ResponseBody
     public ResponseEntity<?> editarPerfilJson(
             @RequestBody Map<String, String> data,
-            HttpSession session) {
+            HttpSession session,
+            Principal principal) {
         User user = perfilService.findById(((User) session.getAttribute("u")).getId());
 
         try {
@@ -126,7 +128,11 @@ public class PerfilController {
                     data.get("oldPassword"),
                     data.get("password"), data.get("img"));
 
-            session.setAttribute("u", perfilService.findById(user.getId())); // actualiza sesión
+            if (!principal.getName().equals(user.getUsername()))
+                session.invalidate();
+            else
+                session.setAttribute("u", perfilService.findById(user.getId()));
+
             return ResponseEntity.ok(Map.of("message", "Perfil actualizado correctamente"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
