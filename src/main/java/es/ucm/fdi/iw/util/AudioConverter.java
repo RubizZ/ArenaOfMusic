@@ -25,22 +25,22 @@ public class AudioConverter {
     }
 
     /**
-     * Convierte un {@link MultipartFile} a mp3 y lo escribe en {@code outputFile},
+     * Convierte un {@link MultipartFile} a opus y lo escribe en {@code outputFile},
      * eliminando todos los metadatos del archivo
      * 
      * @param inputFile
      * @param outputFile
      * @throws IOException
      */
-    public static void convertToMP3(MultipartFile inputFile, File outputFile)
+    public static void convertToOpus(MultipartFile inputFile, File outputFile)
             throws AudioConversionException, IOException {
         // Guardar el archivo de entrada en un archivo temporal
         File tempInputFile = File.createTempFile("input-", ".tmp");
         inputFile.transferTo(tempInputFile);
 
         try {
-            // Convertir el archivo temporal a MP3
-            convertToMP3(tempInputFile.getAbsolutePath(), outputFile.getAbsolutePath());
+            // Convertir el archivo temporal a opus
+            convertToOpus(tempInputFile.getAbsolutePath(), outputFile.getAbsolutePath());
         } finally {
             // Eliminar el archivo temporal de entrada
             tempInputFile.delete();
@@ -48,14 +48,15 @@ public class AudioConverter {
     }
 
     /**
-     * Convierte el archivo en la ruta {@code inputFilePath} a mp3 y lo coloca en la
+     * Convierte el archivo en la ruta {@code inputFilePath} a opus y lo coloca en
+     * la
      * ruta {@code outputFilePath}
      * 
      * @param inputFilePath
      * @param outputFilePath
      * @throws Exception
      */
-    public static void convertToMP3(String inputFilePath, String outputFilePath) throws AudioConversionException {
+    public static void convertToOpus(String inputFilePath, String outputFilePath) throws AudioConversionException {
         avutil.av_log_set_level(avutil.AV_LOG_QUIET);
         FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(inputFilePath);
         FFmpegFrameRecorder recorder = null;
@@ -93,7 +94,7 @@ public class AudioConverter {
                 }
             }
         } catch (Exception e) {
-            throw new AudioConversionException("Error al convertir a mp3", e);
+            throw new AudioConversionException("Error al convertir a opus", e);
         }
     }
 

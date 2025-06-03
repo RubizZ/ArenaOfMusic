@@ -552,7 +552,7 @@ public class PartidaService {
             double start = Math.random() * (totalDuration - duracion);
 
             // 4. Crear archivo temporal
-            File tempFile = File.createTempFile("fragment_", ".mp3");
+            File tempFile = File.createTempFile("fragment_", ".opus");
 
             // 5. Posicionar el grabber en el tiempo de inicio
             grabber.setTimestamp((long) (start * 1_000_000)); // segundos a microsegundos
@@ -560,10 +560,10 @@ public class PartidaService {
             // 6. Configurar el recorder
             try (FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(
                     tempFile, grabber.getAudioChannels())) {
-                recorder.setFormat("mp3");
+                recorder.setFormat("opus");
                 recorder.setSampleRate(grabber.getSampleRate());
                 recorder.setAudioChannels(grabber.getAudioChannels());
-                recorder.setAudioCodec(org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_ID_MP3);
+                recorder.setAudioCodec(org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_ID_OPUS);
                 recorder.start();
 
                 // 7. Grabar los frames de audio durante la duración solicitada
