@@ -4,60 +4,53 @@
  * WebSocket API, which only works once initialized
  */
 const ws = {
-
-    /**
-     * Number of retries if connection fails
-     */
     retries: 3,
-
-    /**
-     * Default action when message is received. 
-     */
-    receive: (text) => {
-        console.log(text);
-        let p = document.querySelector("#nav-unread");
-        if (p) {
-            p.textContent = +p.textContent + 1;
-        }
-    },
-
+    handlers: {},
     headers: { 'X-CSRF-TOKEN': config.csrf.value },
+    connected: false,
+    pendingSubscriptions: [],
 
-    /**
-     * Attempts to establish communication with the specified
-     * web-socket endpoint. If successfull, will call 
-     */
-    initialize: (endpoint, subs = []) => {
+    initialize: (endpoint) => {
         try {
             ws.stompClient = Stomp.client(endpoint);
             ws.stompClient.reconnect_delay = 2000;
-            // only works on modified stomp.js, not on original from mantainer's site
             ws.stompClient.reconnect_callback = () => ws.retries-- > 0;
             ws.stompClient.connect(ws.headers, () => {
                 ws.connected = true;
-                console.log('Connected to ', endpoint, ' - subscribing:');
-                while (subs.length != 0) {
-                    let sub = subs.pop();
-                    console.log(` ... to ${sub} ...`)
-                    ws.subscribe(sub);
-                }
+                console.log('Connected to', endpoint);
+                ws.pendingSubscriptions.forEach(([sub, handler]) => ws._doSubscribe(sub, handler));
+                ws.pendingSubscriptions = [];
             });
-            console.log("Connected to WS '" + endpoint + "'")
         } catch (e) {
-            console.log("Error, connection to WS '" + endpoint + "' FAILED: ", e);
+            console.error("WS connection failed:", e);
         }
     },
 
-    subscribe: (sub) => {
-        try {
-            ws.stompClient.subscribe(sub,
-                (m) => ws.receive(JSON.parse(m.body))); // fails if non-json received!
-            console.log("Hopefully subscribed to " + sub);
-        } catch (e) {
-            console.log("Error, could not subscribe to " + sub, e);
+    _doSubscribe: (sub, handler) => {
+        if (!ws.handlers[sub]) {
+            ws.handlers[sub] = [];
+            try {
+                ws.stompClient.subscribe(sub, (m) => {
+                    const msg = JSON.parse(m.body);
+                    ws.handlers[sub].forEach(h => h(msg));
+                });
+                console.log("Subscribed to " + sub);
+            } catch (e) {
+                console.error("Could not subscribe to " + sub, e);
+            }
+        }
+        ws.handlers[sub].push(handler);
+    },
+
+    subscribe: (sub, handler) => {
+        if (ws.connected) {
+            ws._doSubscribe(sub, handler);
+        } else {
+            console.log("WS not yet connected, queuing subscription to", sub);
+            ws.pendingSubscriptions.push([sub, handler]);
         }
     }
-}
+};
 
 /**
  * Sends an "ajax" request using Fetch. Sends JSON and expects JSON back.
@@ -196,23 +189,7 @@ function postImage(img, endpoint, name, filename) {
  */
 document.addEventListener("DOMContentLoaded", () => {
     if (config.socketUrl) {
-        let subs = config.admin ? ["/topic/admin", "/user/queue/updates"] : ["/user/queue/updates"]
-        ws.initialize(config.socketUrl, subs);
-
-        let p = document.querySelector("#unread-messages");
-        if (p) {
-            go(`${config.rootUrl}/user/unread`, "GET").then(d => {
-                handleUnreadMessages(d.unread);
-            });
-        }
-
-        let fr = document.querySelector("#friend-requests");
-        if (fr) {
-            go(config.rootUrl + "/amigos/list", "POST", { view: "solicitudes", search: "" })
-                .then(r => {
-                    handleFriendRequests(r.length);
-                });
-        }
+        ws.initialize(config.socketUrl);
     } else {
         console.log("Not opening websocket: missing config", config)
     }

@@ -70,18 +70,16 @@
                 .catch(error => console.error(error));
         }
 
-        ws.receive = (m) => {
-            const involved = (m.from === friendName || m.to === friendName);
-            if (!involved) {
-                return;
-            }
+        ws.subscribe(`/user/queue/updates`, (m) => {
+            if (m.type !== "message") return;
+            if (m.from !== friendName && m.to !== myName) return;
 
-            appendMessage(m);
+            appendMessage(m.data);
 
             if (m.to === myName) {
                 markRead();
             }
-        }
+        });
 
         function appendMessage({ from, text, sent }) {
             const box = document.getElementById("chatBox");

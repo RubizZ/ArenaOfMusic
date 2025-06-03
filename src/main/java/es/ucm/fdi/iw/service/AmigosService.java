@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +38,9 @@ public class AmigosService {
 
     @Autowired
     private MessageService messageService;
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     public User findUser(String name) {
         return userService.findByUsername(name);
@@ -143,6 +147,13 @@ public class AmigosService {
             friendship.setAccepted(true);
             friendship.setFriendshipDate(LocalDateTime.now());
             entityManager.merge(friendship);
+
+            // Enviar notificación de aceptación de solicitud
+            messagingTemplate.convertAndSendToUser(
+                    requestUser.getUsername(),
+                    "/queue/updates",
+                    Map.of("type", "friendRequestAccepted", "from", me.getUsername()));
+
             return true;
         }
 
@@ -166,6 +177,13 @@ public class AmigosService {
 
         if (!friendship.isEmpty()) {
             entityManager.remove(friendship.get(0));
+
+            // Enviar notificación de rechazo de solicitud
+            messagingTemplate.convertAndSendToUser(
+                    requestUser.getUsername(),
+                    "/queue/updates",
+                    Map.of("type", "friendRequestRejected", "from", me.getUsername()));
+
             return true;
         }
 
@@ -303,6 +321,12 @@ public class AmigosService {
         friendship.setUser2(other);
         friendship.setAccepted(false);
         entityManager.persist(friendship);
+
+        // Enviar notificación de nueva solicitud
+        messagingTemplate.convertAndSendToUser(
+                other.getUsername(),
+                "/queue/updates",
+                Map.of("type", "friendRequest", "from", me.getUsername()));
 
         return "ok";
     }

@@ -25,8 +25,7 @@ public class MessageService {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    public Message sendMessage(User sender, User recipient, String text)
-    {
+    public Message sendMessage(User sender, User recipient, String text) {
         Message m = new Message();
         m.setSender(sender);
         m.setRecipient(recipient);
@@ -35,29 +34,30 @@ public class MessageService {
 
         entityManager.persist(m);
 
-        messagingTemplate.convertAndSend("/user/" + recipient.getUsername() + "/queue/updates", m.toTransfer());
+        messagingTemplate.convertAndSendToUser(recipient.getUsername(), "/queue/updates",
+                Map.of("type", "message", "data", m.toTransfer()));
 
         return m;
     }
 
     @Transactional
-    public List<Message> getConversation(User me, User friend)
-    {
+    public List<Message> getConversation(User me, User friend) {
         List<Message> messages = entityManager.createQuery(
-            "SELECT m FROM Message m "
-            + "WHERE (m.sender = :me AND m.recipient = :friend) "
-            + "OR (m.sender = :friend AND m.recipient = :me) "
-            + "ORDER BY m.dateSent", Message.class)
-            .setParameter("me", me)
-            .setParameter("friend", friend)
-            .getResultList();
+                "SELECT m FROM Message m "
+                        + "WHERE (m.sender = :me AND m.recipient = :friend) "
+                        + "OR (m.sender = :friend AND m.recipient = :me) "
+                        + "ORDER BY m.dateSent",
+                Message.class)
+                .setParameter("me", me)
+                .setParameter("friend", friend)
+                .getResultList();
 
         messages.stream()
-        .filter(m -> m.getDateRead() == null && m.getRecipient().getId() == me.getId())
-        .forEach(m -> {
-            m.setDateRead(LocalDateTime.now());
-            entityManager.merge(m);
-        });
+                .filter(m -> m.getDateRead() == null && m.getRecipient().getId() == me.getId())
+                .forEach(m -> {
+                    m.setDateRead(LocalDateTime.now());
+                    entityManager.merge(m);
+                });
 
         entityManager.flush();
 
@@ -65,18 +65,18 @@ public class MessageService {
     }
 
     @Transactional
-    public Map<Long, Long> countUnreadMessages(User me)
-    {
+    public Map<Long, Long> countUnreadMessages(User me) {
         return entityManager.createQuery(
-            "SELECT m.sender.id, COUNT(m) FROM Message m "
-            + "WHERE m.recipient = :me AND m.dateRead IS NULL "
-            + "GROUP BY m.sender.id", Object[].class)
-            .setParameter("me", me)
-            .getResultList()
-            .stream()
-            .collect(Collectors.toMap(
-                r -> (Long) r[0], // id del amigo
-                r -> (Long) r[1]  // número de mensajes no leídos
-            ));
+                "SELECT m.sender.id, COUNT(m) FROM Message m "
+                        + "WHERE m.recipient = :me AND m.dateRead IS NULL "
+                        + "GROUP BY m.sender.id",
+                Object[].class)
+                .setParameter("me", me)
+                .getResultList()
+                .stream()
+                .collect(Collectors.toMap(
+                        r -> (Long) r[0], // id del amigo
+                        r -> (Long) r[1] // número de mensajes no leídos
+                ));
     }
 }

@@ -46,9 +46,8 @@
                                         <path
                                             d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1zm-7.978-1L7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002-.014.002zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0M6.936 9.28a6 6 0 0 0-1.23-.247A7 7 0 0 0 5 9c-4 0-5 3-5 4q0 1 1 1h4.216A2.24 2.24 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816M4.92 10A5.5 5.5 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275ZM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0m3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4" />
                                     </svg>
-                                    <span id="unread-messages"
-                                        class="badge bg-danger notification-badge d-none">0</span>
-                                    <span id="friend-requests" class="friend-request-dot d-none">&#8203;</span>
+                                    <span id="nav-unread" class="badge bg-danger notification-badge d-none">0</span>
+                                    <span id="nav-friend-requests" class="friend-request-dot d-none">&#8203;</span>
                                 </a>
                             </li>
                         </th:block>
@@ -135,13 +134,13 @@
                 </div>
             </div>
         </nav>
-        <script th:inline="javascript">
+        <script th:if="${u}" th:inline="javascript">
             let tooltipFriends = null;
             let friendRequests = 0;
             let unreadMessages = 0;
 
             function handleUnreadMessages(unread) {
-                const u = document.getElementById('unread-messages');
+                const u = document.getElementById('nav-unread');
                 unreadMessages = unread;
                 if (unread > 0) {
                     u.textContent = unread > 99 ? '99+' : unread;
@@ -153,7 +152,7 @@
             }
 
             function handleFriendRequests(requests) {
-                const u = document.getElementById('friend-requests');
+                const u = document.getElementById('nav-friend-requests');
                 friendRequests = requests;
                 if (requests > 0) {
                     u.classList.remove('d-none');
@@ -186,15 +185,10 @@
                 }
             }
 
-
-
-
-        </script>
-
-        <script th:if="${u}" th:inline="javascript">
             document.addEventListener('DOMContentLoaded', () => {
                 const expElement = document.getElementById('exp');
                 const id = /*[[${u.id}]]*/ null;
+                const myName = /*[[${u.username}]]*/ "myUsername";
 
                 if (expElement) {
                     go(`/user/${id}/exp`, 'GET').then(data => {
@@ -202,6 +196,40 @@
                     });
                     expElement.classList.remove('d-none');
                 }
+
+                let unread = document.querySelector("#nav-unread");
+                if (unread) {
+                    go(`${config.rootUrl}/user/unread`, "GET").then(d => {
+                        handleUnreadMessages(d.unread);
+                    });
+                }
+
+                let fr = document.querySelector("#nav-friend-requests");
+                if (fr) {
+                    go(config.rootUrl + "/amigos/list", "POST", { view: "solicitudes", search: "" })
+                        .then(r => {
+                            handleFriendRequests(r.length);
+                        });
+                }
+
+                ws.subscribe("/user/queue/updates", (m) => {
+                    switch (m.type) {
+                        case "message":
+                            const message = m.data;
+                            if (message.from === myName) return;
+                            if (message.to !== myName) return;
+                            handleUnreadMessages(unreadMessages + 1);
+                            break;
+                        case "friendRequest":
+                            showErrorNotification(`Solicitud de amistad de ${m.from} recibida`, 'info');
+                            handleFriendRequests(friendRequests + 1);
+                            break;
+                        case "friendRequestAccepted":
+                        case "friendRequestRejected":
+                            showErrorNotification(`${m.from} ha ${m.type === 'friendRequestAccepted' ? 'aceptado' : 'rechazado'} tu solicitud de amistad`, 'info');
+                            break;
+                    }
+                });
             });
         </script>
     </header>
