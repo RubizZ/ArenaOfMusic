@@ -1,8 +1,10 @@
 package es.ucm.fdi.iw.controller;
 
+import java.security.Principal;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -11,9 +13,11 @@ import java.util.UUID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -115,22 +119,37 @@ public class PerfilController {
     public ResponseEntity<?> editarPerfilJson(
             @RequestBody Map<String, String> data,
             HttpSession session) {
-        User user = perfilService.findById(((User) session.getAttribute("u")).getId());
+
+        User sessionUser = (User) session.getAttribute("u");
+        if (sessionUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no autenticado");
+        }
+
+        User user = perfilService.findById(sessionUser.getId());
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
+        }
 
         try {
-            perfilService.actualizarPerfil(
-                    user,
-                    data.get("username"),
-                    data.get("email"),
-                    data.get("description"),
-                    data.get("oldPassword"),
-                    data.get("password"), data.get("img"));
+            // Extraer datos del JSON
+            String email = data.get("email");
+            String description = data.get("description");
+            String oldPassword = data.get("oldPassword");
+            String newPassword = data.get("password");
+            String imgBase64 = data.get("img");
 
-            session.setAttribute("u", perfilService.findById(user.getId())); // actualiza sesión
+            // Llamar al servicio para actualizar
+            perfilService.actualizarPerfil(user, email, description, oldPassword, newPassword, imgBase64);
+
+            session.setAttribute("u", user); // Actualizar el usuario en la sesión
+
             return ResponseEntity.ok(Map.of("message", "Perfil actualizado correctamente"));
+
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al actualizar el perfil"));
         }
     }
-
 }

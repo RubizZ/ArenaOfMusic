@@ -21,13 +21,8 @@ public class PerfilService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public void actualizarPerfil(User user, String username, String email, String description, String oldPassword,
+    public void actualizarPerfil(User user, String email, String description, String oldPassword,
             String newPassword, String img) {
-
-        // Check for duplicate username
-        if (!user.getUsername().equals(username) && usernameExists(username)) {
-            throw new IllegalArgumentException("Username is already in use.");
-        }
 
         // Check for duplicate email
         if (!user.getEmail().equals(email) && emailExists(email)) {
@@ -51,22 +46,10 @@ public class PerfilService {
             user.setProfileImage(null);
         }
 
-        user.setUsername(username);
         user.setEmail(email);
         user.setDescription(description);
 
         entityManager.merge(user); // update the record in the database
-    }
-
-    private boolean usernameExists(String username) {
-        try {
-            entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
-                    .setParameter("username", username)
-                    .getSingleResult();
-            return true;
-        } catch (NoResultException e) {
-            return false;
-        }
     }
 
     private boolean emailExists(String email) {
