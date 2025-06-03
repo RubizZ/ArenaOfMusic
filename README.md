@@ -249,6 +249,9 @@ Incluye accesos a:
   - Sustituidos alerts por notificaciones personalizadas de error, confirmación, aviso e información.
   - Arreglada visualización de perfil de amigos y mejorado el manejo de errores.
 
+- ### Chat
+  - Añadida foto de perfil de usuario al que se esta escribiendo y roles que tiene el usuario
+
 - ### Perfil
   - Modificado el Historial de Partidas(Añadida fecha de partida y ordenación por fecha).
 
@@ -257,12 +260,14 @@ Incluye accesos a:
   - Visualización de Mensajes de administrador
   - Mejorado diseño navbar:
     1. Cambiados nombres de enlaces por iconos.
-    2. Añadido nombre de usuario loggeado a la navbar y la Experiencia total acumulada
-    3. Notificaciones de mensajes nuevos y solicitudes.
+    2. Añadida foto de perfil de usuario loggeado para acceso al perfil y la Experiencia total acumulada a la derecha de la navbar
+    3. Notificaciones "badge" de mensajes nuevos y solicitudes de amistad entrantes usando websockets.
+    4. Notificaciones "toast" de solicitudes de amistad entrantes y aceptacion o rechazo de solicitudes salientes usando websockets
 
 - ### Admin - Usuarios
   - Arreglada carga de usuarios
-  - Envio de mensajes de administrador a usuarios
+  - Posibilidad de ver perfiles de usuarios
+  - Envio de mensajes de administrador con sender ArenaOfMusic (superadmin/root user) a usuarios a traves de sus perfiles 
 
 - ### Admin - Playlist
   - Cambiado transformación de formato de `.mp3` a `.opus`.
