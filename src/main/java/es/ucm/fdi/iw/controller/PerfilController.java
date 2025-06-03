@@ -118,30 +118,23 @@ public class PerfilController {
     @ResponseBody
     public ResponseEntity<?> editarPerfilJson(
             @RequestBody Map<String, String> data,
-            HttpSession session) {
-
-        User sessionUser = (User) session.getAttribute("u");
-        if (sessionUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no autenticado");
-        }
-
-        User user = perfilService.findById(sessionUser.getId());
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
-        }
+            HttpSession session,
+            Principal principal) {
+        User user = perfilService.findById(((User) session.getAttribute("u")).getId());
 
         try {
-            // Extraer datos del JSON
-            String email = data.get("email");
-            String description = data.get("description");
-            String oldPassword = data.get("oldPassword");
-            String newPassword = data.get("password");
-            String imgBase64 = data.get("img");
+            perfilService.actualizarPerfil(
+                    user,
+                    data.get("username"),
+                    data.get("email"),
+                    data.get("description"),
+                    data.get("oldPassword"),
+                    data.get("password"), data.get("img"));
 
-            // Llamar al servicio para actualizar
-            perfilService.actualizarPerfil(user, email, description, oldPassword, newPassword, imgBase64);
-
-            session.setAttribute("u", user); // Actualizar el usuario en la sesión
+            if (!principal.getName().equals(user.getUsername()))
+                session.invalidate();
+            else
+                session.setAttribute("u", perfilService.findById(user.getId()));
 
             return ResponseEntity.ok(Map.of("message", "Perfil actualizado correctamente"));
 
