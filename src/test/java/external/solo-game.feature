@@ -8,6 +8,7 @@ Feature: partida solitario
 #
 
 Scenario: solo-game completo
+
     # El usuario 'b' llega a la página de inicio de sesión y accede con sus credenciales.
     Given driver baseUrl + '/login'
     And input('#username', 'b')
@@ -28,9 +29,9 @@ Scenario: solo-game completo
     Then waitForUrl(baseUrl + '/partida/configuracion-partida')
 
     # Llega a la sala de configuración y elige su playlist favorita.
-    Given waitFor('#playlist975')
-    When click('#playlist975')
-    Then match script("document.querySelector('#playlist975').checked") == true
+    Given waitFor('#playlist994')
+    When click('#playlist994')
+    Then match script("document.querySelector('#playlist994').checked") == true
 
     # Ajusta el reto: solo una ronda para calentar motores.
     Given waitFor('#rounds')
@@ -42,14 +43,19 @@ Scenario: solo-game completo
     When script("document.querySelector('#time').value = '1'; document.querySelector('#time').dispatchEvent(new Event('input'))")
     Then match text('#timeValue') == '1'
 
-    # Escoge el modo de juego donde debe escribir el nombre de la canción.
+    # Escoge el modo de juego donde adivinar el nombre de la canción.
     Given waitFor('#song')
     When click('#song')
     Then match script("document.querySelector('#song').checked") == true
 
+    # Escoge el modo de respuesta donde debe escribir el nombre de la canción.
+    Given waitFor('#write')
+    When click('#write')
+    Then match script("document.querySelector('#write').checked") == true
+
     # Con todo listo, pulsa el botón para comenzar la partida.
-    Given waitFor('#buttonCrear')
-    When click('#buttonCrear')
+    Given waitFor('#buttonAccion')
+    When click('#buttonAccion')
     Then waitForUrl(baseUrl + '/partida/sala-espera')
 
     # Cuando está listo, inicia la partida.
@@ -62,7 +68,7 @@ Scenario: solo-game completo
     And input('#songInput', 'Uno más uno son 7')
 
     # Tras la ronda, revisa los resultados y decide volver al inicio.
-    Then waitForUrl(baseUrl + '/partida/resultados')
+    Then waitForUrl(baseUrl + '/partida/resultados')  
     Given waitFor('a#btn-continue')    
     When click('a#btn-continue')
     Then waitForUrl(baseUrl)
@@ -82,10 +88,10 @@ Scenario: solo-game completo
     When click("a[href*='/partida/configuracion-partida']")
     Then waitForUrl(baseUrl + '/partida/configuracion-partida')
 
-    # Esta vez, selecciona otra playlist y se prepara para una partida más larga.
-    Given waitFor('#playlist975')
-    When click('#playlist975')
-    Then match script("document.querySelector('#playlist975').checked") == true
+    # Selecciona la misma playlist y se prepara para una partida más larga.
+    Given waitFor('#playlist994')
+    When click('#playlist994')
+    Then match script("document.querySelector('#playlist994').checked") == true
 
     # Decide que la partida tendrá 10 rondas, ¡quiere superarse!
     Given waitFor('#rounds')
@@ -97,14 +103,19 @@ Scenario: solo-game completo
     When script("document.querySelector('#time').value = '15'; document.querySelector('#time').dispatchEvent(new Event('input'))")
     Then match text('#timeValue') == '15'
 
-    # Vuelve a elegir el modo de escribir la canción.
+    # Vuelve a elegir el modo de adivinar la canción.
     Given waitFor('#song')
     When click('#song')
     Then match script("document.querySelector('#song').checked") == true
 
+    # Y esta vez elige el modo de respuestas Opciones.
+    Given waitFor('#options')
+    When click('#options')
+    Then match script("document.querySelector('#options').checked") == true
+
     # Está a punto de empezar, pero en el último momento se arrepiente y abandona la sala de espera.
-    Given waitFor('#buttonCrear')
-    When click('#buttonCrear')
+    Given waitFor('#buttonAccion')
+    When click('#buttonAccion')
     Then waitForUrl(baseUrl + '/partida/sala-espera')
     Given waitFor('#botonSalir')
     When click('#botonSalir')
@@ -120,9 +131,9 @@ Scenario: solo-game completo
     Then waitForUrl(baseUrl + '/partida/configuracion-partida')
 
     # Configura la partida con 5 rondas y fragmentos de 3 segundos.
-    Given waitFor('#playlist975')
-    When click('#playlist975')
-    Then match script("document.querySelector('#playlist975').checked") == true
+    Given waitFor('#playlist994')
+    When click('#playlist994')
+    Then match script("document.querySelector('#playlist994').checked") == true
     Given waitFor('#rounds')
     When script("document.querySelector('#rounds').value = '5'; document.querySelector('#rounds').dispatchEvent(new Event('input'))")
     Then match text('#roundsValue') == '5'
@@ -132,10 +143,13 @@ Scenario: solo-game completo
     Given waitFor('#song')
     When click('#song')
     Then match script("document.querySelector('#song').checked") == true
+    Given waitFor('#write')
+    When click('#write')
+    Then match script("document.querySelector('#write').checked") == true
 
     # Comienza la partida una vez más.
-    Given waitFor('#buttonCrear')
-    When click('#buttonCrear')
+    Given waitFor('#buttonAccion')
+    When click('#buttonAccion')
     Then waitForUrl(baseUrl + '/partida/sala-espera')
     Given waitFor('#startButton')    
     When click('#startButton')
