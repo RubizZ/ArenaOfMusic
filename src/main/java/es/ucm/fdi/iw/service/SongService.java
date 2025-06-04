@@ -105,7 +105,7 @@ public class SongService {
             File imgDest = new File(UPLOAD_DIR + song.getId() + "/cover.webp");
             ImageConverter.readAndConvertImage(data.getCover().getInputStream(), imgDest.toPath());
 
-            File songDest = new File(UPLOAD_DIR + song.getId() + "/audio.opus");
+            File songDest = new File(UPLOAD_DIR + song.getId() + "/audio.ogg");
             AudioConverter.convertToOpus(data.getAudio(), songDest);
 
             return song.getId();
@@ -186,11 +186,11 @@ public class SongService {
                             new File(UPLOAD_DIR + song.getId() + "/cover.webp").toPath());
 
                 if (audio != null) {
-                    File songDest = new File(UPLOAD_DIR + song.getId() + "/audio.opus");
+                    File songDest = new File(UPLOAD_DIR + song.getId() + "/audio.ogg");
                     AudioConverter.convertToOpus(audio, songDest);
                 } else
-                    Files.copy(oldPath.resolve(timestamp + ".opus"),
-                            new File(UPLOAD_DIR + song.getId() + "/audio.opus").toPath());
+                    Files.copy(oldPath.resolve(timestamp + ".ogg"),
+                            new File(UPLOAD_DIR + song.getId() + "/audio.ogg").toPath());
             }
 
         } catch (IOException | AudioConversionException e) {
@@ -204,9 +204,9 @@ public class SongService {
                     Path mainImgPath = mainPath.resolve("cover.webp");
                     if (!Files.exists(mainImgPath)) {
                         Files.move(oldPath.resolve(timestamp + ".webp"), mainImgPath);
-                        Path mainSongPath = mainPath.resolve("audio.opus");
+                        Path mainSongPath = mainPath.resolve("audio.ogg");
                         if (!Files.exists(mainSongPath)) {
-                            Files.move(oldPath.resolve(timestamp + ".opus"), mainSongPath);
+                            Files.move(oldPath.resolve(timestamp + ".ogg"), mainSongPath);
                         }
                     }
                 }
@@ -386,7 +386,7 @@ public class SongService {
         if (!existsSong(id))
             throw new IllegalArgumentException("No existe la canción con id " + id);
 
-        Path audioPath = Paths.get(UPLOAD_DIR + id + "/audio.opus");
+        Path audioPath = Paths.get(UPLOAD_DIR + id + "/audio.ogg");
         if (Files.exists(audioPath)) {
             return audioPath.toFile();
         } else {

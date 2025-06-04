@@ -3,9 +3,9 @@ package es.ucm.fdi.iw.util;
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
+import org.bytedeco.javacv.FFmpegLogCallback;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.ffmpeg.global.avcodec;
-import org.bytedeco.ffmpeg.global.avformat;
 import org.bytedeco.javacpp.Loader;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,6 +21,8 @@ import java.io.IOException;
 public class AudioConverter {
     static {
         // Cargar las bibliotecas nativas de FFmpeg
+        FFmpegLogCallback.set();
+        avutil.av_log_set_level(avutil.AV_LOG_ERROR);
         Loader.load(avcodec.class);
     }
 
@@ -57,7 +59,6 @@ public class AudioConverter {
      * @throws Exception
      */
     public static void convertToOpus(String inputFilePath, String outputFilePath) throws AudioConversionException {
-        avutil.av_log_set_level(avutil.AV_LOG_QUIET);
         FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(inputFilePath);
         FFmpegFrameRecorder recorder = null;
         try {
@@ -65,20 +66,18 @@ public class AudioConverter {
                 grabber.start();
 
                 recorder = new FFmpegFrameRecorder(outputFilePath, grabber.getAudioChannels());
-                recorder.setFormat("opus");
+                recorder.setFormat("ogg");
                 recorder.setSampleRate(grabber.getSampleRate());
-                recorder.setAudioBitrate(49152);
+                recorder.setSampleRate(48000);
                 recorder.setAudioCodec(avcodec.AV_CODEC_ID_OPUS);
 
                 // Start the recorder
                 recorder.start();
 
-                Frame frame;
                 // Only process audio frames
-                while ((frame = grabber.grab()) != null) {
-                    if (frame.samples != null) { // Check if it's an audio frame
-                        recorder.record(frame);
-                    }
+                Frame audioFrame;
+                while ((audioFrame = grabber.grabSamples()) != null) {
+                    recorder.recordSamples(audioFrame.sampleRate, audioFrame.audioChannels, audioFrame.samples);
                 }
 
                 // Explicitly flush and close the recorder

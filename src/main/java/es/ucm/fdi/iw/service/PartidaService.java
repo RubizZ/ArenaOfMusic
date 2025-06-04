@@ -17,9 +17,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
+import org.bytedeco.javacv.Frame;
 import org.springframework.stereotype.Service;
 
 import es.ucm.fdi.iw.dto.game.GameConfigDTO;
@@ -537,7 +539,6 @@ public class PartidaService {
         // Método para generar un fragmento de audio aleatorio de una canción usando
         // FFmpegFrameGrabber y FFmpegFrameRecorder
         // 1. Obtener duración total del audio
-        avutil.av_log_set_level(avutil.AV_LOG_QUIET);
         try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(audioOriginal)) {
             grabber.start();
             double totalDuration = grabber.getLengthInTime() / 1_000_000.0; // microsegundos a segundos
@@ -552,7 +553,7 @@ public class PartidaService {
             double start = Math.random() * (totalDuration - duracion);
 
             // 4. Crear archivo temporal
-            File tempFile = File.createTempFile("fragment_", ".opus");
+            File tempFile = File.createTempFile("fragment_", ".ogg");
 
             // 5. Posicionar el grabber en el tiempo de inicio
             grabber.setTimestamp((long) (start * 1_000_000)); // segundos a microsegundos
@@ -560,21 +561,19 @@ public class PartidaService {
             // 6. Configurar el recorder
             try (FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(
                     tempFile, grabber.getAudioChannels())) {
-                recorder.setFormat("opus");
+                recorder.setFormat("ogg");
                 recorder.setSampleRate(grabber.getSampleRate());
                 recorder.setAudioChannels(grabber.getAudioChannels());
-                recorder.setAudioCodec(org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_ID_OPUS);
+                recorder.setAudioCodec(avcodec.AV_CODEC_ID_OPUS);
                 recorder.start();
 
                 // 7. Grabar los frames de audio durante la duración solicitada
                 long endTimestamp = (long) ((start + duracion) * 1_000_000);
                 while (grabber.getTimestamp() < endTimestamp) {
-                    org.bytedeco.javacv.Frame frame = grabber.grab();
+                    Frame frame = grabber.grabSamples();
                     if (frame == null)
                         break;
-                    if (frame.samples != null) {
-                        recorder.record(frame);
-                    }
+                    recorder.recordSamples(frame.sampleRate, frame.audioChannels, frame.samples);
                 }
                 recorder.stop();
             }
