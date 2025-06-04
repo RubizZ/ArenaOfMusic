@@ -76,7 +76,7 @@ function finalizarRonda() {
 
     clearInterval(countdownTimer);
 
-    let respuesta = selectedAnswer || document.querySelector("#songInput").value;
+    let respuesta = selectedAnswer || document.querySelector("#songInput").value.trim();
 
     const csrfToken = config.csrf.value;
 
@@ -218,7 +218,19 @@ function actualizarSugerencias() {
 }
 
 function marcarRespuesta() {
-    selectedAnswer = document.getElementById('songInput').value;
+    const raw = document.getElementById('songInput').value.trim();
+    if (!raw) {
+        selectedAnswer = "";
+        return;
+    }
+
+    // Filtrar la lista de títulos disponibles que contengan la subcadena
+    const matches = availableSongs.filter(t => t.toLowerCase().includes(raw.toLowerCase()));
+    if (matches.length === 1) {
+        selectedAnswer = matches[0];
+    } else {
+        selectedAnswer = raw;
+    }
 }
 //FIN LÓGICA SUGERENCIAS
 //-----------------------------------------------------

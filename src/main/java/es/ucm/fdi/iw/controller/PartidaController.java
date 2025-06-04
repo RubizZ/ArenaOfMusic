@@ -132,7 +132,12 @@ public class PartidaController {
     }
 
     @PostMapping("/partida/abandonar/{gameId}")
-    public ResponseEntity<String> abandonarPartida(@PathVariable UUID gameId, HttpServletResponse response) {
+    public ResponseEntity<String> abandonarPartida(@PathVariable UUID gameId, HttpServletResponse response, HttpSession session) {
+        User me = (User) session.getAttribute("u");
+        if (me == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         try {
             Game game = partidaService.getGameById(gameId);
             if (game == null || !game.getActive()) {
@@ -142,6 +147,11 @@ public class PartidaController {
                     || game.getGameState().equals(Game.GameState.ABANDONED)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La partida no se puede abandonar.");
             }
+
+            if (!partidaService.isPlayerInGame(me.getId(), gameId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
             partidaService.leaveGame(game);
 
             ResponseCookie cookie = ResponseCookie.from("partidaAbandonada" + gameId, "true")
@@ -161,9 +171,20 @@ public class PartidaController {
     }
 
     @PostMapping("/partida/iniciar/{gameId}")
-    public String iniciarPartida(@PathVariable UUID gameId, RedirectAttributes redirectAttributes) {
+    public String iniciarPartida(@PathVariable UUID gameId, RedirectAttributes redirectAttributes, HttpSession session) {
         try {
+            User me = (User) session.getAttribute("u");
+            if (me == null) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Debes iniciar sesión.");
+            }
             Game game = validarEstadoPartida(gameId, Game.GameState.WAITING);
+
+            GameConfigDTO cfg = new GameConfigDTO();
+            cfg.parseGameConfigDTO(game.getConfigJson());
+            if (cfg.getHostId() != me.getId()) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Solo el anfitrión puede iniciar la partida.");
+            }
+
             partidaService.startGame(game);
             return "redirect:/partida/" + gameId.toString();
         } catch (ResponseStatusException e) {
@@ -266,9 +287,18 @@ public class PartidaController {
 
     @PostMapping("/partida/finRonda/{gameId}")
     public ResponseEntity<RoundResponseDTO> finRonda(@PathVariable UUID gameId, @RequestBody Map<Long, String> body,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes, HttpSession session) {
+
+        User me = (User) session.getAttribute("u");
+        if (me == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         try {
             Game game = validarEstadoPartida(gameId, Game.GameState.PLAYING);
+
+            if (!partidaService.isPlayerInGame(me.getId(), gameId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
 
             RoundResponseDTO response = partidaService.endRound(game, body);
             return ResponseEntity.ok(response);
@@ -278,9 +308,18 @@ public class PartidaController {
     }
 
     @PostMapping("/partida/finalizar/{gameId}")
-    public ResponseEntity<Void> finalizarPartida(@PathVariable UUID gameId, RedirectAttributes redirectAttributes) {
+    public ResponseEntity<Void> finalizarPartida(@PathVariable UUID gameId, RedirectAttributes redirectAttributes, HttpSession session) {
+        User me = (User) session.getAttribute("u");
+        if (me == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         try {
             Game game = validarEstadoPartida(gameId, Game.GameState.PLAYING);
+
+            if (!partidaService.isPlayerInGame(me.getId(), gameId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
 
             partidaService.endGame(game);
             return ResponseEntity.ok().build();

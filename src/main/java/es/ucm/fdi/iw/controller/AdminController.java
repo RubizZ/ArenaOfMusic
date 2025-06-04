@@ -123,11 +123,14 @@ public class AdminController {
         ObjectMapper mapper = new ObjectMapper();
         try {
             List<User> results = q.getResultList();
-            System.out.println("Utenti trovati: " + results.size());
-            return mapper.writeValueAsString(results);
+            List<User.Transfer> transfers = results.stream()
+                    .map(User::toTransfer)
+                    .toList();
+            System.out.println("Usuarios encontrados " + transfers.size());
+            return mapper.writeValueAsString(transfers);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
-            return "{}";
+            return "[]";
         }
     }
 

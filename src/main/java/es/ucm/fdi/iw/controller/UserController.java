@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -44,6 +45,7 @@ import es.ucm.fdi.iw.model.Message;
 import es.ucm.fdi.iw.model.Transferable;
 import es.ucm.fdi.iw.model.User;
 import es.ucm.fdi.iw.model.User.Role;
+import es.ucm.fdi.iw.service.AmigosService;
 import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -72,6 +74,9 @@ public class UserController {
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+
+	@Autowired
+	private AmigosService amigosService;
 
 	@ModelAttribute
 	public void populateModel(HttpSession session, Model model) {
@@ -122,7 +127,22 @@ public class UserController {
 	 */
 	@GetMapping("{id}")
 	public String index(@PathVariable long id, Model model, HttpSession session) {
+		User requester = (User) session.getAttribute("u");
+		if (requester == null) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Debes iniciar sesión.");
+		}
+
 		User target = entityManager.find(User.class, id);
+		if(target == null) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado.");
+		}
+
+		if (requester.getId() != target.getId() &&
+				!requester.hasRole(Role.ADMIN) &&
+				!amigosService.areFriends(requester.getUsername(), target.getUsername()))
+		{
+			throw new NoEsTuPerfilException();
+		}
 		model.addAttribute("user", target);
 		return "user";
 	}

@@ -307,4 +307,27 @@ public class AmigosService {
             return "Última conexión hace " + days + " día" + (days > 1 ? "s" : "");
         }
     }
+
+    public boolean areFriends(String username, String friendUsername) {
+        User me = userService.findByUsername(username);
+        User friend = userService.findByUsername(friendUsername);
+
+        if (me == null || friend == null) {
+            return false;
+        }
+
+        Long meId = me.getId();
+        Long friendId = friend.getId();
+
+        List<Friendship> friendships = entityManager.createQuery(
+            "SELECT f FROM Friendship f " +
+            "WHERE f.accepted = true AND " +
+            "((f.user1.id = :meId AND f.user2.id = :friendId) OR " +
+            "(f.user1.id = :friendId AND f.user2.id = :meId))",
+            Friendship.class)
+            .setParameter("meId", meId)
+            .setParameter("friendId", friendId)
+            .getResultList();
+        return !friendships.isEmpty();
+    }
 }

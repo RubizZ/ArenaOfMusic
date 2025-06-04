@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +26,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 
@@ -163,8 +165,18 @@ public class AmigosController {
     }
 
     @GetMapping("/ver-perfil/{name}")
-    public String verPerfilUsuario(@PathVariable String name, Model model) {
-        model.addAttribute("user", amigosService.findUser(name));
+    public String verPerfilUsuario(@PathVariable String name, Model model, Principal principal) {
+        User me = userService.findByUsername(principal.getName());
+        User target = userService.findByUsername(name);
+        if (target == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no existe.");
+        }
+
+        if(me.getId() != target.getId() && !amigosService.areFriends(me.getUsername(), target.getUsername())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No tienes permiso para ver este perfil.");
+        }
+
+        model.addAttribute("user", target);
         return "ver-perfil";
     }
 }
