@@ -62,7 +62,7 @@ Los usuarios tienen acceso a funcionalidades sociales:
 - Crear playlists desde cero añadiendo canciones nuevas o existentes.
 - Subida y conversión automática de archivos:
   - Los audios se convierten a formato `.opus` (48kbps, mediante `FFmpeg`). Es un formato muy ligero que permite almacenar más canciones.
-  - Conversión de imágenes a `.webp` (a través de la **librería estándar** de Java `ImageIO`). Imágenes de alta calidad con archivos mucho más ligeros que JPEG o PNG, lo que acelera la carga de las páginas.
+  - Conversión de imágenes a `.webp` (a través de la `webp-ImageIO`). Imágenes de alta calidad con archivos mucho más ligeros que JPEG o PNG, lo que acelera la carga de las páginas.
 
 ### Gestión de Usuarios
 
