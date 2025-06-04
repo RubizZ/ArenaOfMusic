@@ -1,9 +1,7 @@
 package es.ucm.fdi.iw.service;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -18,7 +16,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.bytedeco.ffmpeg.global.avcodec;
-import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Frame;
@@ -218,6 +215,12 @@ public class PartidaService {
                 for (Song s : allSongs) {
                     uniqueArtists.addAll(s.getArtists());
                 }
+                
+                // Sacamos al primer artista de la cancion para poder añadirlo como respuesta segura
+                //(Aunque si en la cancion participan varios artistas y son seleccionados para
+                // las opciones también se darán por buenas las respuestas)
+                uniqueArtists.remove(song.getArtists().getFirst());
+
                 // Baraja y elige 3
                 List<String> artistOptions = new ArrayList<>(uniqueArtists);
                 Collections.shuffle(artistOptions);
