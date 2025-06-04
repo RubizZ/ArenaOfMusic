@@ -16,22 +16,18 @@ Modo de juego en solitario donde el jugador:
 
 - Configura la partida:
   1. Selecciona la playlist sobre la que deseas jugar.
-  2. Decide el numero de rondas que quieres jugar y la duración que tendrá cada fragmento de canción.
+  2. Decide el **número** de rondas que quieres jugar y la duración que tendrá cada fragmento de canción.
   3. Puedes intentar adivinar o el título de la canción o los artistas que la interpretan.
-  4. Elige el formato de respuesta: 
+  4. Elige el formato de respuesta:
       - Escribiendo el nombre y completando con las sugerencias que se mostrarán debajo del input. Pulsando sobre ellas se autocompletará directamente.
       - Seleccionando una de entre 4 opciones que estarán disponibles al comienzo de cada ronda.
-- Una vez configurada la partida accedes a la sala de espera para comenzar cuando te sientas preparado para el desafio y poder modificar las configuraciones previas.
+- Una vez configurada la partida accedes a la sala de espera para comenzar cuando te sientas preparado para el **desafío** y poder modificar las configuraciones previas.
 - Durante el transcurso de cada ronda sonará un fragmento aleatorio de una de las canciones de la playlist y antes de que termine el tiempo hay que intentar responder.
-- Ganaras 10 puntos si acertaste o 0 en caso contrario.
+- **Ganarás** 10 puntos si acertaste o 0 en caso contrario.
 - Una vez termina la ronda se visualiza la solución mientras se reproduce el fragmento de nuevo.
 - Al finalizar, se muestran los resultados finales de la partida.
 
-<span style="background-color: rgba(255, 165, 0, 0.5); padding: 4px 8px; border-radius: 4px;">
-<b>Aviso:</b> Actualmente solo está implementado el modo en solitario. Los modos <b>Duelo 1vs1</b> y <b>Multijugador</b> no han sido desarrollados. 
-</span>
-  
-
+> ⚠️ **Aviso:** Actualmente solo está implementado el modo en solitario. Los modos **Duelo 1vs1** y **Multijugador** no han sido desarrollados.   
 
 ---
 
@@ -74,14 +70,14 @@ Los usuarios tienen acceso a funcionalidades sociales:
 - Crear, editar y eliminar canciones.
 - Crear playlists desde cero añadiendo canciones nuevas o existentes.
 - Subida y conversión automática de archivos:
-  - Los audios con convertidos a formato `.opus` (48kbps, mediante `FFmpeg`). Es un formato muy ligero que permite almacenar más canciones.
-  - Conversión de imágenes a `.webp` (a través de la libreria estandar de java `ImageIO`). Imágenes de alta calidad con archivos mucho más ligeros que JPEG o PNG, lo que acelera la carga de las páginas.
+  - Los audios se convierten a formato `.opus` (48kbps, mediante `FFmpeg`). Es un formato muy ligero que permite almacenar más canciones.
+  - Conversión de imágenes a `.webp` (a través de la **librería estándar** de Java `ImageIO`). Imágenes de alta calidad con archivos mucho más ligeros que JPEG o PNG, lo que acelera la carga de las páginas.
 
 ### Gestión de Usuarios
 
 - Buscar usuarios con filtros avanzados.
 - Banear o desactivar usuarios.
-- Envio de mensajes informativos.
+- **Envío** de mensajes informativos.
 
 ### Gestión de Reportes
 
@@ -89,15 +85,10 @@ Los usuarios tienen acceso a funcionalidades sociales:
 - Tomar acciones como resolver reportes o banear usuarios.
 - Confirmación de decisiones mediante interfaz segura y filtros por estado y fecha.
 
-<div style="background-color: rgba(255, 165, 0, 0.5); padding-top: 4px; border-radius: 4px;">
-  <p style="padding: 8px 0px 0px 4px; text-align-center"><b>Funcionalidades no desarrolladas:</b></p>
-  <ul style="background-color: rgba(255, 165, 0, 0.3); padding: 4px 4px 4px 24px; border-radius: 0px 0px 4px 4px;">
-    <li> Visualización de partidas en tiempo real.
-    <li> Estadísticas generales.
-    <li> Tienda (funcionalidad descontinuada).
-  </ul> 
-</div>
-
+> ⚠️ **Funcionalidades no desarrolladas:**
+> - Visualización de partidas en tiempo real.
+> - Estadísticas generales.
+> - Tienda (funcionalidad descontinuada).
 
 ---
 
@@ -110,27 +101,29 @@ Los usuarios tienen acceso a funcionalidades sociales:
 
 ### Vista de Perfil
 
-- Muestra información del usuario
-- Listado del historial partidas jugadas.
+- Muestra información del usuario.
+- Listado del historial de partidas jugadas.
 - Modal para editar los datos personales.
 
 ### Vista Amigos
 
-- Listado de amigos con un input para buscar amigos por su nombre de usuario.
-- Botón que abre un modal para añadir amigos por su ombre de usuario.
-- Boton para cambiar entre la vista de solicitudes de amistas pendientes y amigos.
-- Pulsando encima de cada amigo o solicitud se abre la información del pefil de ese usuraio.
+- Listado de amigos con un input para buscar amigos por su **nombre de usuario**.
+- Botón que abre un modal para añadir amigos por su **nombre de usuario**.
+- **Botón** para cambiar entre la vista de solicitudes de **amistad** pendientes y amigos.
+- Pulsando encima de cada amigo o solicitud se abre la información del **perfil** de ese **usuario**.
 - A la derecha de cada amigo hay un botón que muestra 3 opciones:
-  1. **Enviar Mensaje**: Abre el chat que compartis ese amigo y tú.
+  1. **Enviar Mensaje**: Abre el chat que **compartís** ese amigo y tú.
   2. **Eliminar**: Para dejar de ser amigo de ese usuario.
   3. **Bloquear y Reportar**: Permite bloquear a ese usuario y reportarlo si lo consideras necesario.
 
 ### Vistas de Partida
+
 ---
+
 ### Configuración de partida
 
 - Selector de playlist con previsualización de portada y nombre.
-- Información acerca del máximo de jugadores en función del modo seleccionado (1 para Solitario, 2 para Duelos y 4 para Multijugador)
+- Información acerca del máximo de jugadores en función del modo seleccionado (1 para Solitario, 2 para Duelos y 4 para Multijugador).
 - Inputs para elegir número de rondas, duración de cada fragmento y número máximo de jugadores.
 - Selección del modo de juego (adivinar canción o artista).
 - Selección del tipo de respuesta: escrita (con sugerencias automáticas) u opciones múltiples (4 posibles opciones).
@@ -160,7 +153,9 @@ Los usuarios tienen acceso a funcionalidades sociales:
 - Botones para volver a jugar o regresar al inicio.
 - Detalles de la partida: playlist utilizada, número de canciones jugadas, tabla de resultados por ronda (canción, artistas, aciertos/fallos de cada jugador).
 - Imagen de portada de la playlist y resumen de la configuración de la partida.
---- 
+
+---
+
 ### Panel de Administrador
 
 Incluye accesos a:
@@ -169,7 +164,8 @@ Incluye accesos a:
 - Gestión de canciones y playlists.
 - Gestión de reportes.
 
-- <span style="background-color: rgba(255, 165, 0, 0.5); padding: 4px 8px; border-radius: 4px;">Accesos desactivados a estadísticas, espectador de partidas y gestión de tienda.</span>
+> ⚠️ Accesos desactivados a **estadísticas**, **espectador de partidas** y **gestión de tienda**.
+
 ---
 
 ## Vistas de Administrador
@@ -190,7 +186,7 @@ Incluye accesos a:
 - Formularios para crear nuevas playlists y canciones, con validación de campos obligatorios.
 - Subida de archivos de audio (convertidos automáticamente a `.opus`) e imágenes de portada (convertidas a `.webp`).
 - Gestión de canciones dentro de playlists: añadir, eliminar y reordenar canciones.
-- Rollback automático en caso de error durante la creación de playlists o canciones.
+- **rollback** automático en caso de error durante la creación de playlists o canciones.
 
 ### Gestión de reportes
 
@@ -204,11 +200,13 @@ Incluye accesos a:
 
 ## Licencias y Créditos
 
-- **[FFmpeg](https://github.com/FFmpeg/FFmpeg)**: Utilizado para la conversión y análisis de archivos de audio. FFmpeg es software libre, licenciado bajo la LGPL v2.1 o posterior, con componentes opcionales bajo GPL. Arena of Music no distribuye FFmpeg directamente, sino que lo invoca externamente, cumpliendo así con los términos de la licencia. Más información en su documentación legal.
+- **[FFmpeg](https://github.com/FFmpeg/FFmpeg)**: Incluido mediante la dependencia Maven [`org.bytedeco:ffmpeg:6.0-1.5.9`](https://mvnrepository.com/artifact/org.bytedeco/ffmpeg/6.0-1.5.9). Esta librería contiene binarios de FFmpeg bajo GPL 2.0 (y partes bajo Apache 2.0). Arena of Music invoca internamente estas clases, por lo que el proyecto se publicará bajo licencia GPL 2.0 o compatibles.
 
 - **[SpotDL](https://github.com/spotDL/spotify-downloader)**: Utilizado en la fase de recopilación para la descarga de canciones desde Spotify (vía YouTube). SpotDL es un proyecto de código abierto bajo licencia MIT.
 
-- **[Bootstrap Icons](https://icons.getbootstrap.com/)**: Todos los íconos de la aplicación provienen de Bootstrap Icons, distribuidos bajo la licencia MIT.
+- **Música utilizada:** Toda la música incluida en Arena of Music está protegida por derechos de autor. Su uso en la aplicación es exclusivamente con fines demostrativos y académicos, como parte de un proyecto universitario. Bajo ningún concepto la aplicación será publicada ni monetizada con estos contenidos, y no se distribuye ningún archivo musical fuera del entorno educativo.
+
+- **[Bootstrap Icons](https://icons.getbootstrap.com/)**: Todos los **iconos** de la aplicación provienen de Bootstrap Icons, distribuidos bajo la licencia MIT.
 
 - **Imágenes:** Generadas con **[ChatGPT](https://chatgpt.com/)** (licencia OpenAI) y **[Gemini](https://gemini.google.com/)** (Licencia sujeta a los [Términos de Uso de Gemini](https://support.google.com/gemini/answer/13594961))
 
@@ -216,18 +214,18 @@ Incluye accesos a:
 
 ## Estado del Proyecto
 
-| Módulo                     | Estado                                                                      |
-|----------------------------|-----------------------------------------------------------------------------|
-| Partida en solitario       | <span style="color: green; padding-right: 4px;">&#x25CF; </span> Completado |
-| Chat en tiempo real        | <span style="color: green; padding-right: 4px;">&#x25CF; </span> Completado |
-| Sistema de amistad         | <span style="color: green; padding-right: 4px;">&#x25CF; </span> Completado |
-| Personalización de Perfil  | <span style="color: green; padding-right: 4px;">&#x25CF; </span> Completado |
-| Administración de música   | <span style="color: green; padding-right: 4px;">&#x25CF; </span> Completado |
-| Reportes de usuarios       | <span style="color: green; padding-right: 4px;">&#x25CF; </span> Completado |
-| Duelo 1vs1 / Multijugador  | <span style="color: red; padding-right: 4px;">&#x25CF; </span> Pendiente    |
-| Visualización de partidas  | <span style="color: red; padding-right: 4px;">&#x25CF; </span> No hecho     |
-| Estadísticas generales     | <span style="color: red; padding-right: 4px;">&#x25CF; </span> No hecho     |
-| Tienda                     | <span style="color: red; padding-right: 4px;">&#x25CF; </span> Cancelado    |
+| Módulo                     | Estado        |
+|----------------------------|---------------|
+| Partida en solitario       | 🟢 Completado |
+| Chat en tiempo real        | 🟢 Completado |
+| Sistema de amistad         | 🟢 Completado |
+| Personalización de Perfil  | 🟢 Completado |
+| Administración de música   | 🟢 Completado |
+| Reportes de usuarios       | 🟢 Completado |
+| Duelo 1vs1 / Multijugador  | 🟡 Pendiente  |
+| Visualización de partidas  | 🔴 No hecho   |
+| Estadísticas generales     | 🔴 No hecho   |
+| Tienda                     | 🔴 Cancelado  |
 
 ---
 
@@ -241,7 +239,7 @@ Incluye accesos a:
 ## Adiciones, Cambios y Mejoras desde la entrega pre-examen
 - ### Partida:
   - Añadidos modo artista y opciones.
-  - Separación entre tipo de respuesta (Titulo o Artista) y formato de respuesta(Escribir u Opciones).
+  - Separación entre tipo de respuesta (Título o Artista) y formato de respuesta (Escribir u Opciones).
   - Posibilidad de modificar la configuración de la partida desde la sala de espera
 
 - ### Amigos
@@ -250,24 +248,24 @@ Incluye accesos a:
   - Arreglada visualización de perfil de amigos y mejorado el manejo de errores.
 
 - ### Chat
-  - Añadida foto de perfil de usuario al que se esta escribiendo y roles que tiene el usuario
+  - Añadida foto de perfil de usuario al que se **está** escribiendo y roles que tiene el usuario
 
 - ### Perfil
-  - Modificado el Historial de Partidas(Añadida fecha de partida y ordenación por fecha).
+  - Modificado el Historial de Partidas (Añadida fecha de partida y ordenación por fecha).
 
 - ### Home
   - Actualizado texto de *¿Cómo Jugar?*
   - Visualización de Mensajes de administrador
   - Mejorado diseño navbar:
     1. Cambiados nombres de enlaces por iconos.
-    2. Añadida foto de perfil de usuario loggeado para acceso al perfil y la Experiencia total acumulada a la derecha de la navbar
-    3. Notificaciones "badge" de mensajes nuevos y solicitudes de amistad entrantes usando websockets.
-    4. Notificaciones "toast" de solicitudes de amistad entrantes y aceptacion o rechazo de solicitudes salientes usando websockets
+    2. Añadida foto de perfil de usuario **logueado** para acceso al perfil y la Experiencia total acumulada a la derecha de la navbar
+    3. Notificaciones "badge" de mensajes nuevos y solicitudes de amistad entrantes usando WebSockets.
+    4. Notificaciones "toast" de solicitudes de amistad entrantes y **aceptación** o rechazo de solicitudes salientes usando WebSockets
 
 - ### Admin - Usuarios
   - Arreglada carga de usuarios
   - Posibilidad de ver perfiles de usuarios
-  - Envio de mensajes de administrador con sender ArenaOfMusic (superadmin/root user) a usuarios a traves de sus perfiles 
+  - **Envío** de mensajes de administrador con sender ArenaOfMusic (superadmin/root user) a usuarios a través de sus perfiles 
 
 - ### Admin - Playlist
   - Cambiado transformación de formato de `.mp3` a `.opus`.
