@@ -45,8 +45,11 @@
                         style="height: 400px; overflow: auto;">
                     </div>
 
-                    <!-- Escribir nuevo mensaje -->
-                    <div class="input-group">
+                    <div th:if="${friend.username == 'ArenaOfMusic'}" class="alert bg-warning text-dark"
+                        style="font-weight: bold;">
+                        No se pueden enviar un mensajes a esta cuenta.
+                    </div>
+                    <div th:unless="${friend.username == 'ArenaOfMusic'}" class="input-group">
                         <textarea id="message" class="form-control shadow-none" rows="1"
                             placeholder="Escribe un mensaje..."></textarea>
                         <button class="btn btn-primary" onclick="sendMessage()">Enviar</button>
@@ -59,87 +62,90 @@
     <th:block th:replace="~{fragments/footer.html :: footer}" />
 
     <script th:inline="javascript">
-        const friendName = /*[[${friend.username}]]*/ "friend";
-        const myName = /*[[${u.username}]]*/ "me";
+    const friendName = /*[[${friend.username}]]*/ "friend";
+    const myName = /*[[${u.username}]]*/ "me";
 
-        function markRead() {
-            fetch(`${config.rootUrl}/chat/${friendName}/messages`, {
-                method: "GET",
-                credentials: "same-origin"
+    function markRead() {
+        fetch(`${config.rootUrl}/chat/${friendName}/messages`, {
+            method: "GET",
+            credentials: "same-origin"
+        })
+            .catch(error => console.error(error));
+    }
+
+    ws.subscribe(`/user/queue/updates`, (m) => {
+        if (m.type !== "message") return;
+        if (m.from !== friendName && m.to !== myName) return;
+
+        appendMessage(m.data);
+
+        if (m.to === myName) {
+            markRead();
+        }
+    });
+
+    function appendMessage({ from, text, sent }) {
+        const box = document.getElementById("chatBox");
+        const time = new Date(sent).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        const mine = (from === myName);
+
+        const wrapper = document.createElement("div");
+        wrapper.className = mine ? "msg-out" : "msg-in";
+
+        const bubble = document.createElement("div");
+        bubble.className = "msg-bubble";
+        bubble.textContent = text;
+
+        const timeElement = document.createElement("div");
+        timeElement.className = "msg-time";
+        timeElement.textContent = time;
+
+        bubble.appendChild(timeElement);
+        wrapper.appendChild(bubble);
+        box.appendChild(wrapper);
+
+        box.scrollTop = box.scrollHeight; // bajar al último mensaje
+    }
+
+    // Enviar mensaje
+    function sendMessage() {
+        const msgText = document.getElementById("message");
+        if (!msgText) return; // No hay input si es ArenaOfMusic
+        const message = msgText.value.trim();
+        if (!message) return;
+
+        go(`${config.rootUrl}/chat/${friendName}/messages`, "POST", { message })
+            .then(() => {
+                appendMessage({
+                    from: myName,
+                    text: message,
+                    sent: new Date().toISOString()
+                });
+                msgText.value = "";
             })
-                .catch(error => console.error(error));
-        }
+            .catch(() => alert("Error al enviar"));
+    }
 
-        ws.subscribe(`/user/queue/updates`, (m) => {
-            if (m.type !== "message") return;
-            if (m.from !== friendName && m.to !== myName) return;
-
-            appendMessage(m.data);
-
-            if (m.to === myName) {
-                markRead();
-            }
+    // Historial
+    function loadHistory() {
+        go(`${config.rootUrl}/chat/${friendName}/messages`, "GET")
+            .then(messages => messages.forEach(appendMessage))
+            .catch((error) => console.error(error));
+        go(`${config.rootUrl}/user/unread`, "GET").then(d => {
+            handleUnreadMessages(d.unread);
         });
+    }
 
-        function appendMessage({ from, text, sent }) {
-            const box = document.getElementById("chatBox");
-            const time = new Date(sent).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-            const mine = (from === myName);
-
-            const wrapper = document.createElement("div");
-            wrapper.className = mine ? "msg-out" : "msg-in";
-
-            const bubble = document.createElement("div");
-            bubble.className = "msg-bubble";
-            bubble.textContent = text;
-
-            const timeElement = document.createElement("div");
-            timeElement.className = "msg-time";
-            timeElement.textContent = time;
-
-            bubble.appendChild(timeElement);
-            wrapper.appendChild(bubble);
-            box.appendChild(wrapper);
-
-            box.scrollTop = box.scrollHeight; // bajar al último mensaje
-        }
-
-        // Enviar mensaje
-        function sendMessage() {
-            const msgText = document.getElementById("message");
-            const message = msgText.value.trim();
-            if (!message) return;
-
-            go(`${config.rootUrl}/chat/${friendName}/messages`, "POST", { message })
-                .then(() => {
-                    appendMessage({
-                        from: myName,
-                        text: message,
-                        sent: new Date().toISOString()
-                    });
-                    msgText.value = "";
-                })
-                .catch(() => alert("Error al enviar"));
-        }
-
-        // Historial
-        function loadHistory() {
-            go(`${config.rootUrl}/chat/${friendName}/messages`, "GET")
-                .then(messages => messages.forEach(appendMessage))
-                .catch((error) => console.error(error));
-            go(`${config.rootUrl}/user/unread`, "GET").then(d => {
-                handleUnreadMessages(d.unread);
+    // Enviar mensaje al pulsar enter SOLO si existe el input
+    document.addEventListener("DOMContentLoaded", () => {
+        loadHistory();
+        const msgText = document.getElementById("message");
+        if (msgText) {
+            msgText.addEventListener("keydown", e => {
+                if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
             });
         }
+    });
 
-        // Enviar mensaje al pulsar enter
-        document.getElementById("message").addEventListener("keydown", e => {
-            if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-        });
-
-        document.addEventListener("DOMContentLoaded", () => {
-            loadHistory();
-        });
-
-    </script>
+</script>
 </body>
