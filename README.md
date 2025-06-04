@@ -54,15 +54,6 @@ Los usuarios tienen acceso a funcionalidades sociales:
 
 ---
 
-### Credenciales de prueba
-
-| Usuario | Rol   | Username | Password  |
-|--------|--------|----------|-----------|
-| A      | Admin | a        | aom_admin |
-| B      | User  | b        | aom_user  |
-
----
-
 ## Administradores
 
 ### Gestión de Contenido
@@ -200,15 +191,28 @@ Incluye accesos a:
 
 ## Licencias y Créditos
 
-- **[FFmpeg](https://github.com/FFmpeg/FFmpeg)**: Incluido mediante la dependencia Maven [`org.bytedeco:ffmpeg:6.0-1.5.9`](https://mvnrepository.com/artifact/org.bytedeco/ffmpeg/6.0-1.5.9). Esta librería contiene binarios de FFmpeg bajo GPL 2.0 (y partes bajo Apache 2.0). Arena of Music invoca internamente estas clases, por lo que el proyecto se publicará bajo licencia GPL 2.0 o compatibles.
+- **[JavaCV](https://github.com/bytedeco/javacv)**: (`org.bytedeco:javacv:1.5.9`): Interfaz Java para OpenCV, FFmpeg y otras librerías. Está licenciada bajo Apache License 2.0 y GPL 2.0 (o posterior).
+
+- **[FFmpeg](https://github.com/FFmpeg/FFmpeg)**: (`org.bytedeco:ffmpeg:6.0-1.5.9`). Esta librería contiene binarios de FFmpeg bajo GPL 2.0 (y partes bajo Apache 2.0), por lo que al distribuir se debe cumplir con los términos de la GPL 2.0 y proporcionar el código fuente completo correspondiente. Arena of Music invoca internamente estas clases, por lo que el proyecto se publicará bajo licencia GPL 2.0 o compatible.
+
+- **[webp-imageio](https://github.com/sejda-pdf/webp-imageio)**: (`org.sejda.imageio:webp-imageio:0.1.6`): Provee soporte para WebP en ImageIO de la libreria estandar de Java. Licenciada bajo Apache License 2.0. 
+
+- **[jsmediatags](https://github.com/aadsm/jsmediatags)**: Utilizado para la leer los metadatos de las canciones en el frontend a la hora de subirlas a la aplicación. Licenciado bajo BSD-3-Clause.
 
 - **[SpotDL](https://github.com/spotDL/spotify-downloader)**: Utilizado en la fase de recopilación para la descarga de canciones desde Spotify (vía YouTube). SpotDL es un proyecto de código abierto bajo licencia MIT.
 
 - **Música utilizada:** Toda la música incluida en Arena of Music está protegida por derechos de autor. Su uso en la aplicación es exclusivamente con fines demostrativos y académicos, como parte de un proyecto universitario. Bajo ningún concepto la aplicación será publicada ni monetizada con estos contenidos, y no se distribuye ningún archivo musical fuera del entorno educativo.
 
-- **[Bootstrap Icons](https://icons.getbootstrap.com/)**: Todos los **iconos** de la aplicación provienen de Bootstrap Icons, distribuidos bajo la licencia MIT.
+- **[Bootstrap Icons](https://icons.getbootstrap.com/)**: Todos los iconos de la aplicación provienen de Bootstrap Icons, distribuidos bajo la licencia MIT.
 
 - **Imágenes:** Generadas con **[ChatGPT](https://chatgpt.com/)** (licencia OpenAI) y **[Gemini](https://gemini.google.com/)** (Licencia sujeta a los [Términos de Uso de Gemini](https://support.google.com/gemini/answer/13594961))
+
+
+---
+
+## Licencia de ***Arena of Music***
+
+- **Licencia GPL 3.0 o posterior**: Arena of Music se publicará bajo GNU GPL 3.0 (o cualquier versión posterior) para garantizar la compatibilidad con todas las dependencias utilizadas (FFmpeg, JavaCV, webp-imageio, etc.) y respetar los requisitos de redistribución de las bibliotecas GPL y Apache 2.0. Esta licencia asegura que el código fuente permanezca abierto y que todas las mejoras futuras sigan bajo los mismos términos.
 
 ---
 
@@ -274,3 +278,14 @@ Incluye accesos a:
   - Eliminado histórico.
   - Mejorado diseño y contenidos.
   - Añadidas licencias y créditos.
+
+  
+### Credenciales de prueba
+
+| Usuario | Username     | Password | Rol   | Definición Rol |
+|---------|--------------|----------|-------|----------------|
+| ROOT    | ArenaOfMusic | aom_root | Root  | Super usuario administrador con todos los privilegios, propietario del sistema |
+| A       | a            | aom_admin| Admin | Usuario con privilegios de acceso al panel de administrador y todas sus subpáginas para administrar la aplicación y su contenido |
+| B       | b            | aom_user | User  | Usuario con acceso a la funcionalidad principal del sistema (jugar, amigos, chat, etc) |
+
+---
