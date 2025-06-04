@@ -28,7 +28,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
 
 /**
  * Site administration.

@@ -282,10 +282,19 @@ Incluye accesos a:
   
 ### Credenciales de prueba
 
-| Usuario | Username     | Password | Rol   | Definición Rol |
-|---------|--------------|----------|-------|----------------|
-| ROOT    | ArenaOfMusic | aom_root | Root  | Super usuario administrador con todos los privilegios, propietario del sistema |
-| A       | a            | aom_admin| Admin | Usuario con privilegios de acceso al panel de administrador y todas sus subpáginas para administrar la aplicación y su contenido |
-| B       | b            | aom_user | User  | Usuario con acceso a la funcionalidad principal del sistema (jugar, amigos, chat, etc) |
+| Usuario | Username     | Password | Rol   | Información de la cuenta                                                                     |
+|---------|--------------|----------|-------|----------------------------------------------------------------------------------------------|
+| ROOT    | ArenaOfMusic | aom_root | Root  | Vacio (los mensajes de administradores siempre son a su nombre)                              |
+| A       | a            | aom_admin| Admin | Reporte resuelto y reporte pendiente, Lista de usuarios, Gestion de Playlist, Amigos         |
+| B       | b            | aom_user | User  | Partidas jugadas, Solicitud de amistad pendiente, Mensaje de administrador sin leer, Amigos  |
+| C       | c            | aom_user | User  | Mensajes sin leer, Amigos, Solicitud de amistad pendiente                                    |
+| D       | d            | aom_user | User  | Reportado por c                                                                              |
+| E       | e            | aom_user | User  | Usuario baneado                                                                              |
+| F       | f            | aom_user | User  | Usuario inactivo                                                                             |
 
 ---
+
+#### Definición Roles:
+- **Root**: Super usuario administrador con todos los privilegios, propietario del sistema. Actualmente no añade funcionalidades extra con respecto a ADMIN
+- **Admin**: Usuario con privilegios de acceso al panel de administrador y todas sus subpáginas para administrar la aplicación y su contenido
+- **User**: Usuario con acceso a la funcionalidad principal del sistema (jugar, amigos, chat, etc) 

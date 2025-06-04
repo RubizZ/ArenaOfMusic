@@ -3,7 +3,6 @@ package es.ucm.fdi.iw.controller.admincontrollers;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
@@ -45,8 +44,6 @@ public class PlaylistsController {
 
     @Autowired
     private PlaylistService playlistService;
-
-    private static final List<String> availableViewTypes = List.of("new-playlist", "new-song", "list");
 
     @ModelAttribute
     public void populateModel(HttpSession session, Model model) {

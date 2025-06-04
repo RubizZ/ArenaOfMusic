@@ -47,7 +47,7 @@
         <p th:text="${user.email}">usuario@example.com</p>
 
         <div th:if="${u.hasRole('ADMIN')}">
-          <h5>Mensaje admin</h5>
+          <h5>Mensaje de los Administradores</h5>
           <form id="submitAdminMsg" enctype="text/plain">
             <input id="comment" type="text" class="form-control mb-3"></input>
             <button class="btn btn-primary" type="submit">Enviar mensaje</button>

@@ -2,11 +2,6 @@ package es.ucm.fdi.iw.dto;
 
 import java.util.List;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import lombok.Data;

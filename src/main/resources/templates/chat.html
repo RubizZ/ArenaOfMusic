@@ -47,7 +47,7 @@
 
                     <div th:if="${friend.username == 'ArenaOfMusic'}" class="alert bg-warning text-dark"
                         style="font-weight: bold;">
-                        No se pueden enviar un mensajes a esta cuenta.
+                        No se pueden enviar mensajes a esta cuenta.
                     </div>
                     <div th:unless="${friend.username == 'ArenaOfMusic'}" class="input-group">
                         <textarea id="message" class="form-control shadow-none" rows="1"

@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 
 import es.ucm.fdi.iw.model.User;
 import jakarta.persistence.EntityManager;
-import jakarta.transaction.Transactional;
 
 @Service
 public class UserService {
