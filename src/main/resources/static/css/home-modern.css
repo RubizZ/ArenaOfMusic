@@ -1,0 +1,270 @@
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Poppins:wght@500;700;800&display=swap');
+
+/* Variables para la página de inicio */
+:root {
+    --primary-gradient: linear-gradient(135deg, #1db954, #1ed760);
+    --text-gradient: linear-gradient(to right, #ffffff, #a8ffb2);
+    --glass-bg: rgba(20, 20, 20, 0.45);
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+    --blur-intensity: blur(15px);
+}
+
+/* Tipografía general para el Home */
+.home-main {
+    font-family: 'Inter', sans-serif;
+    color: #ffffff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 4rem 1rem 4rem 1rem;
+}
+
+/* Efecto de fondo oscurecido para resaltar el cristal */
+.home-main::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.8) 100%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Contenido siempre por encima del fondo oscuro */
+.home-content {
+    z-index: 1;
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+}
+
+/* Título Premium */
+.home-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(3rem, 6vw, 5rem);
+    font-weight: 800;
+    background: var(--text-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.6));
+    animation: fadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    letter-spacing: -1px;
+    line-height: 1.1;
+}
+
+/* Paneles Glassmorphism */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur-intensity);
+    -webkit-backdrop-filter: var(--blur-intensity);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: var(--glass-shadow);
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-panel:hover {
+    transform: translateY(-5px);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 15px 40px 0 rgba(0, 0, 0, 0.7);
+}
+
+.glass-panel h2 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    color: #1ed760;
+    margin-bottom: 1.2rem;
+    font-size: 2.2rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.glass-panel p {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #e0e0e0;
+}
+
+/* Acordeón (Desplegable Glass) */
+.glass-accordion {
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    margin-top: 1.5rem;
+    margin-bottom: 0 !important;
+}
+
+.glass-accordion-btn {
+    background: transparent !important;
+    color: #1ed760 !important;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 1.2rem;
+    box-shadow: none !important;
+    padding: 0.8rem 1.5rem !important;
+    text-align: center;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0 !important;
+}
+
+.glass-accordion-btn::after {
+    filter: invert(1) brightness(2);
+    position: absolute !important;
+    right: 1.5rem !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    margin: 0 !important;
+}
+
+.glass-accordion-btn:not(.collapsed) {
+    color: #ffffff !important;
+    background: rgba(29, 185, 84, 0.2) !important;
+}
+
+.glass-accordion-btn:not(.collapsed)::after {
+    filter: invert(1) brightness(2);
+    transform: translateY(-50%) rotate(-180deg) !important;
+}
+
+/* Imagen en tarjeta */
+.glass-img {
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.4));
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.glass-panel:hover .glass-img {
+    transform: scale(1.1) rotate(5deg);
+}
+
+/* Animación en cascada horizontal/vertical */
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.3s; }
+.delay-3 { animation-delay: 0.5s; }
+
+/* Botón Jugar Glow */
+.btn-glow-container {
+    animation: fadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+}
+
+.btn-glow {
+    position: relative;
+    background: var(--primary-gradient);
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 800;
+    font-size: 1.4rem;
+    padding: 1.2rem 4rem;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 25px rgba(29, 185, 84, 0.6);
+    z-index: 1;
+    letter-spacing: 2px;
+}
+
+.btn-glow::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #1ed760, #1db954);
+    z-index: -1;
+    transition: opacity 0.3s ease;
+    opacity: 0;
+}
+
+.btn-glow:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 15px 40px rgba(29, 185, 84, 0.9);
+    color: white;
+}
+
+.btn-glow:hover::before {
+    opacity: 1;
+}
+
+/* Modal Styling Premium */
+.modal-glass .modal-content {
+    background: rgba(15, 15, 15, 0.9);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    color: #fff;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+}
+
+.modal-glass .modal-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-glass .modal-title {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    color: #1ed760;
+}
+
+.modal-glass .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+.modal-glass .modal-footer {
+    border-top: none;
+}
+
+/* Tarjetas dentro del modal */
+.modal-glass .card.hoverable, .modal-glass .card.desactivar {
+    background: rgba(30, 30, 30, 0.6) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-glass .card.hoverable:hover {
+    transform: translateY(-8px);
+    background: rgba(29, 185, 84, 0.15) !important;
+    border-color: #1ed760;
+    box-shadow: 0 10px 25px rgba(29, 185, 84, 0.3);
+}
+
+.modal-glass .card.hoverable .card-title {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    color: #fff;
+}
+
+.modal-glass .card.desactivar {
+    opacity: 0.4;
+    filter: grayscale(1);
+}
+
+/* Animaciones Clave */
+@keyframes fadeUp {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
